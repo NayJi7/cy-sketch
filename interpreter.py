@@ -11,13 +11,13 @@
 ###############################################################
 
 import os
-import lexer
+import lexer_parser
 
 text = None
 
 while text != "exit":
     text = input('draw++ > ')
-    result, error = lexer.run('<stdin>', text)
+    result, error = lexer_parser.run('<stdin>', text)
 
     if text=="exit": 
         restart = False
