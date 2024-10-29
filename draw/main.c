@@ -1,11 +1,4 @@
-// mingw32-make EQUIVALENT à make sur Windows
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL2_gfxPrimitives.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#undef main  //avoid main's problems when we doing a make
+#include "../files.h/main.h"
 
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
 {
@@ -21,13 +14,15 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
 }
 
 
-int main(int argc, char *argv[]) {
+int main(void) {
     
     //Initialise a window
     SDL_Window *window = NULL;
     //Initialise a render to have the possibility of drawing
     SDL_Renderer *renderer = NULL;
+
     int statut = EXIT_FAILURE;
+
     SDL_Color white = {255, 255, 255, 255};
     //Initialise a Surface for the cursor
     SDL_Surface *cursorSurface = NULL;
@@ -45,29 +40,7 @@ int main(int argc, char *argv[]) {
         goto Quit;
     }
 
-// Create a window
-    /*
-    //=> SDL_CreateWindow(title, x, y, weight, height, (flags))
-        //flags : SDL_WINDOW_RESIZABLE = change the size with your cursor
-    window = SDL_CreateWindow("Hello SDL",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 600, 400, SDL_WINDOW_RESIZABLE);
-    // robustness
-    if (!window) {
-        printf("Error SDL_CreateWindow : %s\n", SDL_GetError());
-        goto Quit;
-    }
-// ----------------------------------------------------------------------
-    */
-// Create a renderer to interect with the window 
-    /*
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if(!renderer)
-    {
-        printf("Error SDL_CreateRenderer : %s\n", SDL_GetError());
-        goto Quit;
-    }
-    */
-    
+ 
    //CREATE window and Renderer in a same time
     if(SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0)
     {
@@ -75,27 +48,6 @@ int main(int argc, char *argv[]) {
         goto Quit;
     }
     SDL_SetWindowTitle(window, "Hello SDL");
-
-//How to create and change a cursor :
-    screenSurface = SDL_GetWindowSurface(window);
-
-
-    cursorSurface = SDL_LoadBMP("dmp/pencil.bmp");
-    if(!cursorSurface)
-    {
-        printf("Error SDL_LoadBMP : %s\n", SDL_GetError());
-        goto Quit;
-    }
-
-    cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
-    if(!cursor)
-    {
-        printf("Error SDL_CreateColorCursor : %s\n", SDL_GetError());
-        goto Quit;
-    }
-
-    
-    SDL_SetCursor(cursor);
 
 
     //Setting a color
@@ -105,6 +57,13 @@ int main(int argc, char *argv[]) {
         goto Quit;
     }
     SDL_RenderPresent(renderer);
+
+
+    drawCircle(renderer, 400, 270, 60, 0xFF00FF00, "filled");
+    drawEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
+    drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "filled");
+    drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "empty");
+    drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
 
 //Event Part
     int running = 1;
@@ -151,19 +110,16 @@ int main(int argc, char *argv[]) {
                     break;
             }
         }
-
-        SDL_RenderClear(renderer);
-        SDL_RenderPresent(renderer);
     }
 
     statut = EXIT_SUCCESS;
 
 Quit:
-    if (renderer)
+    if(renderer)
         SDL_DestroyRenderer(renderer);
-    if (window)
+    if(window)
         SDL_DestroyWindow(window);
-    if (cursorSurface)
+    if(cursorSurface)
         SDL_FreeSurface(cursorSurface);
 
     SDL_Quit();
