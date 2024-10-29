@@ -1,4 +1,5 @@
 *.pyc
 .vscode
-*.exe
+files.exe/
 src/
+files.o/
