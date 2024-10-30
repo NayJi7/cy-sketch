@@ -1,7 +1,5 @@
 #include "../files.h/form.h"
 
-#define PI 3.14159265
-
 
 void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type)
 {   
@@ -11,7 +9,7 @@ void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, 
         if(circleColor(renderer, x, y, radius, color) != 0) 
         {
             printf("Error circleColor : %s\n", SDL_GetError());
-            //goto Quit; 
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else if(strcmp(type, "filled") == 0) 
@@ -19,13 +17,13 @@ void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, 
         if(filledCircleColor(renderer, x, y, radius, color) != 0) 
         {
             printf("Error filledCircleColor : %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else 
     {
         printf("Invalid circle type: %s\n", type);
-        //goto Quit;  
+        return;  
     }
 
     // Pause of 1s to see the result
@@ -45,7 +43,7 @@ void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 co
         if(ellipseColor(renderer, x, y, rx, ry, color) != 0) 
         {
             printf("Error in ellipseColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else if(strcmp(type, "filled") == 0) 
@@ -53,13 +51,13 @@ void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 co
         if(filledEllipseColor(renderer, x, y, rx, ry, color) != 0) 
         {
             printf("Error in filledEllipseColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }  
     else
     {
         printf("Invalid ellipse type: %s\n", type);
-        //goto Quit;
+        return;
     }
 
     SDL_Delay(1000);
@@ -76,7 +74,7 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 co
         if(rectangleColor(renderer, x, y, w, h, color) != 0)
         {
             printf("Error in rectangleColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else if(strcmp(type, "filled") == 0)
@@ -84,17 +82,47 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 co
         if(boxColor(renderer, x, y, w, h, color) != 0)
         {
             printf("Error in boxColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else
     {
         printf("Invalid rectangle type: %s\n", type);
-        //goto Quit;
+        return;
     }
 
     SDL_Delay(1000);
     SDL_RenderPresent(renderer);  
+
+}
+
+void drawRoundedRectangle(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint32 color, char *type)
+{
+
+    if(strcmp(type, "empty") == 0)
+    {
+        if(roundedRectangleColor(renderer, x1, y1, x2, y2, rad, color) != 0)
+        {
+            printf("Error in roundedRectangleColor: %s\n", SDL_GetError());
+            cleanResources(renderer, NULL, true, false, -1);
+        }
+    }
+    else if(strcmp(type, "filled") == 0)
+    {
+        if(roundedBoxColor(renderer, x1, y1, x2, y2, rad, color) != 0)
+        {
+            printf("Error in roundedBoxColor: %s\n", SDL_GetError());
+            cleanResources(renderer, NULL, true, false, -1);
+        }
+    }
+    else
+    {
+        printf("Invalid roundedRectangle type: %s\n", type);
+        return;
+    }
+
+    SDL_Delay(1000);
+    SDL_RenderPresent(renderer); 
 
 }
 
@@ -107,7 +135,7 @@ void drawPolygon(SDL_Renderer *renderer, Sint16 *vx, Sint16 *vy, int n, Uint32 c
         if(polygonColor(renderer, vx, vy, n, color) != 0)
         {
             printf("Error in polygonColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else if(strcmp(type, "filled") == 0)
@@ -115,13 +143,13 @@ void drawPolygon(SDL_Renderer *renderer, Sint16 *vx, Sint16 *vy, int n, Uint32 c
         if(filledPolygonColor(renderer, vx, vy, n, color) != 0)
         {
             printf("Error in filledPolygonColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     }
     else
     {
         printf("Invalid polygon type: %s\n", type);
-        //goto Quit;
+        return;
     }
 
     SDL_Delay(1000);
@@ -135,7 +163,7 @@ void drawCustomPolygon(SDL_Renderer *renderer, Sint16 cx, Sint16 cy, int radius,
     if (sides < 3 || sides > 12) 
     {
         printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
-        //goto Quit;
+        return;
     }
 
     Sint16 vx[12]; // Tableau pour les coordonnées X
@@ -161,7 +189,7 @@ void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, Uint32 col
         if(lineColor(renderer, x1, y1, x2, y2, color) != 0) 
         {
             printf("Error in lineColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     } 
     else if(strcmp(type, "filled") == 0) 
@@ -169,13 +197,13 @@ void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, Uint32 col
         if(thickLineColor(renderer, x1, y1, x2, y2, thickness, color) != 0) 
         {
             printf("Error in thickLineColor: %s\n", SDL_GetError());
-            //goto Quit;
+            cleanResources(renderer, NULL, true, false, -1);
         }
     } 
     else 
     {
         printf("Invalid line type: %s\n", type);
-        //goto Quit;
+        return;
     }
 
     SDL_Delay(1000);

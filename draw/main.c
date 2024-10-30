@@ -1,5 +1,17 @@
 #include "../files.h/main.h"
 
+void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode) 
+{
+    
+    if(freeRenderer && renderer) SDL_DestroyRenderer(renderer);
+    if(freeWindow && window) SDL_DestroyWindow(window);
+    
+    SDL_Quit();
+
+    if(exitCode != -1) exit(exitCode);
+
+}
+
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
 {
     if(SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a) < 0)
@@ -14,22 +26,14 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
 }
 
 
-int main(void) {
+int main() {
     
     //Initialise a window
     SDL_Window *window = NULL;
     //Initialise a render to have the possibility of drawing
     SDL_Renderer *renderer = NULL;
-
-    int statut = EXIT_FAILURE;
-
+    //Initialise color for the window
     SDL_Color white = {255, 255, 255, 255};
-    //Initialise a Surface for the cursor
-    SDL_Surface *cursorSurface = NULL;
-    //Initialise a surface
-    SDL_Surface *screenSurface = NULL;
-    //Initialise a Surface for the cursor
-    SDL_Cursor *cursor = NULL;
     //Initialise an event
     SDL_Event event;
 
@@ -37,7 +41,7 @@ int main(void) {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
     {
         printf("Error SDL : %s\n", SDL_GetError());
-        goto Quit;
+        cleanResources(NULL, NULL, false, false, -2);
     }
 
  
@@ -45,7 +49,7 @@ int main(void) {
     if(SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0)
     {
         printf("Error SDL_CreateWindowAndRenderer : %s\n", SDL_GetError());
-        goto Quit;
+        cleanResources(renderer, window, true, true, -2);
     }
     SDL_SetWindowTitle(window, "Hello SDL");
 
@@ -54,15 +58,16 @@ int main(void) {
     if(setWindowColor(renderer, white) != 0)
     {
         printf("Error setWindowColor : %s\n", SDL_GetError());
-        goto Quit;
+        cleanResources(renderer, window, true, true, -2);
     }
     SDL_RenderPresent(renderer);
 
 
     drawCircle(renderer, 400, 270, 60, 0xFF00FF00, "filled");
     drawEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
-    drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "filled");
-    drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "empty");
+    drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
+    drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty");
+    drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled");
     drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
 
 //Event Part
@@ -112,19 +117,7 @@ int main(void) {
         }
     }
 
-    statut = EXIT_SUCCESS;
-
-Quit:
-    if(renderer)
-        SDL_DestroyRenderer(renderer);
-    if(window)
-        SDL_DestroyWindow(window);
-    if(cursorSurface)
-        SDL_FreeSurface(cursorSurface);
-
-    SDL_Quit();
-
-    return statut;
+    return 0;
 }
 
 
