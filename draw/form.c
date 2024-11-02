@@ -1,6 +1,15 @@
 #include "../files.h/form.h"
 
-
+/**
+ * @brief Draws a circle on the SDL renderer.
+ * 
+ * @param renderer The SDL renderer where the circle will be drawn.
+ * @param x The x-coordinate of the circle's center.
+ * @param y The y-coordinate of the circle's center.
+ * @param radius The radius of the circle.
+ * @param color The color of the circle in Uint32 format (0xRRGGBBAA).
+ * @param type Specifies the type of circle ("empty" for outline, "filled" for solid).
+ */
 void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type)
 {   
 
@@ -33,7 +42,17 @@ void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, 
 
 }
 
-
+/**
+ * @brief Draws an ellipse on the SDL renderer.
+ * 
+ * @param renderer The SDL renderer where the ellipse will be drawn.
+ * @param x The x-coordinate of the ellipse's center.
+ * @param y The y-coordinate of the ellipse's center.
+ * @param rx The horizontal radius of the ellipse.
+ * @param ry The vertical radius of the ellipse.
+ * @param color The color of the ellipse in Uint32 format (0xRRGGBBAA).
+ * @param type Specifies the type of ellipse ("empty" for outline, "filled" for solid).
+ */
 void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 color, char *type) 
 {
 
@@ -65,7 +84,37 @@ void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 co
 
 }
 
+/**
+ * @brief Draws an arc on the SDL renderer.
+ * 
+ * @param renderer The SDL renderer where the arc will be drawn.
+ * @param x The x-coordinate of the arc's center.
+ * @param y The y-coordinate of the arc's center.
+ * @param radius The radius of the arc.
+ * @param start_angle The starting angle of the arc in degrees.
+ * @param end_angle The ending angle of the arc in degrees.
+ * @param color The color of the arc in Uint32 format (0xRRGGBBAA).
+ */
+void drawArc(SDL_Renderer *renderer, int x, int y, int radius, int start_angle, int end_angle, Uint32 color)
+{
+    if(arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0)
+    {
+        printf("Error in arcColor: %s\n", SDL_GetError());
+        cleanResources(renderer, NULL, true, false, -1);
+    }
+}
 
+/**
+ * @brief Draws a rectangle on the SDL renderer.
+ * 
+ * @param renderer The SDL renderer where the rectangle will be drawn.
+ * @param x The x-coordinate of the top-left corner.
+ * @param y The y-coordinate of the top-left corner.
+ * @param w The width of the rectangle.
+ * @param h The height of the rectangle.
+ * @param color The color of the rectangle in Uint32 format (0xRRGGBBAA).
+ * @param type Specifies the type of rectangle ("empty" for outline, "filled" for solid).
+ */
 void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 color, char *type)
 {
 
@@ -96,6 +145,18 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 co
 
 }
 
+/**
+ * @brief Draws a rounded rectangle on the SDL renderer.
+ * 
+ * @param renderer The SDL renderer where the rounded rectangle will be drawn.
+ * @param x1 The x-coordinate of the top-left corner.
+ * @param y1 The y-coordinate of the top-left corner.
+ * @param x2 The x-coordinate of the bottom-right corner.
+ * @param y2 The y-coordinate of the bottom-right corner.
+ * @param rad The radius of the corners.
+ * @param color The color of the rounded rectangle in Uint32 format (0xRRGGBBAA).
+ * @param type Specifies the type of rounded rectangle ("empty" for outline, "filled" for solid).
+ */
 void drawRoundedRectangle(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint32 color, char *type)
 {
 
@@ -126,7 +187,16 @@ void drawRoundedRectangle(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x
 
 }
 
-
+/**
+ * @brief Draws a polygon on the SDL renderer.
+ * 
+ * @param renderer The SDL renderer where the polygon will be drawn.
+ * @param vx Array of x-coordinates for the vertices of the polygon.
+ * @param vy Array of y-coordinates for the vertices of the polygon.
+ * @param n The number of vertices in the polygon.
+ * @param color The color of the polygon in Uint32 format (0xRRGGBBAA).
+ * @param type Specifies the type of polygon ("empty" for outline, "filled" for solid).
+ */
 void drawPolygon(SDL_Renderer *renderer, Sint16 *vx, Sint16 *vy, int n, Uint32 color, char *type)
 {
 
@@ -157,6 +227,17 @@ void drawPolygon(SDL_Renderer *renderer, Sint16 *vx, Sint16 *vy, int n, Uint32 c
 
 }
 
+/**
+ * @brief Draws a custom polygon with a specified number of sides, centered at (cx, cy).
+ * 
+ * @param renderer The SDL renderer where the custom polygon will be drawn.
+ * @param cx The x-coordinate of the polygon's center.
+ * @param cy The y-coordinate of the polygon's center.
+ * @param radius The radius from the center to the vertices.
+ * @param sides The number of sides of the polygon (must be between 3 and 12).
+ * @param color The color of the polygon in Uint32 format (0xRRGGBBAA).
+ * @param type Specifies the type of polygon ("empty" for outline, "filled" for solid).
+ */
 //FULL CHATGPT pour calculer les coordonnées X (vx) et Y (vy)
 void drawCustomPolygon(SDL_Renderer *renderer, Sint16 cx, Sint16 cy, int radius, int sides, Uint32 color, char *type) 
 {
@@ -180,7 +261,18 @@ void drawCustomPolygon(SDL_Renderer *renderer, Sint16 cx, Sint16 cy, int radius,
 }
 
 
-
+/**
+ * @brief Draws a line on the SDL renderer with optional thickness.
+ * 
+ * @param renderer The SDL renderer where the line will be drawn.
+ * @param x1 The x-coordinate of the starting point of the line.
+ * @param y1 The y-coordinate of the starting point of the line.
+ * @param x2 The x-coordinate of the ending point of the line.
+ * @param y2 The y-coordinate of the ending point of the line.
+ * @param color The color of the line in Uint32 format (0xRRGGBBAA).
+ * @param thickness The thickness of the line (ignored if type is "empty").
+ * @param type Specifies the type of line ("empty" for thin line, "filled" for thick line).
+ */
 void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, Uint32 color, int thickness, char *type) 
 {
 
