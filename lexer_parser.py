@@ -93,7 +93,7 @@ class Token:
 					self.pos_end.next()
 
 				if pos_end:
-					self.pos_end = pos_end
+					self.pos_end = pos_end.copy()
 		
 		def __repr__(self):
 				if self.value: return f'{self.type}:{self.value}'

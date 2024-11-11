@@ -11,7 +11,7 @@
 ###############################################################
 
 import os
-import lexer_parser
+import lexer_parser2 as lexer_parser
 
 text = None
 
@@ -23,6 +23,7 @@ while text != "exit":
         restart = False
         break 
     elif text=="clear": os.system('clear')
+    elif text=="cls": os.system('cls')
     elif text=="restart":
         restart = True
         break

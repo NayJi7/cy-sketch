@@ -54,6 +54,7 @@ SYMBOL_TOKENS = {
     'RPAREN': 'TT_RPAREN',   # )
     'LBRACE': 'TT_LBRACE',   # {
     'RBRACE': 'TT_RBRACE',   # }
+    'COMMA': 'TT_COMMA',   # ,
     'EOF': 'TT_EOF'          # Fin de fichier
 }
 
@@ -170,6 +171,15 @@ class Lexer:
                 self.next()
             elif self.current_char == '}':
                 tokens.append(Token(SYMBOL_TOKENS['RBRACE'], pos_start=self.pos))
+                self.next()
+            elif self.current_char == ')':
+                tokens.append(Token(SYMBOL_TOKENS['RPAREN'], pos_start=self.pos))
+                self.next()
+            elif self.current_char == '(':
+                tokens.append(Token(SYMBOL_TOKENS['LPAREN'], pos_start=self.pos))
+                self.next()
+            elif self.current_char == ',':
+                tokens.append(Token(SYMBOL_TOKENS['COMMA'], pos_start=self.pos))
                 self.next()
             else:
                 pos_start = self.pos.copy()
@@ -356,10 +366,16 @@ class Parser:
         if self.current_tok.type != SYMBOL_TOKENS['LPAREN']:
             return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "'(' attendu"))
         
+        if(self.next() == USER_TOKENS['INT'] or USER_TOKENS['FLOAT']):
+            x = self.current_tok.value
+        
         self.next()
-        x = self.current_tok.value
-        self.next()
-        y = self.current_tok.value
+        if(self.current_tok.type != SYMBOL_TOKENS['COMMA']):
+            return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "',' attendu"))
+
+        if(self.next() == USER_TOKENS['INT'] or USER_TOKENS['FLOAT']):
+            y = self.current_tok.value
+            
         self.next()
         
         return res.success(CursorNode(cursor_name, x, y))
