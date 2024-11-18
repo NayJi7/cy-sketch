@@ -22,6 +22,7 @@
 
 # Bibliothèque pour afficher les erreurs avec des flèches dans le code source
 from strings_with_arrows import *
+import re
 
 #######################################
 # CONSTANTES
@@ -519,6 +520,9 @@ def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
     if error: return None, error
+
+    pattern_cursor = r"(CURSOR)\s+([A-Za-z]+)\((\d+),\s*(\d+)\)"
+    # regex => lexer géré lignes par lignes et non char par char
     
     parser = Parser(tokens)
     ast = parser.parse()
