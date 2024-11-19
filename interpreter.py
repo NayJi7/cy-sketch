@@ -11,7 +11,7 @@
 ###############################################################
 
 import os
-import lexer_parser2 as lexer_parser
+import lexer_parser_regex as lexer_parser
 
 text = None
 

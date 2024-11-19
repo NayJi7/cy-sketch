@@ -46,7 +46,8 @@ LANG_TOKENS = {
 USER_TOKENS = {
     'IDENTIFIER': 'TT_IDENTIFIER',  # Noms de curseurs ou variables
     'INT': 'TT_INT',                # Nombre entier
-    'FLOAT': 'TT_FLOAT'             # Nombre à virgule flottante
+    'FLOAT': 'TT_FLOAT',            # Nombre à virgule flottante
+    'VAR': 'TT_VAR'                 # Noms de variables
 }
 
 # Tokens pour les symboles de syntaxe
@@ -57,6 +58,14 @@ SYMBOL_TOKENS = {
     'RBRACE': 'TT_RBRACE',   # }
     'COMMA': 'TT_COMMA',   # ,
     'EOF': 'TT_EOF'          # Fin de fichier
+}
+
+# Tokens pour les operateurs
+OPERATORS_TOKENS = {
+    '+': 'TT_PLUS',
+    '-': 'TT_MINUS',
+    '*': 'TT_MULTIPLY', 
+    '/': 'TT_DIVIDE', 
 }
 
 #######################################
@@ -125,11 +134,9 @@ class Token:
     def __init__(self, type_, value=None, pos_start=None, pos_end=None):
         self.type = type_
         self.value = value
-        if pos_start:
-            self.pos_start = pos_start.copy()
-            self.pos_end = pos_start.copy()
-            self.pos_end.next()
-        if pos_end:
+        if pos_start is not None:
+            self.pos_start = pos_start
+        if pos_end is not None:
             self.pos_end = pos_end
 
     def __repr__(self):
@@ -159,36 +166,137 @@ class Lexer:
     def make_tokens(self):
         """Convertit tout le texte source en une liste de tokens utilisables par le parser."""
         tokens = []
-        
-        while self.current_char is not None:
-            if self.current_char in ' \t':  # Ignore les espaces et tabulations
-                self.next()
-            elif self.current_char in DIGITS:
-                tokens.append(self.make_number())
-            elif self.current_char.isalpha():
-                tokens.append(self.make_identifier_or_keyword())
-            elif self.current_char == '{':
-                tokens.append(Token(SYMBOL_TOKENS['LBRACE'], pos_start=self.pos))
-                self.next()
-            elif self.current_char == '}':
-                tokens.append(Token(SYMBOL_TOKENS['RBRACE'], pos_start=self.pos))
-                self.next()
-            elif self.current_char == ')':
-                tokens.append(Token(SYMBOL_TOKENS['RPAREN'], pos_start=self.pos))
-                self.next()
-            elif self.current_char == '(':
-                tokens.append(Token(SYMBOL_TOKENS['LPAREN'], pos_start=self.pos))
-                self.next()
-            elif self.current_char == ',':
-                tokens.append(Token(SYMBOL_TOKENS['COMMA'], pos_start=self.pos))
-                self.next()
-            else:
-                pos_start = self.pos.copy()
-                char = self.current_char
-                self.next()
-                return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
-        
-        tokens.append(Token(SYMBOL_TOKENS['EOF'], pos_start=self.pos))
+
+        pattern_cursor = r"(CURSOR)\s+([A-Za-z0-9]+)\((\d+\.\d+|\d+|[A-Za-z]+),\s*(\d+\.\d+|\d+|[A-Za-z]+)\)"
+        match = re.search(pattern_cursor, self.text)
+
+        if match:
+            # Vérifie si l'identifiant est un mot-clé
+            type_ = LANG_TOKENS.get(match.group(1), USER_TOKENS['IDENTIFIER'])
+            tokens.append(Token(type_, match.group(1), match.start(1), match.end(1)))
+
+            # Vérifie si l'identifiant est un mot-clé
+            type_ = LANG_TOKENS.get(match.group(2), USER_TOKENS['IDENTIFIER'])
+            tokens.append(Token(type_, match.group(2), match.start(2), match.end(2)))
+
+            count = 0
+            try:
+                # Tentative de conversion en entier
+                int(match.group(3))
+            except ValueError:
+                count +=1
+                pass
+
+            if count == 0:
+                tokens.append(Token(USER_TOKENS['INT'], int(match.group(3)), match.start(3), match.end(3)))
+
+            try:
+                # Si la conversion en int échoue, tenter en float
+                if count != 0:
+                    float(match.group(3))
+                else :
+                    count=3 # is an int and has been append
+            except ValueError:
+                count += 1
+                pass
+
+            if count == 1:
+                tokens.append(Token(USER_TOKENS['FLOAT'], float(match.group(3)), match.start(3), match.end(3)))
+                
+            if count == 2:
+                # Si les deux conversions échouent, alors c'est une chaîne
+                tokens.append(Token(USER_TOKENS['VAR'], match.group(3), match.start(3), match.end(3)))
+
+
+            count = 0
+            try:
+                # Tentative de conversion en entier
+                int(match.group(4))
+            except ValueError:
+                count +=1
+                pass
+
+            if count == 0:
+                tokens.append(Token(USER_TOKENS['INT'], int(match.group(4)), match.start(4), match.end(4)))
+
+            try:
+                # Si la conversion en int échoue, tenter en float
+                if count != 0:
+                    float(match.group(4))
+                else :
+                    count=3 # is an int and has been append
+            except ValueError:
+                count += 1
+                pass
+
+            if count == 1:
+                tokens.append(Token(USER_TOKENS['FLOAT'], float(match.group(4)), match.start(4), match.end(4)))
+                
+            if count == 2:
+                # Si les deux conversions échouent, alors c'est une chaîne
+                tokens.append(Token(USER_TOKENS['VAR'], match.group(4), match.start(4), match.end(4)))
+
+            tokens.append(Token(SYMBOL_TOKENS['EOF'], None, match.end(), match.end()))
+
+        pattern_operation = r"([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?)\s*([\+\-\*\/])\s*([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?)"
+        match_op= re.search(pattern_operation, self.text)
+
+        if match_op:
+            try:
+                # Si la conversion en int fonctionne, c'est un entier
+                tokens.append(Token(USER_TOKENS['INT'], int(match_op.group(1)), match_op.start(1), match_op.end(1)))
+            except ValueError:
+                try:
+                    # Si la conversion en float fonctionne, c'est un flottant
+                    tokens.append(Token(USER_TOKENS['FLOAT'], float(match_op.group(1)), match_op.start(1), match_op.end(1)))
+                except ValueError:
+                    # Sinon, c'est une chaîne
+                    tokens.append(Token(USER_TOKENS['VAR'], match_op.group(1), match_op.start(1), match_op.end(1)))
+
+            tokens.append(Token(OPERATORS_TOKENS[match_op.group(2)], None, match_op.start(2), match_op.end(2)))
+
+            try:
+                # Si la conversion en int fonctionne, c'est un entier
+                tokens.append(Token(USER_TOKENS['INT'], int(match_op.group(3)), match_op.start(3), match_op.end(3)))
+            except ValueError:
+                try:
+                    # Si la conversion en float fonctionne, c'est un flottant
+                    tokens.append(Token(USER_TOKENS['FLOAT'], float(match_op.group(3)), match_op.start(3), match_op.end(3)))
+                except ValueError:
+                    # Sinon, c'est une chaîne
+                    tokens.append(Token(USER_TOKENS['VAR'], match_op.group(3), match_op.start(3), match_op.end(3)))
+            
+                tokens.append(Token(SYMBOL_TOKENS['EOF'], None, match_op.end(), match_op.end()))
+
+        # while self.current_char is not None:
+        #     if self.current_char in ' \t':  # Ignore les espaces et tabulations
+        #         self.next()
+        #     elif self.current_char in DIGITS:
+        #         tokens.append(self.make_number())
+        #     elif self.current_char.isalpha():
+        #         tokens.append(self.make_identifier_or_keyword())
+        #     elif self.current_char == '{':
+        #         tokens.append(Token(SYMBOL_TOKENS['LBRACE'], pos_start=self.pos))
+        #         self.next()
+        #     elif self.current_char == '}':
+        #         tokens.append(Token(SYMBOL_TOKENS['RBRACE'], pos_start=self.pos))
+        #         self.next()
+        #     elif self.current_char == ')':
+        #         tokens.append(Token(SYMBOL_TOKENS['RPAREN'], pos_start=self.pos))
+        #         self.next()
+        #     elif self.current_char == '(':
+        #         tokens.append(Token(SYMBOL_TOKENS['LPAREN'], pos_start=self.pos))
+        #         self.next()
+        #     elif self.current_char == ',':
+        #         tokens.append(Token(SYMBOL_TOKENS['COMMA'], pos_start=self.pos))
+        #         self.next()
+        #     else:
+        #         pos_start = self.pos.copy()
+        #         char = self.current_char
+        #         self.next()
+        #         return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
+
+
         return tokens, None
 
     def make_identifier_or_keyword(self):
@@ -521,9 +629,6 @@ def run(fn, text):
     tokens, error = lexer.make_tokens()
     if error: return None, error
 
-    pattern_cursor = r"(CURSOR)\s+([A-Za-z]+)\((\d+),\s*(\d+)\)"
-    # regex => lexer géré lignes par lignes et non char par char
-    
     parser = Parser(tokens)
     ast = parser.parse()
     if ast.error: return None, ast.error
