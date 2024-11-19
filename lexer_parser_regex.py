@@ -83,7 +83,7 @@ class Error:
     def as_string(self):
         """Retourne une chaîne de texte décrivant l'erreur avec le contexte du code."""
         result  = f'{self.error_name}: {self.details}\n'
-        result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
+        result += f'File {self.fn}, line {self.pos_start.ln + 1}'
         result += '\n\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
         return result
 
@@ -167,6 +167,8 @@ class Lexer:
         """Convertit tout le texte source en une liste de tokens utilisables par le parser."""
         tokens = []
 
+        # pattern n arguments : ([A-Za-z0-9]+)\s([A-Za-z0-9]+)\(([\d\.\w]+(?:,\s*[\d\.\w]+)*)\) 
+        # Il faudra créer une fonction pour récupérer les arguments en coupant le groupe 3 (tout ce qu'il y a entre les parenthèses) à chaque virgule
         pattern_cursor = r"(CURSOR)\s+([A-Za-z0-9]+)\((\d+\.\d+|\d+|[A-Za-z]+),\s*(\d+\.\d+|\d+|[A-Za-z]+)\)"
         match = re.search(pattern_cursor, self.text)
 
@@ -238,35 +240,27 @@ class Lexer:
 
             tokens.append(Token(SYMBOL_TOKENS['EOF'], None, match.end(), match.end()))
 
-        pattern_operation = r"([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?)\s*([\+\-\*\/])\s*([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?)"
-        match_op= re.search(pattern_operation, self.text)
+        pattern_operation = r"([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?)|([\+\-\*\/])"
+        # Appliquer re.finditer pour obtenir des objets Match
+        matches = re.finditer(pattern_operation, self.text)
 
-        if match_op:
-            try:
-                # Si la conversion en int fonctionne, c'est un entier
-                tokens.append(Token(USER_TOKENS['INT'], int(match_op.group(1)), match_op.start(1), match_op.end(1)))
-            except ValueError:
+        # Parcourir les correspondances
+        for match in matches:
+            if match.group(1):  # C'est un opérande
                 try:
-                    # Si la conversion en float fonctionne, c'est un flottant
-                    tokens.append(Token(USER_TOKENS['FLOAT'], float(match_op.group(1)), match_op.start(1), match_op.end(1)))
+                    value = int(match.group(1))  # Vérifier si c'est un entier
+                    tokens.append(Token(USER_TOKENS['INT'], value, match.start(1), match.end(1)))
                 except ValueError:
-                    # Sinon, c'est une chaîne
-                    tokens.append(Token(USER_TOKENS['VAR'], match_op.group(1), match_op.start(1), match_op.end(1)))
+                    try:
+                        value = float(match.group(1))  # Vérifier si c'est un flottant
+                        tokens.append(Token(USER_TOKENS['FLOAT'], value, match.start(1), match.end(1)))
+                    except ValueError:
+                        tokens.append(Token(USER_TOKENS['VAR'], match.group(1), match.start(1), match.end(1)))
+            elif match.group(2):  # C'est un opérateur
+                tokens.append(Token(OPERATORS_TOKENS[match.group(2)], match.group(2), match.start(2), match.end(2)))
 
-            tokens.append(Token(OPERATORS_TOKENS[match_op.group(2)], None, match_op.start(2), match_op.end(2)))
-
-            try:
-                # Si la conversion en int fonctionne, c'est un entier
-                tokens.append(Token(USER_TOKENS['INT'], int(match_op.group(3)), match_op.start(3), match_op.end(3)))
-            except ValueError:
-                try:
-                    # Si la conversion en float fonctionne, c'est un flottant
-                    tokens.append(Token(USER_TOKENS['FLOAT'], float(match_op.group(3)), match_op.start(3), match_op.end(3)))
-                except ValueError:
-                    # Sinon, c'est une chaîne
-                    tokens.append(Token(USER_TOKENS['VAR'], match_op.group(3), match_op.start(3), match_op.end(3)))
-            
-                tokens.append(Token(SYMBOL_TOKENS['EOF'], None, match_op.end(), match_op.end()))
+        # Ajouter un token EOF à la fin
+        tokens.append(Token(SYMBOL_TOKENS['EOF'], None, len(self.text), len(self.text)))
 
         # while self.current_char is not None:
         #     if self.current_char in ' \t':  # Ignore les espaces et tabulations
