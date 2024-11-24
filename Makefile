@@ -5,6 +5,9 @@ EXEC = files.exe/main.exe
 OBJ_DIR_O = files.o
 OBJ_DIR_EXE = files.exe
 
+# Directory for shared libraries
+LIB_DIR = files.lib
+
 # List of source files
 SRC = draw/main.c draw/form.c
 
@@ -17,17 +20,25 @@ CC = gcc
 # Compilation options (SDL2 and SDL2_gfx libraries included)
 CFLAGS = -Wall -Wextra -lSDL2 -lSDL2_gfx -lm
 
+# Rule to create a shared library from form.c
+LIBRARY = $(LIB_DIR)/libform.so
+
 # Default rule to generate the executable
-all: $(EXEC)
+all: $(EXEC) $(LIBRARY)
 
 # Link object files to create the executable
 $(EXEC): $(OBJ)
 	mkdir -p $(OBJ_DIR_EXE)
 	$(CC) $(OBJ) -o $(EXEC) $(CFLAGS)
 
+# Rule to create the shared library
+$(LIBRARY): draw/form.c
+	mkdir -p $(LIB_DIR)  # Create library directory if it does not exist
+	$(CC) -shared -fPIC -o $(LIBRARY) draw/form.c $(CFLAGS)
+
 # Rule to generate object files in the files.o directory
 $(OBJ_DIR_O)/%.o: draw/%.c
-# Create directories if they do not exist
+	# Create directories if they do not exist
 	mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -38,8 +49,8 @@ run: $(EXEC)
 # Rule to clean up object files and the executable
 clean:
 	rm -f $(OBJ) $(EXEC)
-# Remove dirs if empty
-	rmdir $(OBJ_DIR_O) $(OBJ_DIR_EXE) 2>/dev/null || true  
+	rm -f $(LIBRARY)  # Remove shared library as well
+	rmdir $(OBJ_DIR_O) $(OBJ_DIR_EXE) $(LIB_DIR) 2>/dev/null || true
 
 # Indicate that clean and run are not files
 .PHONY: all clean run

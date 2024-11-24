@@ -165,6 +165,7 @@ class Parser:
         self.tokens = tokens
         self.pos = 0  # Position actuelle dans la liste de tokens
         self.current_token = self.tokens[self.pos]
+        self.renderer = None  # Le renderer sera passé depuis le main
 
     def advance(self):
         "Passe au token suivant dans la liste."

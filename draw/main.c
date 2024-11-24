@@ -16,7 +16,7 @@
  * After cleanup, SDL is properly quit, and if `exitCode` is not -1, the program 
  * exits with the specified exit code.
  */
-void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode) 
+extern void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode) 
 {
     
     if(freeRenderer && renderer) SDL_DestroyRenderer(renderer);

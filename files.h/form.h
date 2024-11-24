@@ -4,7 +4,7 @@
 #include "main.h"
 #define PI 3.14159265
 
-void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type);
+extern void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type);
 
 void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 color, char *type);
 
