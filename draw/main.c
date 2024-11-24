@@ -1,5 +1,11 @@
 #include "../files.h/main.h"
 
+
+// Exposer cleanResources et drawCircle pour Python
+extern void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode);
+extern void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type);
+
+
 /**
  * @brief Cleans up and releases SDL resources as specified.
  * 
@@ -16,7 +22,7 @@
  * After cleanup, SDL is properly quit, and if `exitCode` is not -1, the program 
  * exits with the specified exit code.
  */
-extern void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode) 
+void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode) 
 {
     
     if(freeRenderer && renderer) SDL_DestroyRenderer(renderer);
@@ -93,13 +99,39 @@ int main() {
     }
     SDL_RenderPresent(renderer);
 
-    // Draw various shapes on the renderer
-    drawCircle(renderer, 400, 270, 60, 0xFF00FF00, "filled");
-    drawEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
-    drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
-    drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty");
-    drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled");
-    drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
+    // Initialisation de Python
+    /*Py_Initialize();
+    
+    // Appel du script Python
+    PyObject *pName = PyUnicode_DecodeFSDefault("lexer_parser_louaye_functions.py");
+    PyObject *pModule = PyImport_Import(pName);
+    Py_XDECREF(pName);
+    
+    if (pModule != NULL) {
+        // Récupérer la fonction Python
+        PyObject *pFunc = PyObject_GetAttrString(pModule, "main");
+
+        if (PyCallable_Check(pFunc)) {
+            // Passer le renderer en argument à la fonction Python
+            PyObject *arg = PyLong_FromVoidPtr(renderer);  // Convertir renderer en objet Python
+            PyObject *args = PyTuple_Pack(1, arg);  // Créer un tuple avec le renderer
+
+            // Appeler la fonction Python
+            PyObject_CallObject(pFunc, args);
+            Py_XDECREF(args);
+        } else {
+            PyErr_Print();
+        }
+        Py_XDECREF(pFunc);
+        Py_XDECREF(pModule);
+    } else {
+        PyErr_Print();
+    }
+
+    // Finalisation de Python
+    Py_Finalize();*/
+
+
 
     // Event handling loop
     int running = 1;

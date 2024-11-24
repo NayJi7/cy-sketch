@@ -12,7 +12,7 @@
 
 import os
 import lexer_parser_regex as lexer_parser
-import lexer_parser_louaye_v2 as lexer_parser_louaye
+import louaye.lexer_parser_louaye_v2 as lexer_parser_louaye
 
 text = None
 

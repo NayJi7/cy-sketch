@@ -10,7 +10,7 @@
  * @param color The color of the circle in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of circle ("empty" for outline, "filled" for solid).
  */
-extern void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type)
+void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type)
 {   
 
     if(strcmp(type, "empty") == 0) 
