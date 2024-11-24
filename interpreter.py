@@ -12,12 +12,15 @@
 
 import os
 import lexer_parser_regex as lexer_parser
+import lexer_parser_louaye_v2 as lexer_parser_louaye
 
 text = None
 
 while text != "exit":
     text = input('draw++ > ')
     result, error = lexer_parser.run('<stdin>', text)
+    #result, error = lexer_parser_louaye.run('<stdin>', text) #drawCircle(100, 200, 50, 0xFF00FF00, filled)
+
 
     if text=="exit": 
         restart = False

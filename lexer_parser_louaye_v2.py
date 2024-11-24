@@ -160,25 +160,91 @@ class Lexer:
 
 class Parser:
     def __init__(self, tokens):
-        self.tokens = tokens  # Liste de tokens à analyser
+        "Initialise le parser avec une liste de tokens."
+
+        self.tokens = tokens
         self.pos = 0  # Position actuelle dans la liste de tokens
-        self.current_token = self.tokens[self.pos]  # Token courant, initialisé au premier token
+        self.current_token = self.tokens[self.pos]
 
     def advance(self):
-        "Avance au token suivant dans la liste"
+        "Passe au token suivant dans la liste."
 
-        self.pos += 1  # Incrémente la position actuelle
-        # Met à jour le token courant, ou None si on dépasse la liste
+        self.pos += 1
         self.current_token = self.tokens[self.pos] if self.pos < len(self.tokens) else None
 
-    def parse(self):
-        "Parcourir et interpréter les tokens un par un"
+    def expect(self, expected_type):
+        """ Vérifie que le token courant correspond au type attendu et effectue des conversions si nécessaire.
 
-        # Boucle principale pour traiter les tokens jusqu'à rencontrer EOF.
+        - Si `expected_type` est 'TT_INT' ou 'TT_FLOAT', retourne un nombre.
+        - Si `expected_type` est 'TT_COLOR', retourne une couleur convertie en entier.
+        - Si `expected_type` est 'TT_STRING', retourne une chaîne.
+        - Sinon, vérifie simplement le type sans conversion.
+        """
+
+        if self.current_token.type == expected_type:
+            value = self.current_token.value
+
+            # Conversion selon le type attendu
+            if expected_type == 'TT_INT':
+                value = int(value)
+            elif expected_type == 'TT_FLOAT':
+                value = float(value)
+            elif expected_type == 'TT_COLOR':
+                value = int(value, 16)  # Convertir couleur hexadécimale
+            elif expected_type == 'TT_STRING':
+                pass  # Aucun traitement supplémentaire requis pour les chaînes
+
+            self.advance()  # Passe au token suivant
+            return value
+        else:
+            raise SyntaxError(f"Expected {expected_type}, got {self.current_token.type}")
+
+    def parse_draw_circle(self):
+        """Cette méthode lit les arguments de drawCircle(x, y, radius, color, type), 
+        vérifie leur validité grâce à des méthodes expect, et appelle une fonction 
+        associée (execute_draw_circle) avec les valeurs extraites."""
+
+        self.advance()  # Passe le token TT_DRAWCIRCLE
+        #-----------------------------------------------------------------------------
+        self.expect('TT_LPAREN')  # Vérifie et passe '('
+        #-----------------------------------------------------------------------------
+        x = self.expect('TT_INT')  # Lire x
+        #-----------------------------------------------------------------------------
+        self.expect('TT_COMMA')   # Vérifie et passe ','
+        #-----------------------------------------------------------------------------
+        y = self.expect('TT_INT')  # Lire y
+        #-----------------------------------------------------------------------------
+        self.expect('TT_COMMA')   # Vérifie et passe ','
+        #-----------------------------------------------------------------------------
+        radius = self.expect('TT_INT')  # Lire le rayon
+        #-----------------------------------------------------------------------------
+        self.expect('TT_COMMA')   # Vérifie et passe ','
+        #-----------------------------------------------------------------------------
+        color = self.expect('TT_COLOR')  # Lire la couleur
+        #-----------------------------------------------------------------------------
+        self.expect('TT_COMMA')   # Vérifie et passe ','
+        #-----------------------------------------------------------------------------
+        circle_type = self.expect('TT_STRING')  # Lire le type (filled ou empty)
+        #-----------------------------------------------------------------------------
+        self.expect('TT_RPAREN')  # Vérifie et passe ')'
+
+        # Appeler la fonction associée
+        self.execute_draw_circle(x, y, radius, color, circle_type)
+
+
+    def parse(self):
+        "Parse l'ensemble des tokens jusqu'à rencontrer EOF."
+
         while self.current_token.type != SYMBOL_TOKENS['EOF']:
             if self.current_token.type == LANG_TOKENS['DRAWCIRCLE']:
                 # Si le token courant correspond à "drawCircle", appelle une méthode pour le traiter.
                 self.parse_draw_circle()
+            else:
+                # Gère les cas où le token est inconnu ou non pris en charge.
+                print(f"Unknown token: {self.current_token}")
+                self.advance()  # Avance pour éviter une boucle infinie
+                
+        #---        
             #else if self.current_token.type == LANG_TOKENS['DRAWRECTANGLE']:
                 #self.parse_draw_rectangle()
             #else if self.current_token.type == LANG_TOKENS['DRAWROUNDEDRECTANGLE']:
@@ -189,97 +255,16 @@ class Parser:
                 #self.parse_draw_polygon()
             #else if self.current_token.type == LANG_TOKENS['DRAWLINE']:
                 #self.parse_draw_line()
-                
-            else:
-                # Gère les cas où le token est inconnu ou non pris en charge.
-                print(f"Unknown token: {self.current_token}")
-                self.advance()  # Avance pour éviter une boucle infinie
-
-
-    def parse_draw_circle(self):
-        "Cette méthode lit les arguments de drawCircle(x, y, radius, color, type), vérifie leur validité grâce à des méthodes expect, et appelle une fonction associée (execute_draw_circle) avec les valeurs extraites."
-
-        self.advance()  # Passer le token 'TT_DRAWCIRCLE' pour commencer à analyser les arguments.
-        if self.current_token.type == SYMBOL_TOKENS['LPAREN']:  # Vérifie si le prochain token est '('.
-            self.advance()  # Passe '('.
-
-            "Lire les arguments : x, y, radius, color, type"
-
-            x = self.expect_number()  # Attend un nombre pour x.
-#-----------------------------------------------------------------------------
-            self.expect(SYMBOL_TOKENS['COMMA'])  # Vérifie et passe ','.
-#-----------------------------------------------------------------------------
-            y = self.expect_number()  # Attend un nombre pour y.
-#-----------------------------------------------------------------------------
-            self.expect(SYMBOL_TOKENS['COMMA'])  # Vérifie et passe ','.
-#-----------------------------------------------------------------------------
-            radius = self.expect_number()  # Attend un nombre pour radius.
-#-----------------------------------------------------------------------------
-            self.expect(SYMBOL_TOKENS['COMMA'])  # Vérifie et passe ','.
-#-----------------------------------------------------------------------------
-            color = self.expect_color()  # Attend une couleur hexadécimale pour color.
-#-----------------------------------------------------------------------------
-            self.expect(SYMBOL_TOKENS['COMMA'])  # Vérifie et passe ','.
-#-----------------------------------------------------------------------------
-            circle_type = self.expect_string()  # Attend une chaîne ("filled" ou "empty") pour type.
-#-----------------------------------------------------------------------------
-            self.expect(SYMBOL_TOKENS['RPAREN'])  # Vérifie et passe ')'.
-#-----------------------------------------------------------------------------
-
-            "Exécute l'instruction drawCircle avec les arguments lus."
-            self.execute_draw_circle(int(x), int(y), int(radius), color, circle_type)
-
-
-
-    def expect(self, token_type):
-        "Vérifie que le token courant est du type attendu, sinon lève une erreur"
-
-        if self.current_token.type == token_type:  # Vérification du type du token courant
-            self.advance()  # Passe au token suivant
-        else:
-            raise SyntaxError(f"Expected {token_type}, got {self.current_token.type}")  # Sinon, lève une erreur de syntaxe.
-
-
-
-    def expect_number(self):
-        "Vérifie que le token courant est un nombre (int ou float) et retourne sa valeur."
-        
-        if self.current_token.type in ['TT_INT', 'TT_FLOAT']:  # Vérifie si le token est un nombre entier ou flottant.
-            value = self.current_token.value  # Récupère la valeur du token.
-            self.advance()  # Passe au token suivant.
-            return value  # Retourne la valeur du nombre.
-        else:
-            raise SyntaxError(f"Expected a number, got {self.current_token.type}")  # Lève une erreur si ce n'est pas un nombre.
-
-
-    def expect_color(self):
-        "Vérifie que le token courant est une couleur en hexadécimal et retourne sa valeur."
-        
-        if self.current_token.type == 'TT_COLOR':  # Vérifie si le token est une couleur hexadécimale.
-            value = self.current_token.value  # Récupère la valeur du token.
-            self.advance()  # Passe au token suivant.
-            return int(value, 16)  # Convertit la couleur en entier (base 16).
-        else:
-            raise SyntaxError(f"Expected a color (0x...), got {self.current_token.type}")  # Lève une erreur si ce n'est pas une couleur.
-
-
-    def expect_string(self):
-        "Vérifie que le token courant est une chaîne et retourne sa valeur."
-
-        if self.current_token.type == 'TT_STRING':  # Vérifie si le token est ("filled" ou "empty").
-            value = self.current_token.value  # Récupère la valeur de la chaîne.
-            self.advance()  # Passe au token suivant.
-            return value  # Retourne la valeur de la chaîne.
-        else:
-            raise SyntaxError(f"Expected a string (filled/empty), got {self.current_token.type}")  # Lève une erreur si ce n'est pas le cas.
+        #---        
+            
 
 
     def execute_draw_circle(self, x, y, radius, color, circle_type):
-        "Exécute la fonction associée à cercleColor."
-        print(f"Drawing circle at ({x}, {y}) with radius {radius}, color {hex(color)}, type {circle_type}")
+        "Exécute l'action associée à la commande drawCircle avec les paramètres fournis"
 
+        print(f"Drawing circle at ({x}, {y}) with radius {radius}, color {hex(color)}, type {circle_type}")
         # Appelle ici une fonction SDL ou autre pour dessiner le cercle
-        # Exemple d'utilisation : drawCircle(renderer, x, y, radius, color, circle_type)
+
 
 #######################################
 # FONCTION PRINCIPALE D'EXÉCUTION
