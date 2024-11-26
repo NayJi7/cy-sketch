@@ -75,7 +75,7 @@ class Lexer:
 
         if(result == 0) :
             operations(self.text, tokens)
-
+        tokens.append(Token(SYMBOL_TOKENS['EOF'], None))
         return tokens, None
 
 #######################################
