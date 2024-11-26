@@ -5,9 +5,28 @@
 # Caractères numériques pour les nombres
 DIGITS = '0123456789'
 
-COLOR = {
-    'BLUE' : 000,
-    'RED'  : 111
+#Tokens pour les couleurs
+COLORS = {
+    "BLACK": 0xFF000000,      
+    "WHITE": 0xFFFFFFFF,      
+    "RED": 0xFFFF0000,        
+    "GREEN": 0xFF00FF00,      
+    "BLUE": 0xFF0000FF,       
+    "YELLOW": 0xFFFFFF00,     
+    "CYAN": 0xFF00FFFF,       
+    "MAGENTA": 0xFFFF00FF,    
+    "GRAY": 0xFF808080,       
+    "SILVER": 0xFFC0C0C0,     
+    "MAROON": 0xFF800000,     
+    "OLIVE": 0xFF808000,      
+    "LIME": 0xFFBFFF00,       
+    "AQUA": 0xFF00FFFF,       
+    "TURQUOISE": 0xFF40E0D0,  
+    "PURPLE": 0xFF800080,     
+    "INDIGO": 0xFF4B0082,     
+    "GOLD": 0xFFFFD700,       
+    "ORANGE": 0xFFFFA500,     
+    "BROWN": 0xFFA52A2A       
 }
 
 # Tokens spécifiques au langage dpp
@@ -34,7 +53,7 @@ USER_TOKENS = {
     'INT': 'TT_INT',                # Nombre entier
     'FLOAT': 'TT_FLOAT',            # Nombre à virgule flottante
     'VAR': 'TT_VAR',                # Noms de variables
-    'COLOR': 'TT_COLOR',                # Noms de variables
+    'COLOR': 'TT_COLOR',            # Noms de variables
     'STR': 'TT_STR'                 # Strings
 }
 

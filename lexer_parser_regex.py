@@ -176,9 +176,9 @@ def run(fn, text):
     tokens, error = lexer.make_tokens()
     if error: return None, error
 
-    parser = Parser(tokens)
-    ast = parser.parse()
-    if ast.error: return None, ast.error
+   # parser = Parser(tokens)
+    #ast = parser.parse()
+    #if ast.error: return None, ast.error
 
-    c_code = compile_to_c(ast.node)
-    return c_code, None
+    #c_code = compile_to_c(ast.node)
+    #return c_code, None
