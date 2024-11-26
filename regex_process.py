@@ -51,8 +51,8 @@ def operations(text, tokens):
         elif match.group(2):  # C'est un opérateur
             tokens.append(Token(OPERATORS_TOKENS[match.group(2)], match.group(2)))
 
-    # Ajouter un token EOF à la fin
-    tokens.append(Token(SYMBOL_TOKENS['EOF'], None))
+
+
 
 def cursor(text,tokens,result):
     # CURSOR name(x,y)
@@ -70,7 +70,6 @@ def cursor(text,tokens,result):
 
         algoArg(match.group(3), tokens) # append un arg de type int, float ou var
         algoArg(match.group(4), tokens)
-        tokens.append(Token(SYMBOL_TOKENS['EOF'], None))
         return result+1
     else:
         return result
