@@ -2,34 +2,50 @@ from tokens import *
 import re
 
 def algoArg(matchgrp, tokens):
-    count = 0
-
     try:
         # Tentative de conversion en entier
-        int(matchgrp)
+        value = int(matchgrp)
+        tokens.append(Token(USER_TOKENS['INT'], value))
     except ValueError:
-        count += 1
-        pass
+        try:
+            # Si l'entier échoue, tenter une conversion en float
+            value = float(matchgrp)
+            tokens.append(Token(USER_TOKENS['FLOAT'], value))
+        except ValueError:
+            # Si l'int et le float échouent, c'est une variable
+            tokens.append(Token(USER_TOKENS['VAR'], matchgrp))
 
-    if count == 0:
-        tokens.append(Token(USER_TOKENS['INT'], int(matchgrp)))
 
-    try:
-        # Si la conversion en int échoue, tenter en float
-        if count != 0:
-            float(matchgrp)
-        else :
-            count=3 # is an int and has been append
-    except ValueError:
-        count += 1
-        pass
-
-    if count == 1:
-        tokens.append(Token(USER_TOKENS['FLOAT'], float(matchgrp)))
-        
-    if count == 2:
-        # Si les deux conversions échouent, alors c'est une chaîne
-        tokens.append(Token(USER_TOKENS['VAR'], matchgrp))
+#version d'Adam : 
+    #  def algoArg(matchgrp, tokens):
+    #    count = 0
+    #
+    #    try:
+    #        # Tentative de conversion en entier
+    #        int(matchgrp)
+    #    except ValueError:
+    #        count += 1
+    #        pass
+    #
+    #    if count == 0:
+    #        tokens.append(Token(USER_TOKENS['INT'], int(matchgrp)))
+    #
+    #    try:
+    #        # Si la conversion en int échoue, tenter en float
+    #        if count != 0:
+    #            float(matchgrp)
+    #        else :
+    #            count=3 # is an int and has been append
+    #    except ValueError:
+    #        count += 1
+    #        pass
+    #
+    #    if count == 1:
+    #        tokens.append(Token(USER_TOKENS['FLOAT'], float(matchgrp)))
+    #        
+    #    if count == 2:
+    #        # Si les deux conversions échouent, alors c'est une chaîne
+    #        tokens.append(Token(USER_TOKENS['VAR'], matchgrp))      
 
 def operations(text, tokens):
     pattern_operation = r"([A-Za-z0-9]+(?:\.[A-Za-z0-9]+)?)|([\+\-\*\/])"
