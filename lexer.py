@@ -21,12 +21,23 @@ class Lexer:
     def make_tokens(self):
         """Convertit tout le texte source en une liste de tokens utilisables par le parser."""
         tokens = []
+        error = None
 
-        for line in self.lines :
-            result = cursor(line, tokens)
-            result = drawcircle(line, tokens)
+        for ln, line in enumerate(self.lines) :
+            self.ln = ln+1
+            found = False
 
-            self.ln += 1
-
+            error = cursor(ln+1, line, tokens)
+            if error and not found:
+                return None, error
+            elif not error :
+                found = True
+            
+            error = drawcircle(ln+1, line, tokens)
+            if error and not found:
+                return None, error
+            elif not error:
+                found = True
+            
         tokens.append(Token(SYMBOL_TOKENS['EOF'], None))
-        return tokens, None
+        return tokens, error

@@ -1,9 +1,12 @@
+# Ajouter les regex process pour les fonctions non implémentées
+
 #######################################
 # IMPORTS
 #######################################
 
 from tokens import *
 import re
+from errors_codegen import *
 
 #######################################
 # REGEX PATTERNS
@@ -23,9 +26,18 @@ def algoArg(matchgrp, tokens):
             # Si l'int et le float échouent, c'est une variable
             tokens.append(Token(USER_TOKENS['VAR'], matchgrp))     
 
-def cursor(text,tokens):
-    # CURSOR name(x,y)
+def cursor(ln, text, tokens):
+    # Pattern pour la syntaxe complète de CURSOR
     pattern = r"(CURSOR)\s+([A-Za-z][A-Za-z0-9]*)\((-?\d+\.\d+|-?\d+|[A-Za-z][A-Za-z0-9]*),\s*(-?\d+\.\d+|-?\d+|[A-Za-z][A-Za-z0-9]*)\)"
+
+    # Tester pour voir si le mot-clé CURSOR est présent et correspond
+    cursor_match = re.search(r"CURSOR", text)
+
+    if not cursor_match:
+        # Si le mot-clé 'CURSOR' n'est pas trouvé, erreur générale
+        return InvalidSyntaxError(ln, f"Rien ne match")
+    
+    # Tester la syntaxe complète avec la regex
     match = re.search(pattern, text)
 
     if match:
@@ -43,9 +55,23 @@ def cursor(text,tokens):
         tokens.append(Token(SYMBOL_TOKENS['RPAREN'], None))
         tokens.append(Token(SYMBOL_TOKENS['EOL'], None))
 
-def drawcircle(text, tokens):
-    # DRAWCIRCLE name(x, y, radius, COLOR, type)
+        return None
+    else:
+        # Si la syntaxe complète échoue, erreur de syntaxe
+        return InvalidSyntaxError(ln, f"CURSOR trouvé mais pas de match")
+
+def drawcircle(ln, text, tokens):
+    # Pattern pour la syntaxe complète de DRAWCIRCLE
     pattern = r"(DRAWCIRCLE)\s+([A-Za-z][A-Za-z0-9]*)\s*\(\s*(-?\d+\.\d+|-?\d+|[A-Za-z][A-Za-z0-9]*)\s*,\s*(-?\d+\.\d+|-?\d+|[A-Za-z][A-Za-z0-9]*)\s*,\s*(-?\d+\.\d+|-?\d+|[A-Za-z][A-Za-z0-9]*)\s*,\s*([A-Z]+)\s*,\s*([a-zA-Z]+)\s*\)"
+
+    # Tester pour voir si le mot-clé DRAWCIRCLE est présent et correspond
+    drawcircle_match = re.search(r"DRAWCIRCLE", text)
+
+    if not drawcircle_match:
+        # Si le mot-clé 'DRAWCIRCLE' n'est pas trouvé, erreur générale
+        return InvalidSyntaxError(ln, f"Rien ne match")
+
+    # Tester la syntaxe complète avec la regex
     match = re.search(pattern, text)
 
     if match:
@@ -55,12 +81,21 @@ def drawcircle(text, tokens):
         # Vérifie si l'identifiant est un mot-clé
         tokens.append(Token(USER_TOKENS.get('IDENTIFIER'), match.group(2)))
 
+        # Ajout des arguments
         algoArg(match.group(3), tokens)
         algoArg(match.group(4), tokens)
         algoArg(match.group(5), tokens)
 
-        # Vérifie si le group 6 est une color
+        # Vérifie si le group 6 est une couleur
         tokens.append(Token(USER_TOKENS.get('COLOR'), match.group(6)))
 
+        # Ajout du dernier argument comme chaîne
         tokens.append(Token(USER_TOKENS.get('STR'), match.group(7)))
+
+        # Ajouter la fin de ligne
         tokens.append(Token(SYMBOL_TOKENS['EOL'], None))
+
+        return None
+    else:
+        # Si la syntaxe complète échoue, erreur de syntaxe
+        return InvalidSyntaxError(ln, f"DRAWCIRCLE trouvé mais pas de match")

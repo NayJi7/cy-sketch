@@ -1,3 +1,6 @@
+# Vérifier les différentes erreurs et en ajouter d'autres
+# Ajuster et ajouter les codegen pour les fonctions, opérations existantes ou ajoutées
+
 #######################################
 # IMPORTS
 #######################################
