@@ -41,8 +41,6 @@ LANG_TOKENS = {
     'DRAWROUNDEDRECTANGLE': 'TT_DRAWROUNDEDRECTANGLE',
     'DRAWPOLYGON': 'TT_DRAWPOLYGON',
     'DRAWLINE': 'TT_DRAWLINE',
-    'STRING': 'TT_STRING',
-    'COLOR': 'TT_COLOR',
     'IF': 'TT_IF',          # Instruction conditionnelle
     'ELSE': 'TT_ELSE'       # Instruction alternative dans les conditions
 }
@@ -64,7 +62,8 @@ SYMBOL_TOKENS = {
     'LBRACE': 'TT_LBRACE',   # {
     'RBRACE': 'TT_RBRACE',   # }
     'COMMA': 'TT_COMMA',   # ,
-    'EOF': 'TT_EOF'          # Fin de fichier
+    'EOF': 'TT_EOF',          # Fin de fichier
+    'EOL': 'TT_EOL'          # Fin de ligne
 }
 
 # Tokens pour les operateurs
