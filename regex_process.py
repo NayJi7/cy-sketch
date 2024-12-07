@@ -33,10 +33,6 @@ def cursor(ln, text, tokens):
     # Tester pour voir si le mot-clé CURSOR est présent et correspond
     cursor_match = re.search(r"CURSOR", text)
 
-    if not cursor_match:
-        # Si le mot-clé 'CURSOR' n'est pas trouvé, erreur générale
-        return InvalidSyntaxError(ln, f"Rien ne match")
-    
     # Tester la syntaxe complète avec la regex
     match = re.search(pattern, text)
 
@@ -56,9 +52,11 @@ def cursor(ln, text, tokens):
         tokens.append(Token(SYMBOL_TOKENS['EOL'], None))
 
         return None
-    else:
+    elif not match and cursor_match:
         # Si la syntaxe complète échoue, erreur de syntaxe
         return InvalidSyntaxError(ln, f"CURSOR trouvé mais pas de match")
+    elif not match and not cursor_match:
+        return "pass"
 
 def drawcircle(ln, text, tokens):
     # Pattern pour la syntaxe complète de DRAWCIRCLE
@@ -66,10 +64,6 @@ def drawcircle(ln, text, tokens):
 
     # Tester pour voir si le mot-clé DRAWCIRCLE est présent et correspond
     drawcircle_match = re.search(r"DRAWCIRCLE", text)
-
-    if not drawcircle_match:
-        # Si le mot-clé 'DRAWCIRCLE' n'est pas trouvé, erreur générale
-        return InvalidSyntaxError(ln, f"Rien ne match")
 
     # Tester la syntaxe complète avec la regex
     match = re.search(pattern, text)
@@ -96,6 +90,6 @@ def drawcircle(ln, text, tokens):
         tokens.append(Token(SYMBOL_TOKENS['EOL'], None))
 
         return None
-    else:
+    elif not match and not drawcircle_match:
         # Si la syntaxe complète échoue, erreur de syntaxe
-        return InvalidSyntaxError(ln, f"DRAWCIRCLE trouvé mais pas de match")
+        return "pass"

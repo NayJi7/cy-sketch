@@ -26,18 +26,26 @@ class Lexer:
         for ln, line in enumerate(self.lines) :
             self.ln = ln+1
             found = False
+            error = None
 
             error = cursor(ln+1, line, tokens)
-            if error and not found:
+            if error == "pass" :
+                pass
+            elif error and not found:
                 return None, error
-            elif not error :
+            else :
                 found = True
             
             error = drawcircle(ln+1, line, tokens)
-            if error and not found:
+            if error == "pass" :
+                pass
+            elif error and not found:
                 return None, error
-            elif not error:
+            else :
                 found = True
+
+            if not found :
+                return None, InvalidSyntaxError(ln, f"Rien ne match")
             
         tokens.append(Token(SYMBOL_TOKENS['EOF'], None))
         return tokens, error
