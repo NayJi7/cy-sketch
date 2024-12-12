@@ -10,6 +10,7 @@
 
 #include "form.h"
 
+
 void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode);
 
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color);

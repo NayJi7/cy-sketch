@@ -62,7 +62,7 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
  * 
  * @return int Returns 0 on successful execution.
  */
-int main() {
+int main(){
     
     // Initialize an SDL window pointer
     SDL_Window *window = NULL;
@@ -101,57 +101,61 @@ int main() {
     drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled");
     drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
 
-    // Event handling loop
     int running = 1;
     while (running) {
-        // Process events in the SDL event queue
+        // Gestion des événements
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_MOUSEMOTION:
-                    // Log mouse movement
-                    printf("The mouse moved to (%d, %d)\n", event.motion.x, event.motion.y);
-                    break;
-                case SDL_MOUSEWHEEL:
-                    // Log scroll wheel movement
-                    if (event.wheel.y > 0) {
-                        printf("Thumbwheel up\n");
-                    } else if (event.wheel.y < 0) {
-                        printf("Thumbwheel down\n");
-                    }
-                    break;
                 case SDL_MOUSEBUTTONDOWN:
-                    // Log left mouse button press
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         printf("Left mouse button pressed at (%d, %d)\n", event.button.x, event.button.y);
+
+                        // Vérification si une forme est sélectionnée
+                        if (selectShape(event.button.x, event.button.y)) {
+                            renderShapes(renderer);
+                            printf("A shape was selected at (%d, %d)\n", event.button.x, event.button.y);
+                        } else {
+                            printf("No shape was found at (%d, %d)\n", event.button.x, event.button.y);
+                        }
                     }
                     break;
+
                 case SDL_MOUSEBUTTONUP:
-                    // Log left mouse button release
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         printf("Left mouse button released at (%d, %d)\n", event.button.x, event.button.y);
                     }
                     break;
+
                 case SDL_WINDOWEVENT:
-                    // Handle window-specific events
-                    switch (event.window.event) {
-                        case SDL_WINDOWEVENT_RESIZED:
-                            printf("Window resized to (%d, %d)\n", event.window.data1, event.window.data2);
-                            break;
-                        case SDL_WINDOWEVENT_CLOSE:
-                            printf("The window has been closed\n");
-                            break;
+                    if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                        printf("The window has been closed\n");
+                        running = 0;
                     }
                     break;
+
                 case SDL_QUIT:
-                    // Exit the main loop if quit event is received
                     running = 0;
+                    break;
+
+                default:
                     break;
             }
         }
     }
+    // Nettoyer l'écran
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer);
 
-    // Clean up resources and exit
+    // Dessiner toutes les formes, avec la forme sélectionnée en rouge
+    renderShapes(renderer);
+
+    // Mettre à jour l'écran
+    SDL_RenderPresent(renderer);
+
+    // Limiter la fréquence des images (facultatif)
+    SDL_Delay(16); // 60 FPS
+
+    // Libération des ressources et fermeture
     cleanResources(renderer, window, true, true, 0);
     return 0;
 }
-

@@ -2,6 +2,9 @@
 #define FORM_H
 
 #include "main.h"
+#include "structForms.h"
+#include "clickEvents.h"
+
 #define PI 3.14159265
 
 void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type);

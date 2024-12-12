@@ -10,37 +10,37 @@
  * @param color The color of the circle in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of circle ("empty" for outline, "filled" for solid).
  */
-void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, char *type)
-{   
+void drawCircle(SDL_Renderer *renderer, int x, int y, int radius, Uint32 color, char *type) {
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_CIRCLE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.circle.x = x;
+        newShape.data.circle.y = y;
+        newShape.data.circle.radius = radius;
+        shapes[shapeCount++] = newShape;
+    }
 
-    if(strcmp(type, "empty") == 0) 
-    {
-        if(circleColor(renderer, x, y, radius, color) != 0) 
-        {
-            printf("Error circleColor : %s\n", SDL_GetError());
-            cleanResources(renderer, NULL, true, false, -1);
+    // Dessin
+    if (strcmp(type, "empty") == 0) {
+        if (circleColor(renderer, x, y, radius, color) != 0) {
+            printf("Error in circleColor: %s\n", SDL_GetError());
         }
-    }
-    else if(strcmp(type, "filled") == 0) 
-    {
-        if(filledCircleColor(renderer, x, y, radius, color) != 0) 
-        {
-            printf("Error filledCircleColor : %s\n", SDL_GetError());
-            cleanResources(renderer, NULL, true, false, -1);
+    } else if (strcmp(type, "filled") == 0) {
+        if (filledCircleColor(renderer, x, y, radius, color) != 0) {
+            printf("Error in filledCircleColor: %s\n", SDL_GetError());
         }
-    }
-    else 
-    {
+    } else {
         printf("Invalid circle type: %s\n", type);
-        return;  
+        return;
     }
 
-    // Pause of 1s to see the result
-    SDL_Delay(1000);    
-    //Display the drawing
     SDL_RenderPresent(renderer);
-
 }
+
 
 /**
  * @brief Draws an ellipse on the SDL renderer.
@@ -53,36 +53,38 @@ void drawCircle(SDL_Renderer* renderer, int x, int y, int radius, Uint32 color, 
  * @param color The color of the ellipse in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of ellipse ("empty" for outline, "filled" for solid).
  */
-void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 color, char *type) 
-{
-
-    if(strcmp(type, "empty") == 0) 
-    {
-        // Dessiner une ellipse vide
-        if(ellipseColor(renderer, x, y, rx, ry, color) != 0) 
-        {
-            printf("Error in ellipseColor: %s\n", SDL_GetError());
-            cleanResources(renderer, NULL, true, false, -1);
-        }
+void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 color, char *type) {
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_ELLIPSE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.ellipse.x = x;
+        newShape.data.ellipse.y = y;
+        newShape.data.ellipse.rx = rx;
+        newShape.data.ellipse.ry = ry;
+        shapes[shapeCount++] = newShape;
     }
-    else if(strcmp(type, "filled") == 0) 
-    {
-        if(filledEllipseColor(renderer, x, y, rx, ry, color) != 0) 
-        {
-            printf("Error in filledEllipseColor: %s\n", SDL_GetError());
-            cleanResources(renderer, NULL, true, false, -1);
+
+    // Dessin
+    if (strcmp(type, "empty") == 0) {
+        if (ellipseColor(renderer, x, y, rx, ry, color) != 0) {
+            printf("Error in ellipseColor: %s\n", SDL_GetError());
         }
-    }  
-    else
-    {
+    } else if (strcmp(type, "filled") == 0) {
+        if (filledEllipseColor(renderer, x, y, rx, ry, color) != 0) {
+            printf("Error in filledEllipseColor: %s\n", SDL_GetError());
+        }
+    } else {
         printf("Invalid ellipse type: %s\n", type);
         return;
     }
 
-    SDL_Delay(1000);
-    SDL_RenderPresent(renderer);   
-
+    SDL_RenderPresent(renderer);
 }
+
 
 /**
  * @brief Draws an arc on the SDL renderer.
@@ -95,14 +97,28 @@ void drawEllipse(SDL_Renderer* renderer, int x, int y, int rx, int ry, Uint32 co
  * @param end_angle The ending angle of the arc in degrees.
  * @param color The color of the arc in Uint32 format (0xRRGGBBAA).
  */
-void drawArc(SDL_Renderer *renderer, int x, int y, int radius, int start_angle, int end_angle, Uint32 color)
-{
-    if(arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0)
-    {
+void drawArc(SDL_Renderer *renderer, int x, int y, int radius, int start_angle, int end_angle, Uint32 color) {
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_ARC;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.arc.x = x;
+        newShape.data.arc.y = y;
+        newShape.data.arc.radius = radius;
+        newShape.data.arc.start_angle = start_angle;
+        newShape.data.arc.end_angle = end_angle;
+        shapes[shapeCount++] = newShape;
+    }
+
+    if (arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0) {
         printf("Error in arcColor: %s\n", SDL_GetError());
         cleanResources(renderer, NULL, true, false, -1);
     }
 }
+
 
 /**
  * @brief Draws a rectangle on the SDL renderer.
@@ -115,34 +131,38 @@ void drawArc(SDL_Renderer *renderer, int x, int y, int radius, int start_angle, 
  * @param color The color of the rectangle in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of rectangle ("empty" for outline, "filled" for solid).
  */
-void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 color, char *type)
-{
+void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 color, char *type) {
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_RECTANGLE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.rectangle.x = x;
+        newShape.data.rectangle.y = y;
+        newShape.data.rectangle.w = w;
+        newShape.data.rectangle.h = h;
+        shapes[shapeCount++] = newShape;
+    }
 
-    if(strcmp(type, "empty") == 0)
-    {
-        if(rectangleColor(renderer, x, y, w, h, color) != 0)
-        {
+    if (strcmp(type, "empty") == 0) {
+        if (rectangleColor(renderer, x, y, w, h, color) != 0) {
             printf("Error in rectangleColor: %s\n", SDL_GetError());
             cleanResources(renderer, NULL, true, false, -1);
         }
-    }
-    else if(strcmp(type, "filled") == 0)
-    {
-        if(boxColor(renderer, x, y, w, h, color) != 0)
-        {
+    } else if (strcmp(type, "filled") == 0) {
+        if (boxColor(renderer, x, y, w, h, color) != 0) {
             printf("Error in boxColor: %s\n", SDL_GetError());
             cleanResources(renderer, NULL, true, false, -1);
         }
-    }
-    else
-    {
+    } else {
         printf("Invalid rectangle type: %s\n", type);
         return;
     }
 
     SDL_Delay(1000);
     SDL_RenderPresent(renderer);  
-
 }
 
 /**
@@ -157,35 +177,41 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int w, int h, Uint32 co
  * @param color The color of the rounded rectangle in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of rounded rectangle ("empty" for outline, "filled" for solid).
  */
-void drawRoundedRectangle(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint32 color, char *type)
-{
+void drawRoundedRectangle(SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint32 color, char *type) {
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_ROUNDEDRECTANGLE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.roundedrectangle.x1 = x1;
+        newShape.data.roundedrectangle.y1 = y1;
+        newShape.data.roundedrectangle.x2 = x2;
+        newShape.data.roundedrectangle.y2 = y2;
+        newShape.data.roundedrectangle.rad = rad;
+        shapes[shapeCount++] = newShape;
+    }
 
-    if(strcmp(type, "empty") == 0)
-    {
-        if(roundedRectangleColor(renderer, x1, y1, x2, y2, rad, color) != 0)
-        {
+    if (strcmp(type, "empty") == 0) {
+        if (roundedRectangleColor(renderer, x1, y1, x2, y2, rad, color) != 0) {
             printf("Error in roundedRectangleColor: %s\n", SDL_GetError());
             cleanResources(renderer, NULL, true, false, -1);
         }
-    }
-    else if(strcmp(type, "filled") == 0)
-    {
-        if(roundedBoxColor(renderer, x1, y1, x2, y2, rad, color) != 0)
-        {
+    } else if (strcmp(type, "filled") == 0) {
+        if (roundedBoxColor(renderer, x1, y1, x2, y2, rad, color) != 0) {
             printf("Error in roundedBoxColor: %s\n", SDL_GetError());
             cleanResources(renderer, NULL, true, false, -1);
         }
-    }
-    else
-    {
+    } else {
         printf("Invalid roundedRectangle type: %s\n", type);
         return;
     }
 
     SDL_Delay(1000);
     SDL_RenderPresent(renderer); 
-
 }
+
 
 /**
  * @brief Draws a polygon on the SDL renderer.
@@ -227,6 +253,7 @@ void drawPolygon(SDL_Renderer *renderer, Sint16 *vx, Sint16 *vy, int n, Uint32 c
 
 }
 
+
 /**
  * @brief Draws a custom polygon with a specified number of sides, centered at (cx, cy).
  * 
@@ -245,6 +272,20 @@ void drawCustomPolygon(SDL_Renderer *renderer, Sint16 cx, Sint16 cy, int radius,
     {
         printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
         return;
+    }
+
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_POLYGON;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.polygon.cx = cx;
+        newShape.data.polygon.cy = cy;
+        newShape.data.polygon.radius = radius;
+        newShape.data.polygon.sides = sides;
+        shapes[shapeCount++] = newShape;
     }
 
     Sint16 vx[12]; // Tableau pour les coordonnées X
@@ -273,32 +314,37 @@ void drawCustomPolygon(SDL_Renderer *renderer, Sint16 cx, Sint16 cy, int radius,
  * @param thickness The thickness of the line (ignored if type is "empty").
  * @param type Specifies the type of line ("empty" for thin line, "filled" for thick line).
  */
-void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, Uint32 color, int thickness, char *type) 
-{
+void drawLine(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, Uint32 color, int thickness, char *type) {
+    // Ajout dans la liste
+    if (shapeCount < MAX_SHAPES) {
+        Shape newShape = {0};
+        newShape.type = SHAPE_LINE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.typeForm = malloc(10 * sizeof(char));
+        newShape.data.line.x1 = x1;
+        newShape.data.line.y1 = y1;
+        newShape.data.line.x2 = x2;
+        newShape.data.line.y2 = y2;
+        newShape.data.line.thickness = thickness;  
+        shapes[shapeCount++] = newShape;
+    }
 
-    if(strcmp(type, "empty") == 0)
-    {
-        if(lineColor(renderer, x1, y1, x2, y2, color) != 0) 
-        {
+    if (strcmp(type, "empty") == 0) {
+        if (lineColor(renderer, x1, y1, x2, y2, color) != 0) {
             printf("Error in lineColor: %s\n", SDL_GetError());
             cleanResources(renderer, NULL, true, false, -1);
         }
-    } 
-    else if(strcmp(type, "filled") == 0) 
-    {
-        if(thickLineColor(renderer, x1, y1, x2, y2, thickness, color) != 0) 
-        {
+    } else if (strcmp(type, "filled") == 0) {
+        if (thickLineColor(renderer, x1, y1, x2, y2, thickness, color) != 0) {
             printf("Error in thickLineColor: %s\n", SDL_GetError());
             cleanResources(renderer, NULL, true, false, -1);
         }
-    } 
-    else 
-    {
+    } else {
         printf("Invalid line type: %s\n", type);
         return;
     }
 
     SDL_Delay(1000);
     SDL_RenderPresent(renderer); 
-
 }
