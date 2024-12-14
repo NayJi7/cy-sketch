@@ -39,3 +39,29 @@
 <caractere> ::= nimporte quel caractère sauf "\""
 <identifiant> ::= <lettre> | <lettre><identifiant>
 <lettre> ::= "a" ... "z" | "A" ... "Z" | "_"
+
+
+variable x = 10
+draw circle(50, 50, 10)
+move(10, 15)
+if x > 5 {
+    draw square(20, 20, 20)
+}
+
+
+Lexer: 
+VARIABLE, IDENTIFIER(x), EQUALS, NUMBER(10)
+DRAW, IDENTIFIER(circle), LPAREN, NUMBER(50), COMMA, NUMBER(50), COMMA, NUMBER(10), RPAREN
+MOVE, LPAREN, NUMBER(10), COMMA, NUMBER(15), RPAREN
+IF, IDENTIFIER(x), GT, NUMBER(5), LBRACE
+DRAW, IDENTIFIER(square), LPAREN, NUMBER(20), COMMA, NUMBER(20), COMMA, NUMBER(20), RPAREN, RBRACE
+
+Parser:
+[
+    ('assign', 'x', 10),
+    ('draw', 'circle', [50, 50, 10]),
+    ('move', 10, 15),
+    ('if', ('>', 'x', 5), [
+        ('draw', 'square', [20, 20, 20])
+    ])
+]
