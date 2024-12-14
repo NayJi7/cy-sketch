@@ -14,7 +14,12 @@ keywords = {
     'color': 'COLOR',
     'animate': 'ANIMATE',
     'rotate': 'ROTATE',
-    'variable': 'VARIABLE',
+    'var': 'VARIABLE',
+    'line': 'LINE',
+    'circle': 'CIRCLE',
+    'square': 'SQUARE',
+    'arc': 'ARC',
+    'point': 'POINT',
 }
 
 tokens = [
@@ -97,14 +102,6 @@ def find_column(input_text, lexpos):
     return (lexpos - last_newline) if last_newline >= 0 else lexpos + 1
 
 # Construire le lexer
-lexer = lex.lex()
-
-if __name__ == "__main__":
-    data = """
-    variable x = 10;
-    draw circle(50, 50, 10;
-    move(10, 15)
-    """
-    lexer.input(data)
-    for token in lexer:
-        print(token)
+def init_lexer():
+    lexer = lex.lex()
+    return lexer

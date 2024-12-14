@@ -1,0 +1,4 @@
+var x = 1.2
+draw circle(2);
+draw line(1,23,3.8)
+var b = 2
