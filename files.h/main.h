@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "form.h"
+#include "clickEvents.h"
 
 
 void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode);

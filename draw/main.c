@@ -94,12 +94,21 @@ int main(){
     SDL_RenderPresent(renderer);
 
     // Draw various shapes on the renderer
-    drawCircle(renderer, 400, 270, 60, 0xFF00FF00, "filled");
-    drawEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
+    //drawCircle(renderer, 400, 270, 60, 0xFF00FF00, "filled");
+    //drawEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
+    //drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
+    //drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty");
+    //drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled");
+    //drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
+
+    drawAnimatedCircle(renderer, 400, 270, 60, 0xFF00FF00,"empty");
+    //drawAnimatedCircle(renderer, 500, 400, 60, 0xFF00FF00,"filed"); // le filed ne marche pas bien je crois
+    drawAnimatedRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
+    drawAnimatedEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
     drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
-    drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty");
-    drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled");
-    drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
+    //drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty"); // j'ai pas fais avc les angles arrondis
+    drawAnimatedCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled"); // le tableau s'efface idk pk 
+    drawAnimatedLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
 
     int running = 1;
     while (running) {
