@@ -2,6 +2,21 @@
 
 #include <math.h>
 
+// Fonction pour gérer les événements
+int handleEvents(SDL_Renderer* renderer, SDL_Window* window) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return -1;
+        }
+    }
+    return 0;
+}
+
+/*
 // Vérifie si un point (x, y) est à l'intérieur d'un cercle
 int isPointInCircle(int x, int y, int cx, int cy, int radius) {
     // Calculer la distance entre le point (x, y) et le centre du cercle (cx, cy)
@@ -105,8 +120,6 @@ int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
     // Si la distance est inférieure à la tolérance, le point est proche de la ligne
     return (distance <= tolerance);
 }
-
-
 
 
 bool selectShape(int mouseX, int mouseY) {
@@ -245,4 +258,88 @@ void renderShapes(SDL_Renderer* renderer) {
     }
 
     SDL_RenderPresent(renderer);
+}
+*/
+
+int drawShape(SDL_Renderer *renderer, SDL_Window *window, char *mode, char *shape, ...) {
+    va_list args;
+    va_start(args, shape);
+
+    // Vérification du mode
+    int isAnimated = (strcmp(mode, "animated") == 0);
+
+    // Sélection du type de forme
+    if (strcmp(shape, "circle") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int radius = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedCircle(renderer, window, x, y, radius, color, type) == -1) return -1;
+        } else {
+            if(drawCircle(renderer, window, x, y, radius, color, type) == -1) return -1;
+        }
+    } else if (strcmp(shape, "rectangle") == 0) {
+        Sint16 x = va_arg(args, int);
+        Sint16 y = va_arg(args, int);
+        Sint16 w = va_arg(args, int);
+        Sint16 h = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedRectangle(renderer, window, x, y, w, h, color, type) == -1) return -1;
+        } else {
+            if(drawRectangle(renderer, window, x, y, w, h, color, type) == -1) return -1;
+        }
+    } else if (strcmp(shape, "ellipse") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int rx = va_arg(args, int);
+        int ry = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedEllipse(renderer, window, x, y, rx, ry, color, type) == -1) return -1;
+        } else {
+            if(drawEllipse(renderer, window, x, y, rx, ry, color, type) == -1) return -1;
+        }
+    } 
+    else if (strcmp(shape, "line") == 0) {
+        Sint16 x1 = va_arg(args, int);
+        Sint16 y1 = va_arg(args, int);
+        Sint16 x2 = va_arg(args, int);
+        Sint16 y2 = va_arg(args, int);
+        Uint8 thick = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedLine(renderer, window, x1, y1, x2, y2, color, thick, type) == -1) return -1;
+        } else {
+            if(drawLine(renderer, window, x1, y1, x2, y2, color, thick, type) == -1) return -1;
+        }
+    } 
+    else if (strcmp(shape, "polygon") == 0) {
+        int cx = va_arg(args, int);
+        int cy = va_arg(args, int);
+        int radius = va_arg(args, int);
+        int sides = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedCustomPolygon(renderer, window, cx, cy, radius, sides, color, type) == -1) return -1;
+        } else {
+            if(drawCustomPolygon(renderer, window, cx, cy, radius, sides, color, type) == -1) return -1;
+        }
+    } 
+    else {
+        printf("Invalid shape type: %s\n", shape);
+    }
+
+    va_end(args);
 }

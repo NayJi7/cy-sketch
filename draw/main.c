@@ -57,114 +57,67 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
 }
 
 
+
 /**
  * @brief Main function that initializes SDL, creates a window and renderer, and draws shapes.
  * 
  * @return int Returns 0 on successful execution.
  */
 int main(){
-    
-    // Initialize an SDL window pointer
+
+    // Initialisation SDL
     SDL_Window *window = NULL;
-    // Initialize an SDL renderer for drawing
     SDL_Renderer *renderer = NULL;
-    // Define a white color for the window background
-    SDL_Color white = {255, 255, 255, 255};
-    // Initialize an SDL event to handle user input
+    //SDL_Color white = {255, 255, 255, 255};
     SDL_Event event;
 
-    // Initialize SDL video and events subsystems
+    // Initialiser SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-        printf("Error SDL: %s\n", SDL_GetError());
-        cleanResources(NULL, NULL, false, false, -2);
+        printf("Erreur SDL : %s\n", SDL_GetError());
+        return -1;
     }
 
-    // Create an SDL window and renderer with a resizable window of 800x600 pixels
+    // Créer la fenêtre et le renderer
     if (SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0) {
-        printf("Error SDL_CreateWindowAndRenderer: %s\n", SDL_GetError());
-        cleanResources(renderer, window, true, true, -2);
+        printf("Erreur SDL_CreateWindowAndRenderer : %s\n", SDL_GetError());
+        SDL_Quit();
+        return -1;
     }
     SDL_SetWindowTitle(window, "Hello SDL");
 
-    // Set the background color of the window to white
-    if (setWindowColor(renderer, white) != 0) {
-        printf("Error setWindowColor: %s\n", SDL_GetError());
-        cleanResources(renderer, window, true, true, -2);
-    }
-    SDL_RenderPresent(renderer);
+    // Dessiner les formes animées
+    /*if(drawAnimatedCircle(renderer, window, 400, 270, 60, 0xFF00FF00, "fille") == -1) return 0;
 
-    // Draw various shapes on the renderer
-    //drawCircle(renderer, 400, 270, 60, 0xFF00FF00, "filled");
-    //drawEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
-    //drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
-    //drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty");
-    //drawCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled");
-    //drawLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
+    if(drawAnimatedRectangle(renderer, window, 200, 170, 80, 60, 0xFF000000, "filled") == -1) return 0;
+    //drawAnimatedRectangle(renderer, 200, 170, 80, 60, 0xFF00FF00, "filled");
+    if(drawAnimatedEllipse(renderer, window, 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
 
-    drawAnimatedCircle(renderer, 400, 270, 60, 0xFF00FF00,"empty");
-    //drawAnimatedCircle(renderer, 500, 400, 60, 0xFF00FF00,"filed"); // le filed ne marche pas bien je crois
-    drawAnimatedRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
-    drawAnimatedEllipse(renderer, 500, 370, 70, 50, 0xFFFF0000, "empty");
-    drawRectangle(renderer, 200, 170, 80, 60, 0xFF000000, "empty");
-    //drawRoundedRectangle(renderer, 100, 100, 300, 200, 20, 0xFFFF8080, "empty"); // j'ai pas fais avc les angles arrondis
-    drawAnimatedCustomPolygon(renderer, 630, 130, 100, 12, 0xFF808080, "filled"); // le tableau s'efface idk pk 
-    drawAnimatedLine(renderer, 210, 210, 340, 340, 0xFFFF8800, 5, "filled");
+    if(drawAnimatedCustomPolygon(renderer, window, 630, 130, 100, 12, 0xFF808080, "empty") == -1) return 0;
 
+    if(drawAnimatedLine(renderer, window, 210, 210, 340, 340, 0xFFFF8800, 5, "filled") == -1) return 0;*/
+
+    
+    if(drawShape(renderer, window, "instant", "circle", 400, 270, 60, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, window, "instant", "rectangle", 200, 200, 100, 50, 0x00FF00FF, "empty") == -1) return 0;
+    if(drawShape(renderer, window, "instant", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, window, "instant", "polygon", 630, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
+    if(drawShape(renderer, window, "instant", "line", 210, 210, 340, 340, 0xFFFF8800, 20, "filled") == -1) return 0;
+    
+
+    // Boucle d'événements pour fermer la fenêtre
     int running = 1;
     while (running) {
-        // Gestion des événements
         while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        printf("Left mouse button pressed at (%d, %d)\n", event.button.x, event.button.y);
-
-                        // Vérification si une forme est sélectionnée
-                        if (selectShape(event.button.x, event.button.y)) {
-                            renderShapes(renderer);
-                            printf("A shape was selected at (%d, %d)\n", event.button.x, event.button.y);
-                        } else {
-                            printf("No shape was found at (%d, %d)\n", event.button.x, event.button.y);
-                        }
-                    }
-                    break;
-
-                case SDL_MOUSEBUTTONUP:
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        printf("Left mouse button released at (%d, %d)\n", event.button.x, event.button.y);
-                    }
-                    break;
-
-                case SDL_WINDOWEVENT:
-                    if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-                        printf("The window has been closed\n");
-                        running = 0;
-                    }
-                    break;
-
-                case SDL_QUIT:
-                    running = 0;
-                    break;
-
-                default:
-                    break;
+            if (event.type == SDL_QUIT) {
+                running = 0;  // Fermer la fenêtre si l'utilisateur clique sur la croix
             }
         }
     }
-    // Nettoyer l'écran
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderClear(renderer);
 
-    // Dessiner toutes les formes, avec la forme sélectionnée en rouge
-    renderShapes(renderer);
+    // Libérer les ressources et fermer SDL
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
-    // Mettre à jour l'écran
-    SDL_RenderPresent(renderer);
-
-    // Limiter la fréquence des images (facultatif)
-    SDL_Delay(16); // 60 FPS
-
-    // Libération des ressources et fermeture
-    cleanResources(renderer, window, true, true, 0);
     return 0;
 }
