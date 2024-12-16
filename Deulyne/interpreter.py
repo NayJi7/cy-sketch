@@ -23,25 +23,52 @@ def run_file(file_path):
         filetxt = file.read()
         filelines = filetxt.split('\n')  # Diviser le contenu en lignes
         
+        non_comment_lines = []  # Liste pour stocker les lignes valides
         in_multiline_comment = False  # Indicateur pour savoir si on est dans un commentaire multi-ligne
-        non_comment_lines = []
         
         for line in filelines:
             stripped_line = line.strip()
-
-            # Vérifier si on entre dans un commentaire multi-ligne
-            if stripped_line.startswith('/*'):
+            
+            if not stripped_line:  # Ignorer les lignes vides
+                continue
+            
+            # Gestion des blocs de commentaires multi-lignes
+            if in_multiline_comment:
+                # Vérifier si le bloc de commentaire se termine sur cette ligne
+                if '*/' in stripped_line:
+                    in_multiline_comment = False
+                    # Compter tout ce qui est après "*/" s'il y a du code
+                    code_after_comment = stripped_line.split('*/', 1)[1].strip()
+                    if code_after_comment:
+                        non_comment_lines.append(code_after_comment)
+                continue
+            
+            # Vérifier si la ligne commence un bloc de commentaire multi-ligne
+            if '/*' in stripped_line:
                 in_multiline_comment = True
+                # Compter tout ce qui est avant "/*" s'il y a du code
+                code_before_comment = stripped_line.split('/*', 1)[0].strip()
+                if code_before_comment:
+                    non_comment_lines.append(code_before_comment)
+                continue
+            
+            # Gestion des commentaires simples (commençant par #)
+            if stripped_line.startswith('#'):
+                continue
+            
+            # Si la ligne contient un commentaire inline, compter uniquement le code avant le #
+            if '#' in stripped_line:
+                code_before_inline_comment = stripped_line.split('#', 1)[0].strip()
+                if code_before_inline_comment:
+                    non_comment_lines.append(code_before_inline_comment)
+                continue
+            
+            # Si la ligne n'est pas un commentaire ou vide, elle est valide
+            non_comment_lines.append(stripped_line)
+        
+        fileline_count = len(non_comment_lines)  # Compter uniquement les lignes valides
 
-            # Si on n'est pas dans un commentaire, et que ce n'est pas une ligne vide ou un commentaire simple
-            if not in_multiline_comment and not stripped_line.startswith('#') and stripped_line != '':
-                non_comment_lines.append(line)
-
-            # Vérifier si on sort d'un commentaire multi-ligne
-            if stripped_line.endswith('*/'):
-                in_multiline_comment = False
-
-        fileline_count = len(non_comment_lines)  # Compter uniquement les lignes non commentées 
+    # DEBUG print(f"Nombre de lignes non commentées : {fileline_count}")
 
     # Analyse lexicale
     lexer.input(filetxt)
@@ -54,8 +81,9 @@ def run_file(file_path):
         print_error(f"Erreur pendant le parsing : {e}")
         return
 
-    # Exécution de l'AST
-    execute_ast(ast, len(ast) == fileline_count)
+    if(ast):
+        # Exécution de l'AST
+        execute_ast(ast, len(ast) == fileline_count)
 
 # === 5. Mode interactif ===
 def run_interactive():
