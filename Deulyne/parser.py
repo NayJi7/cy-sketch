@@ -55,7 +55,13 @@ def p_assignation(p):
 def p_valeur(p):
     '''valeur : NUMBER
               | STRING
-              | BOOLEAN'''
+              | BOOLEAN
+              | IDENTIFIER'''
+    p[0] = p[1]
+
+def p_valeur_op(p):
+    '''valeur_op : NUMBER
+                 | IDENTIFIER'''
     p[0] = p[1]
 
 def p_bloc(p):
