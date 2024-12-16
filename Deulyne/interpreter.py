@@ -21,8 +21,27 @@ def run_file(file_path):
 
     with open(file_path, 'r') as file:
         filetxt = file.read()
-        filelines = filetxt.split('\n')  
-        fileline_count = len(filelines)   
+        filelines = filetxt.split('\n')  # Diviser le contenu en lignes
+        
+        in_multiline_comment = False  # Indicateur pour savoir si on est dans un commentaire multi-ligne
+        non_comment_lines = []
+        
+        for line in filelines:
+            stripped_line = line.strip()
+
+            # Vérifier si on entre dans un commentaire multi-ligne
+            if stripped_line.startswith('/*'):
+                in_multiline_comment = True
+
+            # Si on n'est pas dans un commentaire, et que ce n'est pas une ligne vide ou un commentaire simple
+            if not in_multiline_comment and not stripped_line.startswith('#') and stripped_line != '':
+                non_comment_lines.append(line)
+
+            # Vérifier si on sort d'un commentaire multi-ligne
+            if stripped_line.endswith('*/'):
+                in_multiline_comment = False
+
+        fileline_count = len(non_comment_lines)  # Compter uniquement les lignes non commentées 
 
     # Analyse lexicale
     lexer.input(filetxt)
@@ -91,7 +110,7 @@ def run_interactive():
 def main():
 
     # DEBUG
-    # sys.argv.append('/home/cytech/gitstore/cy-sketch/Deulyne/test.dpp')
+    sys.argv.append('/home/cytech/gitstore/cy-sketch/Deulyne/test.dpp')
 
     if len(sys.argv) > 1:  # Si un fichier est spécifié
         file_path = sys.argv[1]

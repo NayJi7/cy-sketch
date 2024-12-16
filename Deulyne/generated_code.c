@@ -2,4 +2,4 @@
 #include <stdlib.h>
 #include <math.h>
 
-str y = a;
+float x = 1.2;

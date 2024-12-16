@@ -91,6 +91,18 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
+# Une règle pour les commentaires
+def t_COMMENT(t):
+    r'\#.*'
+    t.lexer.lineno += t.value.count('\n')
+    pass  # Ignorer les commentaires
+
+# Une règle pour les commentaires multi-lignes
+def t_COMMENT_MULTILINE(t):
+    r'/\*([^*]|\*+[^*/])*\*+/'
+    t.lexer.lineno += t.value.count('\n')
+    pass  # Ignorer les commentaires
+
 # Gestion des erreurs lexicales
 def t_error(t):
     print(f"\033[31mErreur lexicale : caractère illégal '{t.value[0]}' à la ligne {t.lineno}, colonne {find_column(t.lexer.lexdata, t.lexpos)}\033[0m")
