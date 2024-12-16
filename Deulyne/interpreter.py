@@ -2,8 +2,6 @@ import os
 import sys
 import atexit
 import readline
-import ply.lex as lex
-import ply.yacc as yacc
 from lexer import init_lexer
 from parser import init_parser
 from myast import *
@@ -21,69 +19,20 @@ def run_file(file_path):
 
     with open(file_path, 'r') as file:
         filetxt = file.read()
-        filelines = filetxt.split('\n')  # Diviser le contenu en lignes
-        
-        non_comment_lines = []  # Liste pour stocker les lignes valides
-        in_multiline_comment = False  # Indicateur pour savoir si on est dans un commentaire multi-ligne
-        
-        for line in filelines:
-            stripped_line = line.strip()
-            
-            if not stripped_line:  # Ignorer les lignes vides
-                continue
-            
-            # Gestion des blocs de commentaires multi-lignes
-            if in_multiline_comment:
-                # Vérifier si le bloc de commentaire se termine sur cette ligne
-                if '*/' in stripped_line:
-                    in_multiline_comment = False
-                    # Compter tout ce qui est après "*/" s'il y a du code
-                    code_after_comment = stripped_line.split('*/', 1)[1].strip()
-                    if code_after_comment:
-                        non_comment_lines.append(code_after_comment)
-                continue
-            
-            # Vérifier si la ligne commence un bloc de commentaire multi-ligne
-            if '/*' in stripped_line:
-                in_multiline_comment = True
-                # Compter tout ce qui est avant "/*" s'il y a du code
-                code_before_comment = stripped_line.split('/*', 1)[0].strip()
-                if code_before_comment:
-                    non_comment_lines.append(code_before_comment)
-                continue
-            
-            # Gestion des commentaires simples (commençant par #)
-            if stripped_line.startswith('#'):
-                continue
-            
-            # Si la ligne contient un commentaire inline, compter uniquement le code avant le #
-            if '#' in stripped_line:
-                code_before_inline_comment = stripped_line.split('#', 1)[0].strip()
-                if code_before_inline_comment:
-                    non_comment_lines.append(code_before_inline_comment)
-                continue
-            
-            # Si la ligne n'est pas un commentaire ou vide, elle est valide
-            non_comment_lines.append(stripped_line)
-        
-        fileline_count = len(non_comment_lines)  # Compter uniquement les lignes valides
-
-    # DEBUG print(f"Nombre de lignes non commentées : {fileline_count}")
 
     # Analyse lexicale
     lexer.input(filetxt)
-    tokens = list(lexer)
 
     # Analyse syntaxique
     try:
-        ast = parser.parse(filetxt, lexer=lexer)
+        ast = parser.parse(filetxt, lexer)
     except Exception as e:
         print_error(f"Erreur pendant le parsing : {e}")
         return
 
     if(ast):
         # Exécution de l'AST
-        execute_ast(ast, len(ast) == fileline_count)
+        execute_ast(ast)
 
 # === 5. Mode interactif ===
 def run_interactive():
@@ -132,7 +81,7 @@ def run_interactive():
             continue
 
         # Exécution de l'AST
-        execute_ast(ast, ast != None)
+        execute_ast(ast)
 
 # === 6. Point d'entrée principal ===
 def main():

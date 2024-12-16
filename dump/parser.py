@@ -2,7 +2,7 @@
 # IMPORTS
 #######################################
 
-from tokens import *  # Contient les types de tokens et les constantes comme LANG_TOKENS['CURSOR'], LANG_TOKENS['DRAWCIRCLE'], etc.
+from dump.tokens import *  # Contient les types de tokens et les constantes comme LANG_TOKENS['CURSOR'], LANG_TOKENS['DRAWCIRCLE'], etc.
 from regex_process import *  # Contient les fonctions de traitement des expressions régulières pour le lexer
 
 # Ces classes sont dans le même fichier ou dans des fichiers séparés

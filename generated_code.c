@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+float x = 1.2;
+
+draw_circle(2);
 draw_line(1, 23, 3.8);
 
 if (1 > 2) {

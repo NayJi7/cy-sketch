@@ -92,7 +92,7 @@ def p_error(p):
         if p.type == "RPAREN":
             print("\033[34mSuggestion : Vérifiez que toutes les parenthèses ouvrantes '(' ont une parenthèse fermante correspondante ')'.\033[0m")
         elif p.type == "SEMICOLON":
-            print("\033[34mSuggestion : Pas besoin de  point virgule ici ';' ouf.\033[0m")
+            print("\033[34mSuggestion : Pas besoin de point virgule ici ';'.\033[0m")
     else:
         print("\033[31mErreur syntaxique : fin de fichier inattendue.\033[0m")
 

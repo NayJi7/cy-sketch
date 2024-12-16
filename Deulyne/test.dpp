@@ -1,4 +1,19 @@
-var x = 1.2
-/* draw circle(2)
+var x = 1.2 # assignation de la var x
+draw circle(2)
 draw line(1,23,3.8)
-var b = 2*/
+# var b = 2
+
+if (1>2) {
+    draw line(2)
+}
+else {
+    draw circle(1)
+    draw line(5)
+}
+
+
+for(var i = 1; 1<5;var i = 7)
+{
+    draw line(2)
+    color("red")
+}

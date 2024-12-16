@@ -4,7 +4,7 @@
 # IMPORTS
 #######################################
 
-from tokens import *
+from dump.tokens import *
 import re
 from errors_codegen import *
 

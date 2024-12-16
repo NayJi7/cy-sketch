@@ -2,7 +2,7 @@
 # IMPORTS
 #######################################
 
-from tokens import *
+from dump.tokens import *
 from regex_process import *
 from errors_codegen import *  # Contient les classes d'erreurs, comme InvalidSyntaxError, IllegalCharError, etc.
 
