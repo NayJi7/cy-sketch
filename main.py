@@ -8,8 +8,6 @@ import tkinter.filedialog
 import tkinter.messagebox
 
 
-
-
 def open_file(event=None):
     "Ouvrir un fichier à partir de l'onglet Fichier dans l'IDE"
     file_path = filedialog.askopenfilename(filetypes= [("Draw++ Files", "*.dpp")])
