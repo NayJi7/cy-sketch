@@ -2,4 +2,5 @@
 #include <stdlib.h>
 #include <math.h>
 
-int x = 89;
+int MaVariable = 9999;
+draw_circle(5);

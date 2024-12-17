@@ -3,6 +3,7 @@ from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor
 from PyQt5.QtCore import Qt, QProcess
 import os
 import platform
+import subprocess
 
 class SyntaxHighlighter(QSyntaxHighlighter):
     ''' Cette classe s'occupe de la coloration syntaxique'''
@@ -17,13 +18,13 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         keyword_format = QTextCharFormat()
         keyword_format.setForeground(QColor("#007ACC"))  # Bleu moderne
         keyword_format.setFontWeight(QFont.Bold)
-        keywords = ["if", "else", "for", "while", "return", "def", "class"]
+        keywords = ["if", "else", "for", "while", "return", "def", "class", "var"]
         self.add_rules(keywords, keyword_format)
         #coloration des fonctions dpp
         keyword_format2 = QTextCharFormat()
         keyword_format2.setForeground(QColor("#ff5733"))
         keyword_format2.setFontWeight(QFont.Bold)
-        functions_word1 = ["rotate", "cursor","draw_circle"]
+        functions_word1 = ["rotate", "cursor","draw line","draw circle"]
         self.add_rules(functions_word1,keyword_format2)
         #coloration des modules d'importation
         keyword_format3 = QTextCharFormat()
@@ -31,8 +32,12 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         keyword_format3.setFontWeight(QFont.Bold)
         functions_word2 = ["import", "from"]
         self.add_rules(functions_word2,keyword_format3)
+        # Coloration des parenthèses
+        parenthesis_format = QTextCharFormat()
+        parenthesis_format.setForeground(QColor("#FFD700"))  # Jaune doré
+        parentheses = [r"\(", r"\)", r"\{", r"\}", r"\[", r"\]"]
+        self.add_rules(parentheses, parenthesis_format)
 
-        
 
     def add_rules(self, patterns, text_format):
         '''méthode pour ajouter une règle de coloration'''
@@ -41,19 +46,28 @@ class SyntaxHighlighter(QSyntaxHighlighter):
             self.rules.append((regex, text_format))
 
     def highlightBlock(self, text):
-        for regex, text_format in self.rules:
-            start = 0
-            while (match := self.findMatch(regex, text, start)):
-                start, length = match
-                self.setFormat(start, length, text_format)
-                start += length
+        '''Applique les règles de coloration sur une ligne de texte.'''
+        for regex, text_format in self.rules:  # Parcourt chaque règle (regex, format)
+            position = 0  # Initialise la position de départ
+            while True:
+                match = self.findMatch(regex, text, position)  # Recherche une correspondance dans le texte
+                if match:  # Si une correspondance est trouvée
+                    start, length = match  # Récupère la position de départ et la longueur
+                    self.setFormat(start, length, text_format)  # Applique le format à la portion correspondante
+                    position = start + length  # Avance pour chercher la prochaine correspondance
+                else:  # Si aucune correspondance n'est trouvée, arrête la boucle
+                    
+                    break
+
 
     def findMatch(self, regex, text, start):
-        import re
-        match = re.search(regex, text[start:])
-        if match:
-            return start + match.start(), match.end() - match.start()
-        return None
+        '''Recherche une correspondance pour un motif regex dans le texte à partir d'une position donnée.'''
+        import re  # Importe le module des expressions régulières
+        match = re.search(regex, text[start:])  # Cherche le motif regex dans le texte à partir de la position donnée
+        if match:  # Si une correspondance est trouvée
+            return start + match.start(), match.end() - match.start()  # Retourne la position de départ et la longueur
+        return None  # Si aucune correspondance, retourne None
+
 
 class MyDrawppIDE(QMainWindow):
     '''Classe principale de l'ide qui est hérité de la super classe QMainWindow'''
@@ -62,7 +76,8 @@ class MyDrawppIDE(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("MyDrawPP IDE")
+        #informations de base sur la fenetre
+        self.setWindowTitle("Visouale stoudio coude")
         self.setGeometry(100, 100, 1000, 700)
         self.setStyleSheet("background-color: #1E1E1E; color: white;")
 
@@ -124,6 +139,8 @@ class MyDrawppIDE(QMainWindow):
         save_as_action_menu.triggered.connect(self.save_as_file)
         file_menu.addAction(save_as_action_menu)
 
+    ''' METHODES DE L'OBJET SELF : principalement les fonctions pour les triggering des boutons'''
+
     def open_file(self):
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Draw++ Files (*.dpp);;All Files (*)", options=options)
@@ -138,19 +155,52 @@ class MyDrawppIDE(QMainWindow):
             with open(file_path, "w") as file:
                 file.write(self.text_area.toPlainText())
 
-    def run_code(self):
-        QMessageBox.information(self, "Run", "Exécution du Code Draw++ fait avec succès")
-        if platform.system() == "Linux":
-            if not os.path.isdir(".to_run"):
-                os.makedirs(".to_run")
-            file_path = "./.to_run/to_execute.dpp"
-            with open(file_path, "w") as file:
-                file.write(self.text_area.toPlainText())
-        elif platform.system() == "Windows":
-            QMessageBox.warning(self, "Attention", "MyDrawpp IDE n'est pas encore compatible avec Windows")
-        else:
-            QMessageBox.critical(self, "Erreur", "MyDrawpp IDE ne fonctionne pas avec " + platform.system())
 
+
+    def run_code(self):
+        QMessageBox.information(self, "Run", "Exécution du Code Draw++ en cours...")
+        
+        # Crée le répertoire ".to_run" (Linux/Mac) ou "to_run" (Windows) si nécessaire
+        if platform.system() in ["Linux", "Darwin"]:  # Pour Linux ou MacOS
+            dir_path = ".to_run"
+            file_path = os.path.join(dir_path, "to_execute.dpp")
+        elif platform.system() == "Windows":  # Pour Windows
+            dir_path = ".to_run"
+            #QMessageBox.warning(self, "Attention", "MyDrawpp IDE est encore en test sur Windows")
+            file_path = os.path.join(dir_path, "to_execute.dpp")
+        else:
+            QMessageBox.critical(self, "Erreur", f"MyDrawpp IDE ne fonctionne pas avec {platform.system()}")
+            return
+
+        # Création du répertoire si nécessaire
+        if not os.path.isdir(dir_path):
+            os.makedirs(dir_path)
+
+        # Écriture du contenu du fichier
+        with open(file_path, "w") as file:
+            file.write(self.text_area.toPlainText())
+
+        # Exécution du script interpreter.py
+        try:
+            interpreter_script = "interpreter.py"  # Script Python à exécuter
+            # Commande pour exécuter le script avec le fichier to_execute.dpp comme argument
+            command = ["python", interpreter_script, file_path]
+
+            # Exécute le script interpreter.py avec subprocess
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            
+            #il faut clean le result
+            
+
+            # Affiche la sortie dans un message box
+            QMessageBox.information(self, "Résultat", f"\033[31mErreur syntaxique\033[0m")
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Erreur", f"Erreur d'exécution :\n{e.stderr}")
+        except FileNotFoundError:
+            QMessageBox.critical(self, "Erreur", "Le fichier 'interpreter.py' n'a pas été trouvé. Vérifiez son emplacement.")
+
+
+#partie obligatoire pour run l'appli
 if __name__ == "__main__":
     app = QApplication([])
     ide = MyDrawppIDE()

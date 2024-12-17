@@ -1,12 +1,13 @@
 import os
 import sys
 import atexit
-import readline
+import platform
 import ply.lex as lex
 import ply.yacc as yacc
 from lexer import init_lexer
 from parser import init_parser
 from myast import *
+
 
 # === 4. Analyse et exécution d'un fichier source ===
 def run_file(file_path):
@@ -95,13 +96,27 @@ def run_interactive():
 
     # Configuration de l'historique
     history_file = os.path.expanduser("~/.drawpp_history")
-    if os.path.exists(history_file):
-        readline.read_history_file(history_file)
-    atexit.register(readline.write_history_file, history_file)
-    readline.set_history_length(1000)
+    
+    ############################### A RAJOUTER POUR FAIRE MARCHER SUR WINDOWS
+    if platform.system() == "Windows":
+        try:
+            import pyreadline3 as readline  # pyreadline3 pour Windows
+        except ImportError:
+            print("Veuillez installer pyreadline3 avec 'pip install pyreadline3'")
+            readline = None
+    else:
+        import readline
 
-    lexer = init_lexer()
-    parser = init_parser()
+    #si on est sur macos ou linux
+    if readline:
+        history_file = os.path.expanduser("~/.python_history")
+        if os.path.exists(history_file):
+            readline.read_history_file(history_file)
+        atexit.register(readline.write_history_file, history_file)
+        readline.set_history_length(1000)
+    #############################################
+        lexer = init_lexer()
+        parser = init_parser()
 
     while True:
         try:
@@ -138,7 +153,15 @@ def run_interactive():
 def main():
 
     # DEBUG
-    sys.argv.append('.to_run/to_execute.dpp')
+    # if platform.system() == "Windows": # Windows
+    #     sys.argv.append('./to_run/to_execute.dpp')
+    # elif platform.system() == "Linux": #Linux ou Mac
+    #     sys.argv.append('to_run/to_execute.dpp')
+    # elif platform.system() == "Darwin":
+    #     sys.argv.append('to_run/to_execute.dpp')
+
+    #pour windows
+    sys.argv.append('./.to_run/to_execute.dpp')
 
     if len(sys.argv) > 1:  # Si un fichier est spécifié
         file_path = sys.argv[1]
