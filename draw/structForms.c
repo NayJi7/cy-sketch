@@ -1,4 +1,5 @@
 #include "../files.h/structForms.h"
+#include "../files.h/clickEvents.h"
+#include "../files.h/main.h"
 
-Shape shapes[MAX_SHAPES];
-int shapeCount = 0;
+ 

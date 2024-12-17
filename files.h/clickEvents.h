@@ -4,21 +4,17 @@
 #include "structForms.h"
 #include "main.h"
 
-int handleEvents(SDL_Renderer* renderer, SDL_Window* window);
+int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture);
 
-int isPointInCircle(int x, int y, int cx, int cy, int radius);
-int isPointInEllipse(int px, int py, int cx, int cy, int rx, int ry);
-int isPointInArc(int x, int y, int cx, int cy, int radius, int startAngle, int endAngle);
-int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH);
-int isPointInRoundedRectangle(int px, int py, int rx, int ry, int width, int height, int radius);
-int isPointInPolygon(int px, int py, int cx, int cy, int radius, int sides);
-int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance);
+void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time);
 
-bool selectShape(int mouseX, int mouseY);
+bool isCursorInCircle(const Cursor *cursor, const Circle *circle);
+Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible);
+void renderCursor(SDL_Renderer *renderer, const Cursor *cursor);
+void moveCursor(Cursor *cursor, int dx, int dy);
 
-void renderShapes(SDL_Renderer* renderer);
 
-int drawShape(SDL_Renderer *renderer, SDL_Window *window, char *mode, char *shape, ...);
+int drawShape(SDL_Renderer *renderer, SDL_Texture* texture, char *mode, char *shape, ...);
 
 #endif // CLICKEVENTS_H
 

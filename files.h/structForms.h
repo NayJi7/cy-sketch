@@ -1,9 +1,10 @@
 #ifndef STRUCTFORMS_H
 #define STRUCTFORMS_H
 
-#include "form.h"
+#include <SDL2/SDL.h>
+#include <stdbool.h>
 
-
+/*
 typedef enum 
 { 
     SHAPE_CIRCLE, 
@@ -37,7 +38,23 @@ typedef struct
 // Déclaration de la liste des formes et de son compteur
 #define MAX_SHAPES 100
 extern Shape shapes[MAX_SHAPES];
-extern int shapeCount;
+extern int shapeCount;*/
+
+
+typedef struct {
+    int x, y;               // Position actuelle
+    SDL_Color color;        // Couleur du curseur
+    int thickness;          // Épaisseur du curseur
+    bool visible;           // Visibilité du curseur
+} Cursor;
+
+//test 
+typedef struct {
+    int x, y;       // Coordonnées du centre
+    int radius;     // Rayon
+    SDL_Color color; // Couleur de la forme
+    bool selected;  // Indique si la forme est sélectionnée
+} Circle;
 
 
 #endif // STRUCTFORMS_H

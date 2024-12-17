@@ -13,13 +13,10 @@
 #include "clickEvents.h"
 
 
+
 void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode);
 
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color);
-
-int handleEvents(SDL_Renderer *renderer, SDL_Window *window);
-
-SDL_Texture* initializeRenderBuffer(SDL_Renderer* renderer, int width, int height);
 
 
 #endif
