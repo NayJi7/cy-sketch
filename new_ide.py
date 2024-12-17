@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit)
 from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor, QFont, QIcon,QPainter,QTextFormat
 from PyQt5.QtCore import Qt, QProcess,QRect, QSize
+from PyQt5.QtWinExtras import QtWin  # Pour Windows uniquement
 import os
 import platform
 import subprocess
+import sys
 
 
 # Ces 3 classes sont utiles pour : avoir les n
@@ -161,7 +163,8 @@ class MyDrawppIDE(QMainWindow):
     '''Classe principale de l'ide qui est hérité de la super classe QMainWindow'''
     def __init__(self):
         super().__init__()
-        self.process = QProcess(self)  
+        self.process = QProcess(self)
+        self.setWindowIcon(QIcon("Dpp_circle.ico"))
         self.init_ui()
 
 
@@ -170,6 +173,8 @@ class MyDrawppIDE(QMainWindow):
         self.setWindowTitle("Visouale stoudio coude")
         self.setGeometry(100, 100, 1000, 700)
         self.setStyleSheet("background-color: #1E1E1E; color: white;")
+        self.setWindowIcon(QIcon("Dpp_circle.ico"))  # Remplacez par le chemin de votre icône
+
 
         # Zone de texte principale - zone d'édition de code
         self.text_area = QTextEdit(self)
@@ -285,12 +290,18 @@ class MyDrawppIDE(QMainWindow):
         interpreter_script = "interpreter.py"
 
         # Commande à exécuter
-        command = ["python3", interpreter_script, file_path]
+        if platform.system() == "Windows": # Windows -> testé et fonctionnel
+            command = ["python", interpreter_script, file_path]
+        else:
+            command = ["python3", interpreter_script, file_path]
         self.terminal.clear()  # Nettoie le terminal avant d'exécuter
         #self.terminal.appendPlainText(f"Running command: {' '.join(command)}\n")
 
         # Démarre le processus
-        self.process.start("python3", [interpreter_script, file_path])
+        if platform.system() == "Windows": # Windows -> testé et fonctionnel
+            self.process.start("python", [interpreter_script, file_path])
+        else:
+            self.process.start("python3", [interpreter_script, file_path])
 
 
     # gestion de l'affiche dans le terminal
@@ -333,7 +344,20 @@ class MyDrawppIDE(QMainWindow):
 
 #partie obligatoire pour run l'appli
 if __name__ == "__main__":
-    app = QApplication([])
-    ide = MyDrawppIDE()
-    ide.show()
-    app.exec_()
+    app = QApplication(sys.argv)
+
+
+    #partie chiante juste pour forcer l'icone dans la barre des taches windows
+    #          ---------NE PAS HESITER A SUPPRIMER SI PROBLEME---------------
+    # Définir l'icône de l'application
+    icon = QIcon("Dpp_circle.ico")
+    app.setWindowIcon(icon)
+    # Appliquer l'icône explicitement pour la barre des tâches sous Windows
+    if hasattr(QtWin, 'setCurrentProcessExplicitAppUserModelID'):
+        myappid = 'mon.application.ide.version1.0'  # ID unique pour votre application
+        QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
+
+
+    window = MyDrawppIDE()
+    window.show()
+    sys.exit(app.exec_())

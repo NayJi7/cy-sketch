@@ -2,4 +2,4 @@
 #include <stdlib.h>
 #include <math.h>
 
-draw_line(44);
+draw_circle(5);
