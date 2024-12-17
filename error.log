@@ -1,0 +1,60 @@
+draw/form.c: In function ‘drawCircle’:
+draw/form.c:51:1: warning: control reaches end of non-void function [-Wreturn-type]
+   51 | }
+      | ^
+draw/form.c: In function ‘drawEllipse’:
+draw/form.c:103:1: warning: control reaches end of non-void function [-Wreturn-type]
+  103 | }
+      | ^
+draw/form.c: In function ‘drawArc’:
+draw/form.c:143:1: warning: control reaches end of non-void function [-Wreturn-type]
+  143 | }
+      | ^
+draw/form.c: In function ‘drawRectangle’:
+draw/form.c:178:1: warning: control reaches end of non-void function [-Wreturn-type]
+  178 | }
+      | ^
+draw/form.c: In function ‘drawRoundedRectangle’:
+draw/form.c:232:1: warning: control reaches end of non-void function [-Wreturn-type]
+  232 | }
+      | ^
+draw/form.c: In function ‘drawCustomPolygon’:
+draw/form.c:324:1: warning: control reaches end of non-void function [-Wreturn-type]
+  324 | }
+      | ^
+draw/form.c: In function ‘drawLine’:
+draw/form.c:367:1: warning: control reaches end of non-void function [-Wreturn-type]
+  367 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedCircle’:
+draw/form.c:409:1: warning: control reaches end of non-void function [-Wreturn-type]
+  409 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedRectangle’:
+draw/form.c:481:1: warning: control reaches end of non-void function [-Wreturn-type]
+  481 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedRoundedRectangle’:
+draw/form.c:568:1: warning: control reaches end of non-void function [-Wreturn-type]
+  568 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedEllipse’:
+draw/form.c:635:1: warning: control reaches end of non-void function [-Wreturn-type]
+  635 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedArc’:
+draw/form.c:679:1: warning: control reaches end of non-void function [-Wreturn-type]
+  679 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedCustomPolygon’:
+draw/form.c:783:1: warning: control reaches end of non-void function [-Wreturn-type]
+  783 | }
+      | ^
+draw/form.c: In function ‘drawAnimatedLine’:
+draw/form.c:832:1: warning: control reaches end of non-void function [-Wreturn-type]
+  832 | }
+      | ^
+draw/clickEvents.c: In function ‘drawShape’:
+draw/clickEvents.c:383:1: warning: control reaches end of non-void function [-Wreturn-type]
+  383 | }
+      | ^

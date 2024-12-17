@@ -135,6 +135,7 @@ int drawArc(SDL_Renderer *renderer, SDL_Window* window, int x, int y, int radius
     if (arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0) {
         printf("Error in arcColor: %s\n", SDL_GetError());
     }
+
     sleep(1);
     SDL_RenderPresent(renderer);
     if (handleEvents(renderer, window) == -1) return -1;
@@ -283,7 +284,6 @@ void drawPolygon(SDL_Renderer *renderer, Sint16 *vx, Sint16 *vy, int n, Uint32 c
  * @param color The color of the polygon in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of polygon ("empty" for outline, "filled" for solid).
  */
-//FULL CHATGPT pour calculer les coordonnées X (vx) et Y (vy)
 int drawCustomPolygon(SDL_Renderer *renderer, SDL_Window* window, Sint16 cx, Sint16 cy, int radius, int sides, Uint32 color, char *type) 
 {
     if (sides < 3 || sides > 12) 
@@ -343,7 +343,7 @@ int drawLine(SDL_Renderer *renderer, SDL_Window *window, Sint16 x1, Sint16 y1, S
     }
     else
     {
-        SDL_RenderPresent(renderer);
+        
         if (handleEvents(renderer, window) == -1) return -1;
 
         if (strcmp(type, "empty") == 0) 
@@ -360,6 +360,8 @@ int drawLine(SDL_Renderer *renderer, SDL_Window *window, Sint16 x1, Sint16 y1, S
         }
         
         if (handleEvents(renderer, window) == -1) return -1;
+        sleep(1);
+        SDL_RenderPresent(renderer);
         sleep(1);
     }
 }
@@ -410,64 +412,158 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Window *window, int x, int y,
 // Fonction pour dessiner un rectangle de manière progressive
 int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Window* window, int x, int y, int w, int h, Uint32 color, char *type) {
 
-    if(strcmp(type, "empty") == 0)
-    {
-
-        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
-
-        // Dessiner le côté supérieur
-        for (int i = 0; i < w; ++i) {
-            if (handleEvents(renderer, window) == -1) return -1;
-
-            SDL_RenderDrawPoint(renderer, x + i, y);
-            SDL_Delay(4);
-            SDL_RenderPresent(renderer);
-        }
-
-        // Dessiner le côté droit
-        for (int j = 0; j < h; ++j) {
-            if (handleEvents(renderer, window) == -1) return -1;
-
-            SDL_RenderDrawPoint(renderer, x + w - 1, y + j);
-            SDL_Delay(4);
-            SDL_RenderPresent(renderer);
-        }
-
-        // Dessiner le côté inférieur
-        for (int i = w - 1; i >= 0; --i) {
-            if (handleEvents(renderer, window) == -1) return -1;
-
-            SDL_RenderDrawPoint(renderer, x + i, y + h - 1);
-            SDL_Delay(4);
-            SDL_RenderPresent(renderer);
-        }
-
-        // Dessiner le côté gauche
-        for (int j = h - 1; j >= 0; --j) {
-            if (handleEvents(renderer, window) == -1) return -1;
-
-            SDL_RenderDrawPoint(renderer, x, y + j);
-            SDL_Delay(4);
-            SDL_RenderPresent(renderer);
-        }
-
-    }
-    else if(strcmp(type, "filled") == 0)
-    {
-        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
-        for (int i = 0; i < w; ++i) 
-        {
-            if (handleEvents(renderer, window) == -1) return -1;
-
-            for (int j = 0; j < h; ++j) {
-                SDL_RenderDrawPoint(renderer, x + i, y + j);
-                SDL_RenderPresent(renderer); // Mettre à jour l'écran pour chaque pixel
-            }
-        }
+    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
+        printf("Invalid animatedCircle type: %s\n", type);
     }
     else
     {
-        printf("Invalid animatedRectangle type: %s\n", type);
+
+        if(strcmp(type, "empty") == 0)
+        {
+
+            SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+
+            // Dessiner le côté supérieur
+            for (int i = 0; i < w; ++i) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                SDL_RenderDrawPoint(renderer, x + i, y);
+                SDL_Delay(4);
+                SDL_RenderPresent(renderer);
+            }
+
+            // Dessiner le côté droit
+            for (int j = 0; j < h; ++j) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                SDL_RenderDrawPoint(renderer, x + w - 1, y + j);
+                SDL_Delay(4);
+                SDL_RenderPresent(renderer);
+            }
+
+            // Dessiner le côté inférieur
+            for (int i = w - 1; i >= 0; --i) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                SDL_RenderDrawPoint(renderer, x + i, y + h - 1);
+                SDL_Delay(4);
+                SDL_RenderPresent(renderer);
+            }
+
+            // Dessiner le côté gauche
+            for (int j = h - 1; j >= 0; --j) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                SDL_RenderDrawPoint(renderer, x, y + j);
+                SDL_Delay(4);
+                SDL_RenderPresent(renderer);
+            }
+
+        }
+        else if(strcmp(type, "filled") == 0)
+        {
+            SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+            for (int i = 0; i < w; ++i) 
+            {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                for (int j = 0; j < h; ++j) {
+                    SDL_RenderDrawPoint(renderer, x + i, y + j);
+                    SDL_RenderPresent(renderer); // Mettre à jour l'écran pour chaque pixel
+                }
+            }
+        }
+        else
+        {
+            printf("Invalid animatedRectangle type: %s\n", type);
+        }
+    }
+}
+
+
+int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Window* window, int x, int y, int w, int h, int radius, Uint32 color, char *type) {
+    if (radius * 2 > w || radius * 2 > h) {
+        printf("Invalid radius: too large for the rectangle dimensions.\n");
+    }
+    else if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
+        printf("Invalid animatedRoundedRectangle type: %s\n", type);
+    }
+    else
+    {
+
+        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+
+        if (strcmp(type, "empty") == 0) {
+            // Dessiner les coins arrondis (arcs partiels)
+            for (double theta = 0; theta <= M_PI / 2; theta += 0.01) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                // Coin supérieur gauche
+                SDL_RenderDrawPoint(renderer, x + radius - (int)(radius * cos(theta)), y + radius - (int)(radius * sin(theta)));
+                SDL_Delay(2);
+                SDL_RenderPresent(renderer);
+
+                // Coin supérieur droit
+                SDL_RenderDrawPoint(renderer, x + w - radius + (int)(radius * cos(theta)), y + radius - (int)(radius * sin(theta)));
+                SDL_Delay(2);
+                SDL_RenderPresent(renderer);
+
+                // Coin inférieur gauche
+                SDL_RenderDrawPoint(renderer, x + radius - (int)(radius * cos(theta)), y + h - radius + (int)(radius * sin(theta)));
+                SDL_Delay(2);
+                SDL_RenderPresent(renderer);
+
+                // Coin inférieur droit
+                SDL_RenderDrawPoint(renderer, x + w - radius + (int)(radius * cos(theta)), y + h - radius + (int)(radius * sin(theta)));
+                SDL_Delay(2);
+                SDL_RenderPresent(renderer);
+            }
+
+            // Dessiner les côtés droits et gauches
+            for (int j = radius; j < h - radius; ++j) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                SDL_RenderDrawPoint(renderer, x, y + j); // Gauche
+                SDL_RenderDrawPoint(renderer, x + w - 1, y + j); // Droite
+                SDL_Delay(2);
+                SDL_RenderPresent(renderer);
+            }
+
+            // Dessiner les côtés supérieur et inférieur
+            for (int i = radius; i < w - radius; ++i) {
+                if (handleEvents(renderer, window) == -1) return -1;
+
+                SDL_RenderDrawPoint(renderer, x + i, y); // Haut
+                SDL_RenderDrawPoint(renderer, x + i, y + h - 1); // Bas
+                SDL_Delay(2);
+                SDL_RenderPresent(renderer);
+            }
+        } 
+        else if (strcmp(type, "filled") == 0) {
+            // Dessiner l'intérieur du rectangle avec coins arrondis
+            for (int j = 0; j < h; ++j) {
+                for (int i = 0; i < w; ++i) {
+                    // Vérifier si le point est à l'intérieur des coins arrondis
+                    int dist_top_left = (i - radius) * (i - radius) + (j - radius) * (j - radius);
+                    int dist_top_right = (i - (w - radius - 1)) * (i - (w - radius - 1)) + (j - radius) * (j - radius);
+                    int dist_bottom_left = (i - radius) * (i - radius) + (j - (h - radius - 1)) * (j - (h - radius - 1));
+                    int dist_bottom_right = (i - (w - radius - 1)) * (i - (w - radius - 1)) + (j - (h - radius - 1)) * (j - (h - radius - 1));
+
+                    if ((dist_top_left > radius * radius && j < radius && i < radius) ||
+                        (dist_top_right > radius * radius && j < radius && i >= w - radius) ||
+                        (dist_bottom_left > radius * radius && j >= h - radius && i < radius) ||
+                        (dist_bottom_right > radius * radius && j >= h - radius && i >= w - radius)) {
+                        continue; // En dehors des coins arrondis
+                    }
+
+                    SDL_RenderDrawPoint(renderer, x + i, y + j);
+                    
+                }
+                if (handleEvents(renderer, window) == -1) return -1;
+                SDL_Delay(4);
+                SDL_RenderPresent(renderer);
+            }
+        } 
     }
 }
 
@@ -539,63 +635,151 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Window* window, int x, int y
 }
 
 
+int drawAnimatedArc(SDL_Renderer *renderer, SDL_Window* window, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type) {
+
+    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
+        printf("Invalid animatedArc type: %s\n", type);
+    }
+    else
+    {
+        // Décomposer la couleur en RGBA
+        Uint8 r = (color >> 24) & 0xFF;
+        Uint8 g = (color >> 16) & 0xFF;
+        Uint8 b = (color >> 8) & 0xFF;
+        Uint8 a = color & 0xFF;
+        
+        
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+        // Convertir les angles de degrés en radians
+        double start_rad = start_angle * M_PI / 180.0;
+        double end_rad = end_angle * M_PI / 180.0;
+
+        // Tracer l'arc
+        for (double theta = start_rad; theta <= end_rad; theta += 0.01) {
+            int dx = (int)(radius * cos(theta));
+            int dy = (int)(radius * sin(theta));
+            
+            if (handleEvents(renderer, window) == -1) return -1;
+
+            if (strcmp(type, "empty") == 0) {
+                SDL_RenderDrawPoint(renderer, x + dx, y - dy);
+            } else if (strcmp(type, "filled") == 0) {
+                for (int r = radius - 2; r <= radius; ++r) { 
+                    int fx = (int)(r * cos(theta));
+                    int fy = (int)(r * sin(theta));
+                    SDL_RenderDrawPoint(renderer, x + fx, y - fy);
+                }
+            }
+            
+            SDL_RenderPresent(renderer);
+            SDL_Delay(8); // Contrôle de la vitesse (ne touche pas au rendu global)
+        }
+    }
+}
+
+
 // Fonction pour dessiner un polygon de manière progressive
 int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Window* window, int cx, int cy, int radius, int sides, Uint32 color, char *type) 
 {
-    if (sides < 3 || sides > 12) {
+    
+    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
+        printf("Invalid animatedPolygon type: %s\n", type);
+    } 
+    else if (sides < 3 || sides > 12) {
         printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
-        return -1;
     }
+    else {
 
-    Sint16 vx[12]; // Tableau pour les coordonnées X
-    Sint16 vy[12]; // Tableau pour les coordonnées Y
+        Sint16 vx[12]; // Tableau pour les coordonnées X
+        Sint16 vy[12]; // Tableau pour les coordonnées Y
 
-    // Calculer les sommets du polygone
-    for (int i = 0; i < sides; i++) 
-    {
-        if (handleEvents(renderer, window) == -1) return -1;
-
-        float angle = i * (2 * PI / sides);
-        vx[i] = cx + radius * cos(angle);
-        vy[i] = cy + radius * sin(angle);
-    }
-
-    // Couleur (décomposer Uint32 en RGB)
-    Uint8 r = (color >> 16) & 0xFF;
-    Uint8 g = (color >> 8) & 0xFF;
-    Uint8 b = color & 0xFF;
-
-    SDL_SetRenderDrawColor(renderer, r, g, b, SDL_ALPHA_OPAQUE);
-
-    // Dessiner chaque segment du polygone avec mise à jour pixel par pixel
-    for (int i = 0; i < sides; i++) 
-    {
-        if (handleEvents(renderer, window) == -1) return -1;
-
-        int x1 = vx[i];
-        int y1 = vy[i];
-        int x2 = vx[(i + 1) % sides];
-        int y2 = vy[(i + 1) % sides];
-
-        // Algorithme de tracé de ligne (Bresenham par exemple)
-        int dx = abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
-        int dy = -abs(y2 - y1), sy = y1 < y2 ? 1 : -1; 
-        int err = dx + dy, e2; /* erreur combinée */
-
-        while (1) {
-            if (handleEvents(renderer, window) == -1) return -1;
-
-            SDL_RenderDrawPoint(renderer, x1, y1); // Dessiner un point
-            SDL_Delay(4); 
-            SDL_RenderPresent(renderer); // Mettre à jour l'écran après avoir dessiné le polygone entier
-
-            if (x1 == x2 && y1 == y2) break;
-            e2 = 2 * err;
-            if (e2 >= dy) { err += dy; x1 += sx; }
-            if (e2 <= dx) { err += dx; y1 += sy; }
+        // Calculer les sommets du polygone
+        for (int i = 0; i < sides; i++) 
+        {
+            float angle = i * (2 * PI / sides);
+            vx[i] = cx + radius * cos(angle);
+            vy[i] = cy + radius * sin(angle);
         }
-    }
 
+        // Couleur (décomposer Uint32 en RGB)
+        Uint8 r = (color >> 16) & 0xFF;
+        Uint8 g = (color >> 8) & 0xFF;
+        Uint8 b = color & 0xFF;
+        SDL_SetRenderDrawColor(renderer, r, g, b, SDL_ALPHA_OPAQUE);
+
+        if (strcmp(type, "empty") == 0) {
+            // Dessiner les contours du polygone
+            for (int i = 0; i < sides; i++) 
+            {
+                int x1 = vx[i];
+                int y1 = vy[i];
+                int x2 = vx[(i + 1) % sides];
+                int y2 = vy[(i + 1) % sides];
+
+                int dx = abs(x2 - x1), sx = x1 < x2 ? 1 : -1;
+                int dy = -abs(y2 - y1), sy = y1 < y2 ? 1 : -1; 
+                int err = dx + dy, e2;
+
+                while (1) {
+                    if (handleEvents(renderer, window) == -1) return -1;
+                    SDL_RenderDrawPoint(renderer, x1, y1);
+                    SDL_RenderPresent(renderer);
+                    SDL_Delay(2);
+
+                    if (x1 == x2 && y1 == y2) break;
+                    e2 = 2 * err;
+                    if (e2 >= dy) { err += dy; x1 += sx; }
+                    if (e2 <= dx) { err += dx; y1 += sy; }
+                }
+            }
+        } 
+        else if (strcmp(type, "filled") == 0) {
+            // Remplir le polygone en traçant des lignes horizontales
+            int ymin = vy[0], ymax = vy[0];
+            for (int i = 1; i < sides; i++) {
+                if (vy[i] < ymin) ymin = vy[i];
+                if (vy[i] > ymax) ymax = vy[i];
+            }
+
+            for (int y = ymin; y <= ymax; y++) {
+                int intersections[12]; // Points d'intersection pour une ligne horizontale
+                int count = 0;
+
+                // Calculer les points d'intersection entre la ligne horizontale et chaque bord
+                for (int i = 0; i < sides; i++) {
+                    int x1 = vx[i], y1 = vy[i];
+                    int x2 = vx[(i + 1) % sides], y2 = vy[(i + 1) % sides];
+
+                    if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y)) { // Intersecte la ligne horizontale
+                        int x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+                        intersections[count++] = x;
+                    }
+                }
+
+                // Trier les intersections par ordre croissant
+                for (int i = 0; i < count - 1; i++) {
+                    for (int j = i + 1; j < count; j++) {
+                        if (intersections[i] > intersections[j]) {
+                            int temp = intersections[i];
+                            intersections[i] = intersections[j];
+                            intersections[j] = temp;
+                        }
+                    }
+                }
+
+                // Dessiner des lignes entre les paires d'intersections
+                for (int i = 0; i < count; i += 2) {
+                    if (handleEvents(renderer, window) == -1) return -1;
+                    for (int x = intersections[i]; x <= intersections[i + 1]; x++) {
+                        SDL_RenderDrawPoint(renderer, x, y);
+                    }
+                    SDL_RenderPresent(renderer); // Mise à jour progressive
+                    SDL_Delay(2);
+                }
+            }
+        }
+    } 
 }
 
 
@@ -614,47 +798,36 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Window* window, int x1, int y1,
         Uint8 a = color & 0xFF;
         SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-        // Calculer les deltas pour l'algorithme de Bresenham
+        // Initialisation des variables pour l'algorithme de Bresenham
         int dx = abs(x2 - x1);
         int dy = abs(y2 - y1);
         int sx = (x1 < x2) ? 1 : -1;
         int sy = (y1 < y2) ? 1 : -1;
         int err = dx - dy;
 
-        // Tracer la ligne pixel par pixel
-        while (true) {
+        while (x1 != x2 || y1 != y2) {
             if (handleEvents(renderer, window) == -1) return -1;
-            // Dessiner selon le type spécifié
+
+            // Dessiner le point actuel
             if (strcmp(type, "filled") == 0) {
-                // Dessiner une ligne épaisse
                 for (int tx = -thickness / 2; tx <= thickness / 2; tx++) {
                     for (int ty = -thickness / 2; ty <= thickness / 2; ty++) {
                         SDL_RenderDrawPoint(renderer, x1 + tx, y1 + ty);
                     }
                 }
-            } else if (strcmp(type, "empty") == 0) {
-                // Dessiner une ligne fine
+            } else {
                 SDL_RenderDrawPoint(renderer, x1, y1);
             }
+
+            // Afficher la progression
+            SDL_Delay(10);  // Animation
             SDL_RenderPresent(renderer);
-            SDL_Delay(10);  // Ajout d'un délai pour l'animation
 
-            // Vérifier si nous avons atteint la fin de la ligne
-            if (x1 == x2 && y1 == y2) break;
-
-            // Calculer la prochaine position
+            // Mise à jour des coordonnées pour l'algorithme de Bresenham
             int e2 = 2 * err;
-            if (e2 > -dy) {
-                err -= dy;
-                x1 += sx;
-            }
-            if (e2 < dx) {
-                err += dx;
-                y1 += sy;
-            }
-            
+            if (e2 > -dy) { err -= dy; x1 += sx; }
+            if (e2 < dx) { err += dx; y1 += sy; }
         }
     }
 }
-
 

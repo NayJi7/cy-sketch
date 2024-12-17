@@ -294,6 +294,44 @@ int drawShape(SDL_Renderer *renderer, SDL_Window *window, char *mode, char *shap
         } else {
             if(drawRectangle(renderer, window, x, y, w, h, color, type) == -1) return -1;
         }
+    } else if (strcmp(shape, "arc") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int radius = va_arg(args, int);
+        int start_angle = va_arg(args, int);
+        int end_angle = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedArc(renderer, window, x, y, radius, start_angle, end_angle, color, type) == -1) return -1;
+        } else {
+            if(drawArc(renderer, window, x, y, radius, start_angle, end_angle, color) == -1) return -1;
+        }
+
+    } else if (strcmp(shape, "roundedRectangle") == 0) {
+        if (isAnimated) {
+            int x = va_arg(args, int);
+            int y = va_arg(args, int);
+            int w = va_arg(args, int);
+            int h = va_arg(args, int);
+            int radius = va_arg(args, int);
+            Uint32 color = va_arg(args, Uint32);
+            char *type = va_arg(args, char*);
+
+            if(drawAnimatedRoundedRectangle(renderer, window, x, y, w, h, radius, color, type) == -1) return -1;
+        } else {
+            Sint16 x1 = va_arg(args, int);
+            Sint16 y1 = va_arg(args, int);
+            Sint16 x2 = va_arg(args, int);
+            Sint16 y2 = va_arg(args, int);
+            Sint16 radius = va_arg(args, int);
+            Uint32 color = va_arg(args, Uint32);
+            char *type = va_arg(args, char*);
+
+            if(drawRoundedRectangle(renderer, window, x1, y1, x2, y2, radius, color, type) == -1) return -1;
+        }
+
     } else if (strcmp(shape, "ellipse") == 0) {
         int x = va_arg(args, int);
         int y = va_arg(args, int);

@@ -26,7 +26,11 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Window *window, int x, int y,
 
 int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Window* window, int x, int y, int w, int h, Uint32 color, char *type);
 
+int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Window* window, int x, int y, int w, int h, int radius, Uint32 color, char *type);
+
 int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Window* window, int x, int y, int rx, int ry, Uint32 color, char *type);
+
+int drawAnimatedArc(SDL_Renderer *renderer, SDL_Window* window, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type);
 
 int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Window* window, int cx, int cy, int radius, int sides, Uint32 color, char *type);
 

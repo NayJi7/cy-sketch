@@ -85,23 +85,15 @@ int main(){
     }
     SDL_SetWindowTitle(window, "Hello SDL");
 
-    // Dessiner les formes animées
-    /*if(drawAnimatedCircle(renderer, window, 400, 270, 60, 0xFF00FF00, "fille") == -1) return 0;
-
-    if(drawAnimatedRectangle(renderer, window, 200, 170, 80, 60, 0xFF000000, "filled") == -1) return 0;
-    //drawAnimatedRectangle(renderer, 200, 170, 80, 60, 0xFF00FF00, "filled");
-    if(drawAnimatedEllipse(renderer, window, 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
-
-    if(drawAnimatedCustomPolygon(renderer, window, 630, 130, 100, 12, 0xFF808080, "empty") == -1) return 0;
-
-    if(drawAnimatedLine(renderer, window, 210, 210, 340, 340, 0xFFFF8800, 5, "filled") == -1) return 0;*/
-
     
-    if(drawShape(renderer, window, "instant", "circle", 400, 270, 60, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, window, "instant", "rectangle", 200, 200, 100, 50, 0x00FF00FF, "empty") == -1) return 0;
-    if(drawShape(renderer, window, "instant", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, window, "animated", "circle", 400, 270, 60, 0xFF00FF00, "empty") == -1) return 0;
+    if(drawShape(renderer, window, "instant", "line", 100, 100, 400, 300, 2, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, window, "animated", "rectangle", 200, 200, 100, 50, 0xFF00FF00, "empty") == -1) return 0;
+    if(drawShape(renderer, window, "animated", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "empty") == -1) return 0;
+    if(drawShape(renderer, window, "animated", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "empty") == -1) return 0;
+    if(drawShape(renderer, window, "instant", "arc", 400, 300, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
     if(drawShape(renderer, window, "instant", "polygon", 630, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
-    if(drawShape(renderer, window, "instant", "line", 210, 210, 340, 340, 0xFFFF8800, 20, "filled") == -1) return 0;
+    
     
 
     // Boucle d'événements pour fermer la fenêtre
