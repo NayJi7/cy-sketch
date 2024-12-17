@@ -153,15 +153,13 @@ def run_interactive():
 def main():
 
     # DEBUG
-    # if platform.system() == "Windows": # Windows
-    #     sys.argv.append('./to_run/to_execute.dpp')
-    # elif platform.system() == "Linux": #Linux ou Mac
-    #     sys.argv.append('to_run/to_execute.dpp')
-    # elif platform.system() == "Darwin":
-    #     sys.argv.append('to_run/to_execute.dpp')
-
-    #pour windows
-    sys.argv.append('./.to_run/to_execute.dpp')
+    if platform.system() == "Windows": # Windows -> testé et fonctionnel
+        sys.argv.append('./.to_run/to_execute.dpp')
+    elif platform.system() == "Linux": #Linux ou Mac
+        sys.argv.append('to_run/to_execute.dpp')
+    elif platform.system() == "Darwin":
+        sys.argv.append('.to_run/to_execute.dpp')
+    
 
     if len(sys.argv) > 1:  # Si un fichier est spécifié
         file_path = sys.argv[1]
