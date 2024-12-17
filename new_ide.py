@@ -163,7 +163,7 @@ class MyDrawppIDE(QMainWindow):
     '''Classe principale de l'ide qui est hérité de la super classe QMainWindow'''
     def __init__(self):
         super().__init__()
-        self.process = QProcess(self)
+        self.process = QProcess(self) #le signal de récup de processus
         self.setWindowIcon(QIcon("Dpp_circle.ico"))
         self.init_ui()
 
@@ -191,7 +191,7 @@ class MyDrawppIDE(QMainWindow):
         # Terminal intégré
         self.terminal = QPlainTextEdit(self)
         self.terminal.setReadOnly(True) # propriété du terminal : ne peut etre que lu et pas écris , pour l'instant
-        self.terminal.setStyleSheet("background-color: #494545; color: white; font-family: Consolas; font-size: 14px;")
+        self.terminal.setStyleSheet("background-color: #000000; color: white; font-family: Consolas; font-size: 14px;")
 
         # Barre d'outils
         self.toolbar = QToolBar("Main Toolbar", self)
@@ -276,7 +276,6 @@ class MyDrawppIDE(QMainWindow):
                 file.write(self.text_area.toPlainText())
 
 
-
     def run_code(self):
         # Préparation du fichier temporaire
         dir_path = ".to_run"
@@ -302,34 +301,41 @@ class MyDrawppIDE(QMainWindow):
             self.process.start("python", [interpreter_script, file_path])
         else:
             self.process.start("python3", [interpreter_script, file_path])
+        
+        
 
 
-    # gestion de l'affiche dans le terminal
+    # gestion de l'affichage dans le terminal
 
 
     def display_output(self):
-        output = self.process.readAllStandardOutput().data().decode() #.data et .decode -> converti en chaine de caracteres visible sinon on comprend rien
+        if platform.system() == "Windows":
+            #.data et .decode -> converti en chaine de caracteres visible sinon on comprend rien
+            output = self.process.readAllStandardOutput().data().decode('utf-8', errors='ignore')
+        else:
+            output = self.process.readAllStandardOutput().data().decode()
+        
 
         for line in output.splitlines():  # Découpe en lignes
             if "31m" in line:  # Si "31m" est détecté -> Rouge
                 line = line.replace("[31m","")
                 line = line.replace("[0m","")
-                self.append_colored_text(line + "\n", QColor("red")) #
+                self.append_colored_text(line + "\n", QColor("#cf4016")) #
             elif "34m" in line:  # Si "34m" est détecté -> Bleu
                 line = line.replace("[34m","")
                 line = line.replace("[0m","")
-                self.append_colored_text(line + "\n", QColor("blue"))
+                self.append_colored_text(line + "\n", QColor("#555df5"))
             else:
                 self.terminal.appendPlainText(line)  # Affiche normalement
-    #def display_error(self):
-        error_output = self.process.readAllStandardError().data().decode()
-        for line in error_output.splitlines():  # Découpe en lignes
-            if "31m" in line:  # Si "31m" est détecté -> Rouge
-                self.append_colored_text(line + "\n", QColor("red"))
-            elif "34m" in line:  # Si "34m" est détecté -> Bleu
-                self.append_colored_text(line + "\n", QColor("blue"))
-            else:
-                self.terminal.appendPlainText(line)  # Affiche normalement
+    # def display_error(self):
+    #     error_output = self.process.readAllStandardError().data().decode()
+    #     for line in error_output.splitlines():  # Découpe en lignes
+    #         if "31m" in line:  # Si "31m" est détecté -> Rouge
+    #             self.append_colored_text(line + "\n", QColor("red"))
+    #         elif "34m" in line:  # Si "34m" est détecté -> Bleu
+    #             self.append_colored_text(line + "\n", QColor("blue"))
+    #         else:
+    #             self.terminal.appendPlainText(line)  # Affiche normalement
 
     def append_colored_text(self, text, color=QColor("color")):
         """Ajoute une ligne de texte colorée dans le terminal."""
