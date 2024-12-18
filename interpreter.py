@@ -1,10 +1,13 @@
 import os
 import sys
+import argparse
 import atexit
 import readline
 from lexer import init_lexer
 from parser import init_parser
 from myast import *
+
+DEBUG = False  # Debug mode is off by default
 
 # === 4. Analyse et exécution d'un fichier source ===
 def run_file(file_path):
@@ -20,19 +23,40 @@ def run_file(file_path):
     with open(file_path, 'r') as file:
         filetxt = file.read()
 
+    if DEBUG:
+        print(f"[DEBUG] File reading... : {file_path}")
+        print(f"[DEBUG] Content :\n")
+
+        lines = filetxt.splitlines()
+        for i,line in enumerate(lines, start=1):
+            print(f"[DEBUG] {i}\t{line}")
+
     # Analyse lexicale
     lexer.input(filetxt)
+    tokens = list(lexer)
 
+    if DEBUG:
+        print(f"\n[DEBUG] TOKENS :")
+        for token in tokens:
+            print(f"[DEBUG] {str(token).replace("LexToken","")}") # Simple way to print tokens
+        
     # Analyse syntaxique
     try:
         ast = parser.parse(filetxt, lexer)
+        if DEBUG:
+            print(f"\n[DEBUG] AST :")
+        if isinstance(ast, list):
+            for node in ast:
+                print(f"[DEBUG] {node}")
+        elif ast is not None:
+            print(f"[DEBUG] Single AST Node: {ast}")
     except Exception as e:
         print_error(f"Erreur pendant le parsing : {e}")
         return
 
-    if(ast):
+    if ast:
         # Exécution de l'AST
-        execute_ast(ast)
+        execute_ast(ast, DEBUG)
 
 # === 5. Mode interactif ===
 def run_interactive():
@@ -73,26 +97,39 @@ def run_interactive():
         lexer.input(text)
         tokens = list(lexer)
 
+        if DEBUG:
+            print(f"[DEBUG] Tokens : {tokens}")
+
         # Analyse syntaxique
         try:
             ast = parser.parse(text, lexer=lexer)
+            if DEBUG:
+                print(f"[DEBUG] AST : {ast}")
         except Exception as e:
             print_error(f"Erreur pendant le parsing : {e}")
             continue
 
-        # Exécution de l'AST
-        execute_ast(ast)
-
 # === 6. Point d'entrée principal ===
 def main():
+    sys.argv.append("-d")
+    sys.argv.append("test.dpp")
 
-    # DEBUG
-    sys.argv.append('test.dpp')
+    argparser = argparse.ArgumentParser(description="Draw++ Language Interpreter")
+    argparser.add_argument("file", nargs="?", help="Source file to execute (optional)")
+    argparser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
+    args = argparser.parse_args()
 
-    if len(sys.argv) > 1:  # Si un fichier est spécifié
-        file_path = sys.argv[1]
+    # Set the debug mode flag globally
+    global DEBUG
+    DEBUG = args.debug
+
+    if DEBUG:
+        print("[DEBUG] Debug mode activated.\n")
+
+    if args.file:  # If a file is specified
+        file_path = args.file
         run_file(file_path)
-    else:  # Mode interactif
+    else:  # Interactive mode
         run_interactive()
 
 if __name__ == "__main__":
