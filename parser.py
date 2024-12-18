@@ -1,3 +1,5 @@
+import os
+import sys
 import ply.yacc as yacc
 from lexer import tokens, find_column
 
@@ -59,11 +61,6 @@ def p_valeur(p):
               | IDENTIFIER'''
     p[0] = p[1]
 
-def p_valeur_op(p):
-    '''valeur_op : NUMBER
-                 | IDENTIFIER'''
-    p[0] = p[1]
-
 def p_bloc(p):
     '''bloc : LBRACE programme RBRACE'''
     p[0] = ('block', p[2])
@@ -102,7 +99,24 @@ def p_error(p):
     else:
         print("\033[31mErreur syntaxique : fin de fichier inattendue.\033[0m")
 
-# === 3. Construire le parser ===
+# === 3. Construire le parser avec fichiers générés dans 'generated' ===
 def init_parser():
-    parser = yacc.yacc()
+    # Dossier des fichiers générés
+    generated_folder = os.path.join(os.path.dirname(__file__), '.parser_generated')
+
+    # Créer le dossier s'il n'existe pas
+    if not os.path.exists(generated_folder):
+        os.makedirs(generated_folder)
+
+    # Ajouter le dossier généré dans le sys.path pour qu'il soit accessible comme module
+    if generated_folder not in sys.path:
+        sys.path.insert(0, generated_folder)
+
+    # Spécifier un nom de module relatif pour parsetab
+    parser = yacc.yacc(
+        debug=True,
+        outputdir=generated_folder,
+        tabmodule="parsetab"  # Nom du module, pas un chemin absolu
+    )
+
     return parser

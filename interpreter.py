@@ -87,7 +87,7 @@ def run_interactive():
 def main():
 
     # DEBUG
-    sys.argv.append('/home/cytech/gitstore/cy-sketch/Deulyne/test.dpp')
+    sys.argv.append('test.dpp')
 
     if len(sys.argv) > 1:  # Si un fichier est spécifié
         file_path = sys.argv[1]
