@@ -1,5 +1,5 @@
-var i = 2 + a * 2 / 8 + a
 var a = 2
+var i = 2 + a * 2 / 8 + a
 a = i + a
 
 draw line(1+1, a * 8)

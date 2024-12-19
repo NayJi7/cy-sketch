@@ -9,8 +9,8 @@
 
 int main() {
 
-	int i = 2 + a * 2 / 8 + a;
 	int a = 2;
+	int i = 2 + a * 2 / 8 + a;
 	a = i + a;
 	draw_line(1 + 1, a * 8);
 	if (a == TRUE) {
