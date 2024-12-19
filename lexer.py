@@ -73,8 +73,7 @@ def t_NUMBER(t):
 
 # Chaînes
 def t_STRING(t):
-    r'\"([^\\\"]|\\.)*\"'
-    t.value = t.value[1:-1]
+    r'("(?:[^"\\]|\\.)*")'
     return t
 
 # Booléens

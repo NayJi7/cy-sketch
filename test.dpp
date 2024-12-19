@@ -1,4 +1,5 @@
-var x = 1.2 # assignation de la var x
+var a = d
+var x = a # assignation de la var x
 draw circle(2)
 draw line(1,23,3.8)
 # var b = 2

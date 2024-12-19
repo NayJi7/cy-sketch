@@ -4,7 +4,8 @@
 
 int main() {
 
-	float x = 1.2;
+	// Error: Variable 'd' not found; // d = None and is None
+	// Error: Variable 'a' not found; // a = None and is None
 	draw_circle(2);
 	draw_line(1, 23, 3.8);
 	if (a > 2) {
@@ -14,7 +15,7 @@ int main() {
 			draw_circle(3)
 
 			for (int i = 0; i < 5; int i = 5) {
-				set_color(red)
+				set_color("red")
 			}
 		}
 	}
