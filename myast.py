@@ -22,46 +22,113 @@ def translate_node_to_c(node, newline, tabulation, semicolon):
     if isinstance(node, tuple) and node[0] == 'draw':
         forme = node[1]
         parametres = node[2]
-        c_code += f"draw_{forme}({', '.join(map(str, parametres))});"
+
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"draw_{forme}({', '.join(map(str, parametres))})"
+
+        if semicolon :
+            c_code += ";"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
     
     # Cas d'un déplacement
     elif isinstance(node, tuple) and node[0] == 'move':
         x = node[1]
         y = node[2]
-        c_code += f"move_to({x}, {y});"
+
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"move_to({x}, {y})"
+
+        if semicolon :
+            c_code += ";"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
     
     # Cas d'une rotation
     elif isinstance(node, tuple) and node[0] == 'rotate':
         angle = node[1]
-        c_code += f"rotate({angle});"
+
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"rotate({angle})"
+
+        if semicolon :
+            c_code += ";"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
     
     # Cas d'une assignation
     elif isinstance(node, tuple) and node[0] == 'assign':
         var_name = node[1]
         value = node[2]
-        c_code += f"{type(value).__name__} {var_name} = {value};\n"
+
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"{type(value).__name__} {var_name} = {value}"
+
+        if semicolon :
+            c_code += ";"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
     
+    # Cas d'une couleur (assignation de couleur)
+    elif isinstance(node, tuple) and node[0] == 'color':
+        color = node[1]
+
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"set_color({color})"
+
+        if semicolon :
+            c_code += ";"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
+
     # Cas d'une conditionnelle (if)
     elif isinstance(node, tuple) and node[0] == 'if':
         condition = node[1]
         bloc_true = node[2][1] # renvoie la liste d'instructions du bloc (le programme)
         bloc_false = node[3][1] if len(node) == 4 else None # renvoie la liste d'instructions du bloc (le programme)
 
-        c_code += f"\nif ({condition_to_c(condition)}) {{"
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"if ({condition_to_c(condition)}) {{"
         
         for instr in bloc_true:
-            c_code += f"\n\t{translate_node_to_c(instr)}\n"
+            c_code += f"\n{translate_node_to_c(instr,1,tabulation+1,0)}"
         
-        c_code += f"}}\n"
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+        c_code += f"}}"
 
-        if not bloc_false : c_code += f"\n"
-        else :
+        if bloc_false :
+            if tabulation > 0 : 
+                for i in range(tabulation) : c_code += "\t"
+
             c_code += f"else {{"
             
             for instr in bloc_false:
-                c_code += f"\n\t{translate_node_to_c(instr)}"
+                c_code += f"\n{translate_node_to_c(instr,1,tabulation+1,0)}"
             
-            c_code += f"\n}}"
+            if tabulation > 0 : 
+                for i in range(tabulation) : c_code += "\t"
+            c_code += f"}}"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
                             
     # Cas d'une boucle (for)
     elif isinstance(node, tuple) and node[0] == 'for':
@@ -70,24 +137,27 @@ def translate_node_to_c(node, newline, tabulation, semicolon):
         increment = node[3]
         bloc = node[4][1] # renvoie la liste d'instructions du bloc (le programme)
 
-        c_code += f"\nfor ({translate_node_to_c(init)}; {condition_to_c(condition)}; {translate_node_to_c(increment)}) \n{{"
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+
+        c_code += f"for ({translate_node_to_c(init,0,0,0)}; {condition_to_c(condition)}; {translate_node_to_c(increment,0,0,0)}) {{\n"
         
         for instr in bloc:
-            c_code += f"\n\t{translate_node_to_c(instr)}"
+            c_code += f"{translate_node_to_c(instr,1,tabulation+1,0)}"
 
-        c_code += f"\n}}"
-    
-    # Cas d'une couleur (assignation de couleur)
-    elif isinstance(node, tuple) and node[0] == 'color':
-        color = node[1]
-        c_code += f"set_color({color});\n"
+        if tabulation > 0 : 
+            for i in range(tabulation) : c_code += "\t"
+        c_code += f"}}"
+
+        if newline > 0 : 
+            for i in range(newline) : c_code += "\n"
     
     # Cas par défaut : on ne sait pas quel type est ce nœud, donc le code est ignoré
     else:
         c_code += f"// Node non pris en charge : {node}\n"
         return c_code
 
-    print(f"[DEBUG] Translated succesfuly : {c_code}")
+    print(f"[DEBUG] Translated succesfuly : {c_code}\n")
 
     return c_code
 
@@ -100,23 +170,28 @@ def translate_ast_to_c(ast):
     c_code += "#include <stdio.h>\n"
     c_code += "#include <stdlib.h>\n"
     c_code += "#include <math.h>\n\n"
+    c_code += f"int main() {{\n\n"
 
     if DEBUG:
         print("\n[DEBUG] Translating AST to C code...")
 
     try:
         for node in ast:
-            c_code += translate_node_to_c(node) + "\n"
+            c_code += translate_node_to_c(node,1,1,1)
 
     except Exception as e:
         print_error(f"Erreur pendant la traduction de l'AST : {e}")
         return None  # Signal an error occurred
 
     if DEBUG:
-        print(f"[DEBUG] Successfully generated C code.")
+        print(f"[DEBUG] Successfully generated C code :")
         lines = c_code.splitlines()
         for i,line in enumerate(lines, start=1):
             print(f"[DEBUG] {i}\t{line}")
+
+    c_code += f"\n\treturn 0;\n"
+    c_code += f"}}\n"
+
     return c_code
 
 # === 3. Exécution de l'AST ===

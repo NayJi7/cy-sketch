@@ -24,7 +24,7 @@ def run_file(file_path):
         filetxt = file.read()
 
     if DEBUG:
-        print(f"[DEBUG] File reading... : {file_path}")
+        print(f"[DEBUG] File : {file_path}")
         print(f"[DEBUG] Content :\n")
 
         lines = filetxt.splitlines()
