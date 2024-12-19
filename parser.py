@@ -115,8 +115,9 @@ def p_operateur_comparaison(p):
     p[0] = p[1]
 
 def p_boucle(p):
-    '''boucle : FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc'''
-    p[0] = ('for', p[3], p[5], p[7], p[9])
+    '''boucle : WHILE LPAREN expression_logique RPAREN bloc
+              | FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc'''
+    p[0] = ('while', p[3], p[5]) if len(p) == 6 else ('for', p[3], p[5], p[7], p[9])
 
 # === 2. Gestion des erreurs syntaxiques ===
 

@@ -41,6 +41,7 @@ def run_file(file_path):
             print(f"[DEBUG] {str(token).replace("LexToken","")}") # Simple way to print tokens
         
     # Analyse syntaxique
+    lexer.lineno = 1 # reset the lineno as it will tokenize again
     try:
         ast = parser.parse(filetxt, lexer)
         if DEBUG:

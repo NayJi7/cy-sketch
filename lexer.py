@@ -62,7 +62,11 @@ t_COLON = r':'
 # Identifiants
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
-    t.type = keywords.get(t.value, 'IDENTIFIER')
+    if t.value in ['True', 'False']:  # Exclusion des mots-clés TRUE et FALSE
+        t.type = 'BOOLEAN'  # Les marquer comme BOOLEAN
+        t.value = (t.value == 'True')
+    else:
+        t.type = keywords.get(t.value, 'IDENTIFIER')  # Vérifiez si c'est un autre mot-clé
     return t
 
 # Nombres

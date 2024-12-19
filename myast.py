@@ -6,7 +6,14 @@ def print_error(error):
     print(f"\033[31mErreur : {error}\033[0m")
 
 def condition_to_c(condition):
-    return f"{condition[1]} {condition[0]} {condition[2]}"
+    if type(condition) == bool:
+        return 'TRUE' if condition else 'FALSE'
+    elif condition[1] == (True or False):
+        return f"TRUE {condition[0]} {condition[2]}" if condition[1] else f"FALSE {condition[0]} {condition[2]}"
+    elif condition[2] == (True or False):
+        return f"{condition[1]} {condition[0]} TRUE" if condition[2] else f"{condition[1]} {condition[0]} FALSE"
+    else:
+        return f"{condition[1]} {condition[0]} {condition[2]}"
 
 def resolve_value_and_find_variable(ast, value, current_position=None):
     """
@@ -248,7 +255,8 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
         if tabulation > 0:
             c_code += "\t" * tabulation
 
-        # Assign based on value type
+        # Assign based on value type    
+
         if isinstance(value, str) and '"' in value:  # String case
             # Allocate memory for the string in `a` (previously declared as void*)
             c_code += "\t" * tabulation + f'strcpy({var_name}, "{value.strip("\"")}")'  # Copy the string value
@@ -313,6 +321,25 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
 
         if newline > 0:
             c_code += "\n" * newline
+
+    elif isinstance(node, tuple) and node[0] == "while":
+        condition = node[1]
+        bloc = node[2][1]
+
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+
+        c_code += f"while ({condition_to_c(condition)}) {{"
+        
+        for instr in bloc:
+            c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, True)}"
+        
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+        c_code += f"}}"
+
+        if newline > 0: 
+            c_code += "\n" * (newline+1)
 
     # Handle conditional (if)
     elif isinstance(node, tuple) and node[0] == 'if':

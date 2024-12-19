@@ -21,6 +21,10 @@ int main() {
 		set_color("pink");
 	}
 
+	while (TRUE) {
+		draw_line(1, 2);
+	}
+
 
 	return 0;
 }
