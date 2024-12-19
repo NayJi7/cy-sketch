@@ -8,84 +8,314 @@ def print_error(error):
 def condition_to_c(condition):
     return f"{condition[1]} {condition[0]} {condition[2]}"
 
+def resolve_value_and_type(ast, value):
+    """
+    Resolve the type and value of a variable or literal.
+    - Handles literals, variables, and operations within the AST.
+    """
+    if isinstance(value, (int, float)):  # Literal Numbers
+        return type(value).__name__, value
+    elif isinstance(value, str) and '"' in value:  # Literal String
+        return "char*", value.strip('"')
+    elif isinstance(value, str):  # Variable name
+        for node in ast:
+            if isinstance(node, tuple):
+                if node[0] in ('assign', 'modify') and node[1] == value:
+                    return resolve_value_and_type(ast, node[2])
+        raise Exception(f"Variable '{value}' not initialized.")
+    elif isinstance(value, tuple):  # Operation Node
+        if value[0] == "op":
+            # Resolve operation result type and expression
+            _, left_c = resolve_value_and_type(ast, value[2])
+            _, right_c = resolve_value_and_type(ast, value[3])
+            operator = value[1]
+
+            # Generate a flat expression
+            expr = f"({left_c} {operator} {right_c})"
+            return "operation", expr
+        else:
+            raise Exception(f"Unsupported operation type: {value[0]}")
+    return None, None  # Unresolved
+    
 def find_variable_in_ast(var_name, ast_tree):
     """
-    Search the AST for the declaration or assignment of a given variable name.
+    Search the AST for the declaration (initialize), assignment (assign), or modification of a given variable name.
     Returns the type and value of the variable.
     """
     for node in ast_tree:
-        if isinstance(node, tuple) and node[0] == 'assign':
-            assigned_var_name = node[1]
-            assigned_value = node[2]
-            
-            if assigned_var_name == var_name:
-                # Determine the type of the value
-                if isinstance(assigned_value, str) and '"' in assigned_value:
-                    return "char*", assigned_value  # String case
-                elif isinstance(assigned_value, (int, float)):
-                    return type(assigned_value).__name__, assigned_value
-                elif isinstance(assigned_value, str):  # Identifier case
-                    return find_variable_in_ast(assigned_value, ast_tree)
-    return None, None  # Variable not found
+        if isinstance(node, tuple):
+            # Case 1: Assignment node
+            if node[0] == 'assign':
+                assigned_var_name = node[1]
+                assigned_value = node[2]
+
+                if assigned_var_name == var_name:
+                    # Return the type and value of the variable in the assignment
+                    if isinstance(assigned_value, str) and '"' in assigned_value:
+                        size = len(assigned_value) - 2  # Removing quotes
+                        return f"char[{size}]", assigned_value.strip('"')
+                    elif isinstance(assigned_value, (int, float)):
+                        return type(assigned_value).__name__, assigned_value
+                    elif isinstance(assigned_value, str):  # Another identifier
+                        return find_variable_in_ast(assigned_value, ast_tree)
+                    elif isinstance(assigned_value, tuple) and assigned_value[0] == "op":
+                        op = translate_node_to_c(ast_tree,assigned_value,0,0,0)
+                        return op[0], op[1]
+
+            # Case 2: Modify node (variable being modified)
+            elif node[0] == 'modify':
+                modified_var_name = node[1]
+                new_value = node[2]
+
+                if modified_var_name == var_name:
+                    # Return the type and value of the modified variable
+                    if isinstance(new_value, str) and '"' in new_value:
+                        size = len(new_value) - 2  # Removing quotes
+                        return f"char[{size}]", new_value.strip('"')
+                    elif isinstance(new_value, (int, float)):
+                        return type(new_value).__name__, new_value
+                    elif isinstance(new_value, str):  # Another identifier
+                        return find_variable_in_ast(new_value, ast_tree)
 
 # === 2. Traduction des nodes vers C ===
-def translate_node_to_c(ast,node, newline, tabulation, semicolon):
-    # adapter la fonction pour ajouter ou non les newline, tab et semicolon
-    # adapter chaque appel a cette fonction pour indiquer si on veut mettre newline, tab et semicolon.
+def translate_node_to_c(ast, node, newline, tabulation, semicolon):
     """Traduire une node en code C."""
     c_code = ""
 
     if DEBUG:
         print(f"[DEBUG] Translating node : {node}")
-
-    # Cas d'une instruction de dessin
+    
+    # Case: Drawing instruction (e.g., draw_circle)
     if isinstance(node, tuple) and node[0] == 'draw':
         forme = node[1]
         parametres = node[2]
+        ok = True
 
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"draw_{forme}({', '.join(map(str, parametres))})"
+        if forme == "line":
+            expected_args = 2
+        elif forme == "circle":
+            expected_args = 2
+        elif forme == "arc":
+            expected_args = 3
+        elif forme == "square":
+            expected_args = 4
+        elif forme == "point":
+            expected_args = 1
 
-        if semicolon :
+        for test in parametres:
+            if type(test) == str and '"' not in test:
+                t = find_variable_in_ast(test, ast)
+
+                if t == None:
+                    c_code += f"// ERROR : {test} variable not initialized"
+                    ok = False
+
+        if expected_args == len(parametres) and ok:
+            c_code += f"draw_{forme}("
+            for i, param in enumerate(parametres):
+                c_code += f"{translate_node_to_c(ast, param, 0, 0, 0)[1]}" if isinstance(param, tuple) and param[0] == "op" else f"{translate_node_to_c(ast, param, 0, 0, 0)}"
+                if i<len(parametres) - 1:
+                    c_code += ', '
+            c_code += ')'
+        elif expected_args != len(parametres) and ok :
+            c_code += f"// ERROR : draw_{forme} function requires {expected_args} arguments, but you gave {len(parametres)}"            
+
+        if semicolon:
             c_code += ";"
 
-        if newline > 0 : 
+        if newline > 0:
             c_code += "\n" * newline
     
-    # Cas d'un déplacement
+    # Case: Movement instruction (e.g., move_to)
     elif isinstance(node, tuple) and node[0] == 'move':
         x = node[1]
         y = node[2]
+        ok = True
 
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"move_to({x}, {y})"
+        if type(x) != int or float:
+            if type(x) == str and '"' not in x:
+                t = find_variable_in_ast(x, ast)
 
-        if semicolon :
+                if t == None:
+                    c_code += f"// ERROR : {x} variable not initialized"
+                    ok = False
+                elif t[0] != ("int" or "float"):
+                    c_code += f"// ERROR : {x} is {t[0]}, expected int or float"
+                    ok = False
+
+        if type(y) != int or float:
+            if type(y) == str and '"' not in y:
+                t = find_variable_in_ast(y, ast)
+
+                if t == None:
+                    c_code += f"// ERROR : {y} variable not initialized"
+                    ok = False
+                elif t[0] != ("int" or "float"):
+                    c_code += f"// ERROR : {y} is {t[0]}, expected int or float"
+                    ok = False
+            
+        if ok:
+            if (isinstance(y, tuple) and y[0] == "op") and (isinstance(x, tuple) and x[0] == "op"):
+                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)[1]}, {translate_node_to_c(ast,y,0,0,0)[1]})"
+            elif isinstance(x, tuple) and x[0] == "op":
+                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)[1]}, {translate_node_to_c(ast,y,0,0,0)})"
+            elif isinstance(y, tuple) and y[0] == "op":
+                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)}, {translate_node_to_c(ast,y,0,0,0)[1]})"
+            else:
+                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)}, {translate_node_to_c(ast,y,0,0,0)})"
+
+        if semicolon:
             c_code += ";"
 
-        if newline > 0 : 
+        if newline > 0: 
             c_code += "\n" * newline
     
-    # Cas d'une rotation
+    # Case: Rotation instruction (e.g., rotate)
     elif isinstance(node, tuple) and node[0] == 'rotate':
         angle = node[1]
+        ok = True
 
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"rotate({angle})"
+        if type(angle) != int:
+            if type(angle) == str and '"' not in angle:
+                t = find_variable_in_ast(angle, ast)
 
-        if semicolon :
+                if t == None:
+                    c_code += f"// ERROR : {angle} variable not initialized"
+                    ok = False
+                elif t[0] != "int":
+                    c_code += f"// ERROR : {angle} is {t[0]}, expected int"
+                    ok = False
+
+        if ok:
+            c_code += f"rotate({translate_node_to_c(ast, angle, 0,0,0)})"
+
+        if semicolon:
             c_code += ";"
 
-        if newline > 0 : 
+        if newline > 0: 
             c_code += "\n" * newline
+
+    # Handle color assignment (e.g., set_color)
+    elif isinstance(node, tuple) and node[0] == 'color':
+        color = node[1]
+        ok = True
+
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+
+        if type(color) == str and '"' not in color:
+            t = find_variable_in_ast(color, ast)
+
+            if t == None:
+                c_code += f"// ERROR : {color} variable not initialized"
+                ok = False
+            elif "char" not in t[0]:
+                c_code += f"// ERROR : {color} is {t[0]}, expected str"
+                ok = False
+        
+        if ok and type(color) != str: # security ++, normally it is stuck at the parser
+            c_code += f"// ERROR : {color} is {type(color)}, expected str"
+            ok = False
+
+        if ok:
+            c_code += f"set_color({color})"
+
+        if semicolon:
+            c_code += ";"
+
+        if newline > 0: 
+            c_code += "\n" * newline
+
+    elif isinstance(node, int):
+        return node
     
-    # Case: assignment
+    elif isinstance(node, float):
+        return node
+    
+    elif isinstance(node, str):
+        return node
+    
+    # Case: Operation artihmetic
+    elif isinstance(node, tuple) and node[0] == 'op':
+        operator = node[1]
+        left_type, left_value = resolve_value_and_type(ast, node[2])
+        right_type, right_value = resolve_value_and_type(ast, node[3])
+
+        # Resolve operation types
+        if left_type == "float" or right_type == "float":
+            result_type = "float"
+        else:
+            result_type = "int"
+
+        # Generate code for the operation
+        left_c = translate_node_to_c(ast, node[2], 0, 0, 0)
+        right_c = translate_node_to_c(ast, node[3], 0, 0, 0)
+
+        # If values are known, calculate the result
+        result_value = None
+        if isinstance(left_value, (int, float)) and isinstance(right_value, (int, float)):
+            if operator == '+':
+                result_value = left_value + right_value
+            elif operator == '-':
+                result_value = left_value - right_value
+            elif operator == '*':
+                result_value = left_value * right_value
+            elif operator == '/':
+                result_value = left_value / right_value
+
+        return result_type, f"{left_c} {operator} {right_c}"
+
+    # Case: Modification (Assigning a value to a previously declared variable)
+    elif isinstance(node, tuple) and node[0] == 'modify':
+        var_name = node[1]
+        value = node[2]
+        var_type, var_val = resolve_value_and_type(ast,var_name)
+
+        if tabulation > 0:
+            c_code += "\t" * tabulation
+
+        # Assign based on value type
+        if isinstance(value, str) and '"' in value:  # String case
+            # Allocate memory for the string in `a` (previously declared as void*)
+            c_code += "\t" * tabulation + f'strcpy({var_name}, "{value.strip("\"")}")'  # Copy the string value
+        elif isinstance(value, int):  # Integer case
+            c_code += f'{var_name} = {value}'
+        elif isinstance(value, float):  # Float case
+            c_code += f'{var_name} = {value}'
+        elif isinstance(value, str):  # Identifier case (a string variable)
+            var_type, value = find_variable_in_ast(value, ast)
+            if "char" in var_type:
+                c_code += "\t" * tabulation + f'strcpy({var_name},{value})'  # Copy the string value
+            elif var_type == ("int" or "float"):
+                c_code += f'{var_name} = {value}'
+            else:
+                c_code += f"// Error: Unsupported type for variable '{value}'"
+        # Case: Operation artihmetic
+        elif isinstance(value, tuple) and value[0] == 'op':
+            op = translate_node_to_c(ast, node[2], 0, 0, 0)
+            if op[0] != var_type:
+                c_code += f"// Error: {var_name} is {var_type} and {op[1]} returns {op[0]}"
+            else:
+                c_code += f"{var_name} = {op[1]}" # 0 = result type, 1 = string op 
+        else:
+            c_code += f"// Error: Unsupported value type"
+
+        if semicolon:
+            c_code += ";"  # Only one semicolon is added here
+
+        if newline > 0:
+            c_code += "\n" * newline
+
+    # Case: Assignment with declaration
     elif isinstance(node, tuple) and node[0] == 'assign':
         var_name = node[1]
         value = node[2]
@@ -93,101 +323,95 @@ def translate_node_to_c(ast,node, newline, tabulation, semicolon):
         if tabulation > 0:
             c_code += "\t" * tabulation
 
-        if isinstance(value, str) and '"' in value:  # String or char case
-            size = len(value) - 3  # Exclude surrounding quotes and initialize the index
-            c_code += f"char {var_name}[{size}] = {value}"
-        elif isinstance(value, str) and '"' not in value:  # Identifier case
+        # Assign based on type
+        if isinstance(value, str) and '"' in value:  # String case
+            size = len(value) - 2
+            c_code += f'char[{size}] {var_name};\n'
+            c_code += "\t" * tabulation + f'strcpy({var_name}, "{value.strip("\"")}")'
+        elif isinstance(value, (int, float)):  # Number case
+            c_code += f"{type(value).__name__} {var_name} = {value}"
+        elif isinstance(value, str):  # Identifier
             var_type, var_value = find_variable_in_ast(value, ast)
-            if var_type and var_value is not None:
+            if var_type:
                 c_code += f"{var_type} {var_name} = {value}"
             else:
                 c_code += f"// Error: Variable '{value}' not found"
-        else:  # Integer or float case
-            c_code += f"{type(value).__name__} {var_name} = {value}"
+        # Case: Operation artihmetic
+        elif isinstance(value, tuple) and value[0] == 'op':
+            operator = value[1]
+            op = translate_node_to_c(ast, node[2], 0, 0, 0)
+            c_code += f"{op[0]} {var_name} = {op[1]}"
+        else:
+            c_code += f"// Error: Unsupported value type"
 
         if semicolon:
-            c_code += f"; // {value} = {var_value} and is {var_type}" if isinstance(value, str) and '"' not in value else ";"
+            c_code += ";"
 
         if newline > 0:
             c_code += "\n" * newline
-    
-    # Cas d'une couleur (assignation de couleur)
-    elif isinstance(node, tuple) and node[0] == 'color':
-        color = node[1]
 
-        if tabulation > 0 : 
-            c_code += "\t" * tabulation
-
-        c_code += f"set_color({color})"
-
-        if semicolon :
-            c_code += ";"
-
-        if newline > 0 : 
-            c_code += "\n" * newline
-
-    # Cas d'une conditionnelle (if)
+    # Handle conditional (if)
     elif isinstance(node, tuple) and node[0] == 'if':
         condition = node[1]
-        bloc_true = node[2][1] # renvoie la liste d'instructions du bloc (le programme)
-        bloc_false = node[3][1] if len(node) == 4 else None # renvoie la liste d'instructions du bloc (le programme)
+        bloc_true = node[2][1]  # List of instructions in the true block
+        bloc_false = node[3][1] if len(node) == 4 else None  # False block if available
 
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
 
         c_code += f"if ({condition_to_c(condition)}) {{"
         
         for instr in bloc_true:
-            c_code += f"\n{translate_node_to_c(ast,instr,1,tabulation+1,0)}"
+            c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, 0)}"
         
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
         c_code += f"}}"
 
-        if bloc_false :
-            if tabulation > 0 : 
+        if bloc_false:
+            if tabulation > 0: 
                 c_code += "\t" * tabulation
 
             c_code += f"else {{"
             
             for instr in bloc_false:
-                c_code += f"\n{translate_node_to_c(ast,instr,1,tabulation+1,0)}"
+                c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, 0)}"
             
-            if tabulation > 0 : 
+            if tabulation > 0: 
                 c_code += "\t" * tabulation
             c_code += f"}}"
 
-        if newline > 0 : 
+        if newline > 0: 
             c_code += "\n" * newline
-                            
-    # Cas d'une boucle (for)
+
+    # Handle loop (for)
     elif isinstance(node, tuple) and node[0] == 'for':
         init = node[1]
         condition = node[2]
         increment = node[3]
-        bloc = node[4][1] # renvoie la liste d'instructions du bloc (le programme)
+        bloc = node[4][1]  # List of instructions in the block
 
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"for ({translate_node_to_c(ast,init,0,0,0)}; {condition_to_c(condition)}; {translate_node_to_c(ast,increment,0,0,0)}) {{\n"
+        c_code += f"for ({translate_node_to_c(ast, init, 0, 0, 0)}; {condition_to_c(condition)}; {translate_node_to_c(ast, increment, 0, 0, 0)}) {{\n"
         
         for instr in bloc:
-            c_code += f"{translate_node_to_c(ast,instr,1,tabulation+1,0)}"
+            c_code += f"{translate_node_to_c(ast, instr, 1, tabulation+1, 0)}"
 
-        if tabulation > 0 : 
+        if tabulation > 0: 
             c_code += "\t" * tabulation
         c_code += f"}}"
 
-        if newline > 0 : 
+        if newline > 0: 
             c_code += "\n" * newline
     
-    # Cas par défaut : on ne sait pas quel type est ce nœud, donc le code est ignoré
+    # Default case (unsupported node)
     else:
         c_code += f"// Node non pris en charge : {node}\n"
         return c_code
 
-    print(f"[DEBUG] Translated succesfuly : {c_code}\n")
+    print(f"[DEBUG] Translated successfully: {c_code}\n")
 
     return c_code
 
@@ -213,14 +437,15 @@ def translate_ast_to_c(ast):
         print_error(f"Erreur pendant la traduction de l'AST : {e}")
         return None  # Signal an error occurred
 
+    c_code += f"\n\treturn 0;\n"
+    c_code += f"}}\n"
+
     if DEBUG:
         print(f"[DEBUG] Successfully generated C code :")
         lines = c_code.splitlines()
         for i,line in enumerate(lines, start=1):
             print(f"[DEBUG] {i}\t{line}")
 
-    c_code += f"\n\treturn 0;\n"
-    c_code += f"}}\n"
 
     return c_code
 

@@ -16,6 +16,7 @@ def p_instruction(p):
                    | rotation
                    | couleur
                    | assignation
+                   | modification
                    | conditionnelle
                    | boucle
                    | bloc'''
@@ -34,31 +35,58 @@ def p_forme(p):
     p[0] = p[1]
 
 def p_parametres(p):
-    '''parametres : parametres COMMA NUMBER
-                  | NUMBER'''
-    p[0] = [p[1]] if len(p) == 2 else p[1] + [p[3]]
+    '''parametres : parametres COMMA arg
+                  | arg'''
+    p[0] = p[1] + [p[3]] if len(p) == 4 else [p[1]]
+
+def p_arg(p):
+    '''arg : NUMBER
+           | IDENTIFIER
+           | STRING
+           | BOOLEAN
+           | expression_arithmetic'''
+    p[0] = p[1]
+
+def p_expression_arithmetic(p):
+    '''expression_arithmetic : expression_arithmetic PLUS expression_arithmetic
+                             | expression_arithmetic MINUS expression_arithmetic
+                             | expression_arithmetic TIMES expression_arithmetic
+                             | expression_arithmetic DIVIDE expression_arithmetic'''
+    # Handle binary operations
+    p[0] = ('op', p[2], p[1], p[3])
+
+def p_expression_arithmetic_atomic(p):
+    '''expression_arithmetic : LPAREN expression_arithmetic RPAREN
+                             | NUMBER
+                             | IDENTIFIER'''
+    # Handle atomic expressions (parentheses, numbers, identifiers)
+    p[0] = p[1] if len(p) == 2 else p[2]
 
 def p_deplacement(p):
-    '''deplacement : MOVE LPAREN NUMBER COMMA NUMBER RPAREN'''
+    '''deplacement : MOVE LPAREN arg COMMA arg RPAREN'''
     p[0] = ('move', p[3], p[5])
 
 def p_rotation(p):
-    '''rotation : ROTATE LPAREN NUMBER RPAREN'''
+    '''rotation : ROTATE LPAREN arg RPAREN'''
     p[0] = ('rotate', p[3])
 
 def p_couleur(p):
-    '''couleur : COLOR LPAREN STRING RPAREN'''
+    '''couleur : COLOR LPAREN arg RPAREN'''
     p[0] = ('color', p[3])
 
 def p_assignation(p):
-    '''assignation : VARIABLE IDENTIFIER EQUALS valeur'''
+    '''assignation : VARIABLE IDENTIFIER EQUALS arg'''
     p[0] = ('assign', p[2], p[4])
+
+def p_modification(p):
+    '''modification : IDENTIFIER EQUALS arg'''
+    p[0] = ('modify', p[1], p[3])
 
 def p_valeur(p):
     '''valeur : NUMBER
+              | IDENTIFIER
               | STRING
-              | BOOLEAN
-              | IDENTIFIER'''
+              | BOOLEAN'''
     p[0] = p[1]
 
 def p_bloc(p):
@@ -71,8 +99,9 @@ def p_conditionnelle(p):
     p[0] = ('if', p[3], p[5], p[7]) if len(p) == 8 else ('if', p[3], p[5])
 
 def p_expression_logique(p):
-    '''expression_logique : valeur operateur_comparaison valeur'''
-    p[0] = (p[2], p[1], p[3])
+    '''expression_logique : valeur operateur_comparaison valeur
+                          | BOOLEAN'''
+    p[0] = (p[2], p[1], p[3]) if len(p) == 4 else p[1]
 
 def p_operateur_comparaison(p):
     '''operateur_comparaison : EQ
@@ -84,7 +113,7 @@ def p_operateur_comparaison(p):
     p[0] = p[1]
 
 def p_boucle(p):
-    '''boucle : FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc'''
+    '''boucle : FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc'''
     p[0] = ('for', p[3], p[5], p[7], p[9])
 
 # === 2. Gestion des erreurs syntaxiques ===
@@ -95,7 +124,7 @@ def p_error(p):
         if p.type == "RPAREN":
             print("\033[34mSuggestion : Vérifiez que toutes les parenthèses ouvrantes '(' ont une parenthèse fermante correspondante ')'.\033[0m")
         elif p.type == "SEMICOLON":
-            print("\033[34mSuggestion : Pas besoin de point virgule ici ';'.\033[0m")
+            print("\033[34mSuggestion : Vérifiez les points-virgules ';'.\033[0m")
     else:
         print("\033[31mErreur syntaxique : fin de fichier inattendue.\033[0m")
 
@@ -116,7 +145,7 @@ def init_parser():
     parser = yacc.yacc(
         debug=True,
         outputdir=generated_folder,
-        tabmodule="parsetab"  # Nom du module, pas un chemin absolu
+        tabmodule="parsetab"
     )
 
     return parser

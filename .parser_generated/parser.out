@@ -6,15 +6,11 @@ Unused terminals:
     ANIMATE
     COLON
     CURSOR
-    DIVIDE
     DO
     LBRACKET
-    MINUS
     NOT
     OR
-    PLUS
     RBRACKET
-    TIMES
     WHILE
 
 Grammar
@@ -27,102 +23,120 @@ Rule 4     instruction -> deplacement
 Rule 5     instruction -> rotation
 Rule 6     instruction -> couleur
 Rule 7     instruction -> assignation
-Rule 8     instruction -> conditionnelle
-Rule 9     instruction -> boucle
-Rule 10    instruction -> bloc
-Rule 11    dessin -> DRAW forme LPAREN parametres RPAREN
-Rule 12    forme -> LINE
-Rule 13    forme -> CIRCLE
-Rule 14    forme -> SQUARE
-Rule 15    forme -> ARC
-Rule 16    forme -> POINT
-Rule 17    parametres -> parametres COMMA NUMBER
-Rule 18    parametres -> NUMBER
-Rule 19    deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN
-Rule 20    rotation -> ROTATE LPAREN NUMBER RPAREN
-Rule 21    couleur -> COLOR LPAREN STRING RPAREN
-Rule 22    assignation -> VARIABLE IDENTIFIER EQUALS valeur
-Rule 23    valeur -> NUMBER
-Rule 24    valeur -> STRING
-Rule 25    valeur -> BOOLEAN
-Rule 26    valeur -> IDENTIFIER
-Rule 27    bloc -> LBRACE programme RBRACE
-Rule 28    conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc
-Rule 29    conditionnelle -> IF LPAREN expression_logique RPAREN bloc
-Rule 30    expression_logique -> valeur operateur_comparaison valeur
-Rule 31    operateur_comparaison -> EQ
-Rule 32    operateur_comparaison -> NEQ
-Rule 33    operateur_comparaison -> LT
-Rule 34    operateur_comparaison -> GT
-Rule 35    operateur_comparaison -> LE
-Rule 36    operateur_comparaison -> GE
-Rule 37    boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
+Rule 8     instruction -> modification
+Rule 9     instruction -> conditionnelle
+Rule 10    instruction -> boucle
+Rule 11    instruction -> bloc
+Rule 12    dessin -> DRAW forme LPAREN parametres RPAREN
+Rule 13    forme -> LINE
+Rule 14    forme -> CIRCLE
+Rule 15    forme -> SQUARE
+Rule 16    forme -> ARC
+Rule 17    forme -> POINT
+Rule 18    parametres -> parametres COMMA arg
+Rule 19    parametres -> arg
+Rule 20    arg -> NUMBER
+Rule 21    arg -> IDENTIFIER
+Rule 22    arg -> STRING
+Rule 23    arg -> BOOLEAN
+Rule 24    arg -> expression_arithmetic
+Rule 25    expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic
+Rule 26    expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic
+Rule 27    expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic
+Rule 28    expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic
+Rule 29    expression_arithmetic -> LPAREN expression_arithmetic RPAREN
+Rule 30    expression_arithmetic -> NUMBER
+Rule 31    expression_arithmetic -> IDENTIFIER
+Rule 32    deplacement -> MOVE LPAREN arg COMMA arg RPAREN
+Rule 33    rotation -> ROTATE LPAREN arg RPAREN
+Rule 34    couleur -> COLOR LPAREN arg RPAREN
+Rule 35    assignation -> VARIABLE IDENTIFIER EQUALS arg
+Rule 36    modification -> IDENTIFIER EQUALS arg
+Rule 37    valeur -> NUMBER
+Rule 38    valeur -> IDENTIFIER
+Rule 39    valeur -> STRING
+Rule 40    valeur -> BOOLEAN
+Rule 41    bloc -> LBRACE programme RBRACE
+Rule 42    conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc
+Rule 43    conditionnelle -> IF LPAREN expression_logique RPAREN bloc
+Rule 44    expression_logique -> valeur operateur_comparaison valeur
+Rule 45    expression_logique -> BOOLEAN
+Rule 46    operateur_comparaison -> EQ
+Rule 47    operateur_comparaison -> NEQ
+Rule 48    operateur_comparaison -> LT
+Rule 49    operateur_comparaison -> GT
+Rule 50    operateur_comparaison -> LE
+Rule 51    operateur_comparaison -> GE
+Rule 52    boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
 
 Terminals, with rules where they appear
 
 AND                  : 
 ANIMATE              : 
-ARC                  : 15
-BOOLEAN              : 25
-CIRCLE               : 13
+ARC                  : 16
+BOOLEAN              : 23 40 45
+CIRCLE               : 14
 COLON                : 
-COLOR                : 21
-COMMA                : 17 19
+COLOR                : 34
+COMMA                : 18 32
 CURSOR               : 
-DIVIDE               : 
+DIVIDE               : 28
 DO                   : 
-DRAW                 : 11
-ELSE                 : 28
-EQ                   : 31
-EQUALS               : 22
-FOR                  : 37
-GE                   : 36
-GT                   : 34
-IDENTIFIER           : 22 26
-IF                   : 28 29
-LBRACE               : 27
+DRAW                 : 12
+ELSE                 : 42
+EQ                   : 46
+EQUALS               : 35 36
+FOR                  : 52
+GE                   : 51
+GT                   : 49
+IDENTIFIER           : 21 31 35 36 38
+IF                   : 42 43
+LBRACE               : 41
 LBRACKET             : 
-LE                   : 35
-LINE                 : 12
-LPAREN               : 11 19 20 21 28 29 37
-LT                   : 33
-MINUS                : 
-MOVE                 : 19
-NEQ                  : 32
+LE                   : 50
+LINE                 : 13
+LPAREN               : 12 29 32 33 34 42 43 52
+LT                   : 48
+MINUS                : 26
+MOVE                 : 32
+NEQ                  : 47
 NOT                  : 
-NUMBER               : 17 18 19 19 20 23
+NUMBER               : 20 30 37
 OR                   : 
-PLUS                 : 
-POINT                : 16
-RBRACE               : 27
+PLUS                 : 25
+POINT                : 17
+RBRACE               : 41
 RBRACKET             : 
-ROTATE               : 20
-RPAREN               : 11 19 20 21 28 29 37
-SEMICOLON            : 37 37
-SQUARE               : 14
-STRING               : 21 24
-TIMES                : 
-VARIABLE             : 22
+ROTATE               : 33
+RPAREN               : 12 29 32 33 34 42 43 52
+SEMICOLON            : 52 52
+SQUARE               : 15
+STRING               : 22 39
+TIMES                : 27
+VARIABLE             : 35
 WHILE                : 
 error                : 
 
 Nonterminals, with rules where they appear
 
-assignation          : 7 37 37
-bloc                 : 10 28 28 29 37
-boucle               : 9
-conditionnelle       : 8
+arg                  : 18 19 32 32 33 34 35 36
+assignation          : 7 52
+bloc                 : 11 42 42 43 52
+boucle               : 10
+conditionnelle       : 9
 couleur              : 6
 deplacement          : 4
 dessin               : 3
-expression_logique   : 28 29 37
-forme                : 11
+expression_arithmetic : 24 25 25 26 26 27 27 28 28 29
+expression_logique   : 42 43 52
+forme                : 12
 instruction          : 1 2
-operateur_comparaison : 30
-parametres           : 11 17
-programme            : 2 27 0
+modification         : 8 52
+operateur_comparaison : 44
+parametres           : 12 18
+programme            : 2 41 0
 rotation             : 5
-valeur               : 22 30 30
+valeur               : 44 44
 
 Parsing method: LALR
 
@@ -136,27 +150,30 @@ state 0
     (5) instruction -> . rotation
     (6) instruction -> . couleur
     (7) instruction -> . assignation
-    (8) instruction -> . conditionnelle
-    (9) instruction -> . boucle
-    (10) instruction -> . bloc
-    (11) dessin -> . DRAW forme LPAREN parametres RPAREN
-    (19) deplacement -> . MOVE LPAREN NUMBER COMMA NUMBER RPAREN
-    (20) rotation -> . ROTATE LPAREN NUMBER RPAREN
-    (21) couleur -> . COLOR LPAREN STRING RPAREN
-    (22) assignation -> . VARIABLE IDENTIFIER EQUALS valeur
-    (28) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
-    (29) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
-    (37) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (8) instruction -> . modification
+    (9) instruction -> . conditionnelle
+    (10) instruction -> . boucle
+    (11) instruction -> . bloc
+    (12) dessin -> . DRAW forme LPAREN parametres RPAREN
+    (32) deplacement -> . MOVE LPAREN arg COMMA arg RPAREN
+    (33) rotation -> . ROTATE LPAREN arg RPAREN
+    (34) couleur -> . COLOR LPAREN arg RPAREN
+    (35) assignation -> . VARIABLE IDENTIFIER EQUALS arg
+    (36) modification -> . IDENTIFIER EQUALS arg
+    (42) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
+    (43) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
+    (52) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+    (41) bloc -> . LBRACE programme RBRACE
 
-    DRAW            shift and go to state 11
-    MOVE            shift and go to state 12
-    ROTATE          shift and go to state 13
-    COLOR           shift and go to state 14
-    VARIABLE        shift and go to state 15
-    IF              shift and go to state 16
-    FOR             shift and go to state 17
-    LBRACE          shift and go to state 18
+    DRAW            shift and go to state 12
+    MOVE            shift and go to state 13
+    ROTATE          shift and go to state 14
+    COLOR           shift and go to state 15
+    VARIABLE        shift and go to state 16
+    IDENTIFIER      shift and go to state 17
+    IF              shift and go to state 18
+    FOR             shift and go to state 19
+    LBRACE          shift and go to state 20
 
     programme                      shift and go to state 1
     instruction                    shift and go to state 2
@@ -165,9 +182,10 @@ state 0
     rotation                       shift and go to state 5
     couleur                        shift and go to state 6
     assignation                    shift and go to state 7
-    conditionnelle                 shift and go to state 8
-    boucle                         shift and go to state 9
-    bloc                           shift and go to state 10
+    modification                   shift and go to state 8
+    conditionnelle                 shift and go to state 9
+    boucle                         shift and go to state 10
+    bloc                           shift and go to state 11
 
 state 1
 
@@ -178,37 +196,41 @@ state 1
     (5) instruction -> . rotation
     (6) instruction -> . couleur
     (7) instruction -> . assignation
-    (8) instruction -> . conditionnelle
-    (9) instruction -> . boucle
-    (10) instruction -> . bloc
-    (11) dessin -> . DRAW forme LPAREN parametres RPAREN
-    (19) deplacement -> . MOVE LPAREN NUMBER COMMA NUMBER RPAREN
-    (20) rotation -> . ROTATE LPAREN NUMBER RPAREN
-    (21) couleur -> . COLOR LPAREN STRING RPAREN
-    (22) assignation -> . VARIABLE IDENTIFIER EQUALS valeur
-    (28) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
-    (29) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
-    (37) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (8) instruction -> . modification
+    (9) instruction -> . conditionnelle
+    (10) instruction -> . boucle
+    (11) instruction -> . bloc
+    (12) dessin -> . DRAW forme LPAREN parametres RPAREN
+    (32) deplacement -> . MOVE LPAREN arg COMMA arg RPAREN
+    (33) rotation -> . ROTATE LPAREN arg RPAREN
+    (34) couleur -> . COLOR LPAREN arg RPAREN
+    (35) assignation -> . VARIABLE IDENTIFIER EQUALS arg
+    (36) modification -> . IDENTIFIER EQUALS arg
+    (42) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
+    (43) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
+    (52) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+    (41) bloc -> . LBRACE programme RBRACE
 
-    DRAW            shift and go to state 11
-    MOVE            shift and go to state 12
-    ROTATE          shift and go to state 13
-    COLOR           shift and go to state 14
-    VARIABLE        shift and go to state 15
-    IF              shift and go to state 16
-    FOR             shift and go to state 17
-    LBRACE          shift and go to state 18
+    DRAW            shift and go to state 12
+    MOVE            shift and go to state 13
+    ROTATE          shift and go to state 14
+    COLOR           shift and go to state 15
+    VARIABLE        shift and go to state 16
+    IDENTIFIER      shift and go to state 17
+    IF              shift and go to state 18
+    FOR             shift and go to state 19
+    LBRACE          shift and go to state 20
 
-    instruction                    shift and go to state 19
+    instruction                    shift and go to state 21
     dessin                         shift and go to state 3
     deplacement                    shift and go to state 4
     rotation                       shift and go to state 5
     couleur                        shift and go to state 6
     assignation                    shift and go to state 7
-    conditionnelle                 shift and go to state 8
-    boucle                         shift and go to state 9
-    bloc                           shift and go to state 10
+    modification                   shift and go to state 8
+    conditionnelle                 shift and go to state 9
+    boucle                         shift and go to state 10
+    bloc                           shift and go to state 11
 
 state 2
 
@@ -219,6 +241,7 @@ state 2
     ROTATE          reduce using rule 1 (programme -> instruction .)
     COLOR           reduce using rule 1 (programme -> instruction .)
     VARIABLE        reduce using rule 1 (programme -> instruction .)
+    IDENTIFIER      reduce using rule 1 (programme -> instruction .)
     IF              reduce using rule 1 (programme -> instruction .)
     FOR             reduce using rule 1 (programme -> instruction .)
     LBRACE          reduce using rule 1 (programme -> instruction .)
@@ -235,6 +258,7 @@ state 3
     ROTATE          reduce using rule 3 (instruction -> dessin .)
     COLOR           reduce using rule 3 (instruction -> dessin .)
     VARIABLE        reduce using rule 3 (instruction -> dessin .)
+    IDENTIFIER      reduce using rule 3 (instruction -> dessin .)
     IF              reduce using rule 3 (instruction -> dessin .)
     FOR             reduce using rule 3 (instruction -> dessin .)
     LBRACE          reduce using rule 3 (instruction -> dessin .)
@@ -251,6 +275,7 @@ state 4
     ROTATE          reduce using rule 4 (instruction -> deplacement .)
     COLOR           reduce using rule 4 (instruction -> deplacement .)
     VARIABLE        reduce using rule 4 (instruction -> deplacement .)
+    IDENTIFIER      reduce using rule 4 (instruction -> deplacement .)
     IF              reduce using rule 4 (instruction -> deplacement .)
     FOR             reduce using rule 4 (instruction -> deplacement .)
     LBRACE          reduce using rule 4 (instruction -> deplacement .)
@@ -267,6 +292,7 @@ state 5
     ROTATE          reduce using rule 5 (instruction -> rotation .)
     COLOR           reduce using rule 5 (instruction -> rotation .)
     VARIABLE        reduce using rule 5 (instruction -> rotation .)
+    IDENTIFIER      reduce using rule 5 (instruction -> rotation .)
     IF              reduce using rule 5 (instruction -> rotation .)
     FOR             reduce using rule 5 (instruction -> rotation .)
     LBRACE          reduce using rule 5 (instruction -> rotation .)
@@ -283,6 +309,7 @@ state 6
     ROTATE          reduce using rule 6 (instruction -> couleur .)
     COLOR           reduce using rule 6 (instruction -> couleur .)
     VARIABLE        reduce using rule 6 (instruction -> couleur .)
+    IDENTIFIER      reduce using rule 6 (instruction -> couleur .)
     IF              reduce using rule 6 (instruction -> couleur .)
     FOR             reduce using rule 6 (instruction -> couleur .)
     LBRACE          reduce using rule 6 (instruction -> couleur .)
@@ -299,6 +326,7 @@ state 7
     ROTATE          reduce using rule 7 (instruction -> assignation .)
     COLOR           reduce using rule 7 (instruction -> assignation .)
     VARIABLE        reduce using rule 7 (instruction -> assignation .)
+    IDENTIFIER      reduce using rule 7 (instruction -> assignation .)
     IF              reduce using rule 7 (instruction -> assignation .)
     FOR             reduce using rule 7 (instruction -> assignation .)
     LBRACE          reduce using rule 7 (instruction -> assignation .)
@@ -308,115 +336,142 @@ state 7
 
 state 8
 
-    (8) instruction -> conditionnelle .
+    (8) instruction -> modification .
 
-    DRAW            reduce using rule 8 (instruction -> conditionnelle .)
-    MOVE            reduce using rule 8 (instruction -> conditionnelle .)
-    ROTATE          reduce using rule 8 (instruction -> conditionnelle .)
-    COLOR           reduce using rule 8 (instruction -> conditionnelle .)
-    VARIABLE        reduce using rule 8 (instruction -> conditionnelle .)
-    IF              reduce using rule 8 (instruction -> conditionnelle .)
-    FOR             reduce using rule 8 (instruction -> conditionnelle .)
-    LBRACE          reduce using rule 8 (instruction -> conditionnelle .)
-    $end            reduce using rule 8 (instruction -> conditionnelle .)
-    RBRACE          reduce using rule 8 (instruction -> conditionnelle .)
+    DRAW            reduce using rule 8 (instruction -> modification .)
+    MOVE            reduce using rule 8 (instruction -> modification .)
+    ROTATE          reduce using rule 8 (instruction -> modification .)
+    COLOR           reduce using rule 8 (instruction -> modification .)
+    VARIABLE        reduce using rule 8 (instruction -> modification .)
+    IDENTIFIER      reduce using rule 8 (instruction -> modification .)
+    IF              reduce using rule 8 (instruction -> modification .)
+    FOR             reduce using rule 8 (instruction -> modification .)
+    LBRACE          reduce using rule 8 (instruction -> modification .)
+    $end            reduce using rule 8 (instruction -> modification .)
+    RBRACE          reduce using rule 8 (instruction -> modification .)
 
 
 state 9
 
-    (9) instruction -> boucle .
+    (9) instruction -> conditionnelle .
 
-    DRAW            reduce using rule 9 (instruction -> boucle .)
-    MOVE            reduce using rule 9 (instruction -> boucle .)
-    ROTATE          reduce using rule 9 (instruction -> boucle .)
-    COLOR           reduce using rule 9 (instruction -> boucle .)
-    VARIABLE        reduce using rule 9 (instruction -> boucle .)
-    IF              reduce using rule 9 (instruction -> boucle .)
-    FOR             reduce using rule 9 (instruction -> boucle .)
-    LBRACE          reduce using rule 9 (instruction -> boucle .)
-    $end            reduce using rule 9 (instruction -> boucle .)
-    RBRACE          reduce using rule 9 (instruction -> boucle .)
+    DRAW            reduce using rule 9 (instruction -> conditionnelle .)
+    MOVE            reduce using rule 9 (instruction -> conditionnelle .)
+    ROTATE          reduce using rule 9 (instruction -> conditionnelle .)
+    COLOR           reduce using rule 9 (instruction -> conditionnelle .)
+    VARIABLE        reduce using rule 9 (instruction -> conditionnelle .)
+    IDENTIFIER      reduce using rule 9 (instruction -> conditionnelle .)
+    IF              reduce using rule 9 (instruction -> conditionnelle .)
+    FOR             reduce using rule 9 (instruction -> conditionnelle .)
+    LBRACE          reduce using rule 9 (instruction -> conditionnelle .)
+    $end            reduce using rule 9 (instruction -> conditionnelle .)
+    RBRACE          reduce using rule 9 (instruction -> conditionnelle .)
 
 
 state 10
 
-    (10) instruction -> bloc .
+    (10) instruction -> boucle .
 
-    DRAW            reduce using rule 10 (instruction -> bloc .)
-    MOVE            reduce using rule 10 (instruction -> bloc .)
-    ROTATE          reduce using rule 10 (instruction -> bloc .)
-    COLOR           reduce using rule 10 (instruction -> bloc .)
-    VARIABLE        reduce using rule 10 (instruction -> bloc .)
-    IF              reduce using rule 10 (instruction -> bloc .)
-    FOR             reduce using rule 10 (instruction -> bloc .)
-    LBRACE          reduce using rule 10 (instruction -> bloc .)
-    $end            reduce using rule 10 (instruction -> bloc .)
-    RBRACE          reduce using rule 10 (instruction -> bloc .)
+    DRAW            reduce using rule 10 (instruction -> boucle .)
+    MOVE            reduce using rule 10 (instruction -> boucle .)
+    ROTATE          reduce using rule 10 (instruction -> boucle .)
+    COLOR           reduce using rule 10 (instruction -> boucle .)
+    VARIABLE        reduce using rule 10 (instruction -> boucle .)
+    IDENTIFIER      reduce using rule 10 (instruction -> boucle .)
+    IF              reduce using rule 10 (instruction -> boucle .)
+    FOR             reduce using rule 10 (instruction -> boucle .)
+    LBRACE          reduce using rule 10 (instruction -> boucle .)
+    $end            reduce using rule 10 (instruction -> boucle .)
+    RBRACE          reduce using rule 10 (instruction -> boucle .)
 
 
 state 11
 
-    (11) dessin -> DRAW . forme LPAREN parametres RPAREN
-    (12) forme -> . LINE
-    (13) forme -> . CIRCLE
-    (14) forme -> . SQUARE
-    (15) forme -> . ARC
-    (16) forme -> . POINT
+    (11) instruction -> bloc .
 
-    LINE            shift and go to state 21
-    CIRCLE          shift and go to state 22
-    SQUARE          shift and go to state 23
-    ARC             shift and go to state 24
-    POINT           shift and go to state 25
+    DRAW            reduce using rule 11 (instruction -> bloc .)
+    MOVE            reduce using rule 11 (instruction -> bloc .)
+    ROTATE          reduce using rule 11 (instruction -> bloc .)
+    COLOR           reduce using rule 11 (instruction -> bloc .)
+    VARIABLE        reduce using rule 11 (instruction -> bloc .)
+    IDENTIFIER      reduce using rule 11 (instruction -> bloc .)
+    IF              reduce using rule 11 (instruction -> bloc .)
+    FOR             reduce using rule 11 (instruction -> bloc .)
+    LBRACE          reduce using rule 11 (instruction -> bloc .)
+    $end            reduce using rule 11 (instruction -> bloc .)
+    RBRACE          reduce using rule 11 (instruction -> bloc .)
 
-    forme                          shift and go to state 20
 
 state 12
 
-    (19) deplacement -> MOVE . LPAREN NUMBER COMMA NUMBER RPAREN
+    (12) dessin -> DRAW . forme LPAREN parametres RPAREN
+    (13) forme -> . LINE
+    (14) forme -> . CIRCLE
+    (15) forme -> . SQUARE
+    (16) forme -> . ARC
+    (17) forme -> . POINT
 
-    LPAREN          shift and go to state 26
+    LINE            shift and go to state 23
+    CIRCLE          shift and go to state 24
+    SQUARE          shift and go to state 25
+    ARC             shift and go to state 26
+    POINT           shift and go to state 27
 
+    forme                          shift and go to state 22
 
 state 13
 
-    (20) rotation -> ROTATE . LPAREN NUMBER RPAREN
-
-    LPAREN          shift and go to state 27
-
-
-state 14
-
-    (21) couleur -> COLOR . LPAREN STRING RPAREN
+    (32) deplacement -> MOVE . LPAREN arg COMMA arg RPAREN
 
     LPAREN          shift and go to state 28
 
 
+state 14
+
+    (33) rotation -> ROTATE . LPAREN arg RPAREN
+
+    LPAREN          shift and go to state 29
+
+
 state 15
 
-    (22) assignation -> VARIABLE . IDENTIFIER EQUALS valeur
-
-    IDENTIFIER      shift and go to state 29
-
-
-state 16
-
-    (28) conditionnelle -> IF . LPAREN expression_logique RPAREN bloc ELSE bloc
-    (29) conditionnelle -> IF . LPAREN expression_logique RPAREN bloc
+    (34) couleur -> COLOR . LPAREN arg RPAREN
 
     LPAREN          shift and go to state 30
 
 
+state 16
+
+    (35) assignation -> VARIABLE . IDENTIFIER EQUALS arg
+
+    IDENTIFIER      shift and go to state 31
+
+
 state 17
 
-    (37) boucle -> FOR . LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
+    (36) modification -> IDENTIFIER . EQUALS arg
 
-    LPAREN          shift and go to state 31
+    EQUALS          shift and go to state 32
 
 
 state 18
 
-    (27) bloc -> LBRACE . programme RBRACE
+    (42) conditionnelle -> IF . LPAREN expression_logique RPAREN bloc ELSE bloc
+    (43) conditionnelle -> IF . LPAREN expression_logique RPAREN bloc
+
+    LPAREN          shift and go to state 33
+
+
+state 19
+
+    (52) boucle -> FOR . LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+
+    LPAREN          shift and go to state 34
+
+
+state 20
+
+    (41) bloc -> LBRACE . programme RBRACE
     (1) programme -> . instruction
     (2) programme -> . programme instruction
     (3) instruction -> . dessin
@@ -424,40 +479,44 @@ state 18
     (5) instruction -> . rotation
     (6) instruction -> . couleur
     (7) instruction -> . assignation
-    (8) instruction -> . conditionnelle
-    (9) instruction -> . boucle
-    (10) instruction -> . bloc
-    (11) dessin -> . DRAW forme LPAREN parametres RPAREN
-    (19) deplacement -> . MOVE LPAREN NUMBER COMMA NUMBER RPAREN
-    (20) rotation -> . ROTATE LPAREN NUMBER RPAREN
-    (21) couleur -> . COLOR LPAREN STRING RPAREN
-    (22) assignation -> . VARIABLE IDENTIFIER EQUALS valeur
-    (28) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
-    (29) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
-    (37) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (8) instruction -> . modification
+    (9) instruction -> . conditionnelle
+    (10) instruction -> . boucle
+    (11) instruction -> . bloc
+    (12) dessin -> . DRAW forme LPAREN parametres RPAREN
+    (32) deplacement -> . MOVE LPAREN arg COMMA arg RPAREN
+    (33) rotation -> . ROTATE LPAREN arg RPAREN
+    (34) couleur -> . COLOR LPAREN arg RPAREN
+    (35) assignation -> . VARIABLE IDENTIFIER EQUALS arg
+    (36) modification -> . IDENTIFIER EQUALS arg
+    (42) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
+    (43) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
+    (52) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+    (41) bloc -> . LBRACE programme RBRACE
 
-    DRAW            shift and go to state 11
-    MOVE            shift and go to state 12
-    ROTATE          shift and go to state 13
-    COLOR           shift and go to state 14
-    VARIABLE        shift and go to state 15
-    IF              shift and go to state 16
-    FOR             shift and go to state 17
-    LBRACE          shift and go to state 18
+    DRAW            shift and go to state 12
+    MOVE            shift and go to state 13
+    ROTATE          shift and go to state 14
+    COLOR           shift and go to state 15
+    VARIABLE        shift and go to state 16
+    IDENTIFIER      shift and go to state 17
+    IF              shift and go to state 18
+    FOR             shift and go to state 19
+    LBRACE          shift and go to state 20
 
-    programme                      shift and go to state 32
+    programme                      shift and go to state 35
     instruction                    shift and go to state 2
     dessin                         shift and go to state 3
     deplacement                    shift and go to state 4
     rotation                       shift and go to state 5
     couleur                        shift and go to state 6
     assignation                    shift and go to state 7
-    conditionnelle                 shift and go to state 8
-    boucle                         shift and go to state 9
-    bloc                           shift and go to state 10
+    modification                   shift and go to state 8
+    conditionnelle                 shift and go to state 9
+    boucle                         shift and go to state 10
+    bloc                           shift and go to state 11
 
-state 19
+state 21
 
     (2) programme -> programme instruction .
 
@@ -466,6 +525,7 @@ state 19
     ROTATE          reduce using rule 2 (programme -> programme instruction .)
     COLOR           reduce using rule 2 (programme -> programme instruction .)
     VARIABLE        reduce using rule 2 (programme -> programme instruction .)
+    IDENTIFIER      reduce using rule 2 (programme -> programme instruction .)
     IF              reduce using rule 2 (programme -> programme instruction .)
     FOR             reduce using rule 2 (programme -> programme instruction .)
     LBRACE          reduce using rule 2 (programme -> programme instruction .)
@@ -473,663 +533,1326 @@ state 19
     RBRACE          reduce using rule 2 (programme -> programme instruction .)
 
 
-state 20
-
-    (11) dessin -> DRAW forme . LPAREN parametres RPAREN
-
-    LPAREN          shift and go to state 33
-
-
-state 21
-
-    (12) forme -> LINE .
-
-    LPAREN          reduce using rule 12 (forme -> LINE .)
-
-
 state 22
 
-    (13) forme -> CIRCLE .
+    (12) dessin -> DRAW forme . LPAREN parametres RPAREN
 
-    LPAREN          reduce using rule 13 (forme -> CIRCLE .)
+    LPAREN          shift and go to state 36
 
 
 state 23
 
-    (14) forme -> SQUARE .
+    (13) forme -> LINE .
 
-    LPAREN          reduce using rule 14 (forme -> SQUARE .)
+    LPAREN          reduce using rule 13 (forme -> LINE .)
 
 
 state 24
 
-    (15) forme -> ARC .
+    (14) forme -> CIRCLE .
 
-    LPAREN          reduce using rule 15 (forme -> ARC .)
+    LPAREN          reduce using rule 14 (forme -> CIRCLE .)
 
 
 state 25
 
-    (16) forme -> POINT .
+    (15) forme -> SQUARE .
 
-    LPAREN          reduce using rule 16 (forme -> POINT .)
+    LPAREN          reduce using rule 15 (forme -> SQUARE .)
 
 
 state 26
 
-    (19) deplacement -> MOVE LPAREN . NUMBER COMMA NUMBER RPAREN
+    (16) forme -> ARC .
 
-    NUMBER          shift and go to state 34
+    LPAREN          reduce using rule 16 (forme -> ARC .)
 
 
 state 27
 
-    (20) rotation -> ROTATE LPAREN . NUMBER RPAREN
+    (17) forme -> POINT .
 
-    NUMBER          shift and go to state 35
+    LPAREN          reduce using rule 17 (forme -> POINT .)
 
 
 state 28
 
-    (21) couleur -> COLOR LPAREN . STRING RPAREN
+    (32) deplacement -> MOVE LPAREN . arg COMMA arg RPAREN
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    STRING          shift and go to state 36
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
 
+    arg                            shift and go to state 38
+    expression_arithmetic          shift and go to state 43
 
 state 29
 
-    (22) assignation -> VARIABLE IDENTIFIER . EQUALS valeur
+    (33) rotation -> ROTATE LPAREN . arg RPAREN
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    EQUALS          shift and go to state 37
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
 
+    arg                            shift and go to state 44
+    expression_arithmetic          shift and go to state 43
 
 state 30
 
-    (28) conditionnelle -> IF LPAREN . expression_logique RPAREN bloc ELSE bloc
-    (29) conditionnelle -> IF LPAREN . expression_logique RPAREN bloc
-    (30) expression_logique -> . valeur operateur_comparaison valeur
-    (23) valeur -> . NUMBER
-    (24) valeur -> . STRING
-    (25) valeur -> . BOOLEAN
-    (26) valeur -> . IDENTIFIER
+    (34) couleur -> COLOR LPAREN . arg RPAREN
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    NUMBER          shift and go to state 40
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
     STRING          shift and go to state 41
     BOOLEAN         shift and go to state 42
-    IDENTIFIER      shift and go to state 43
+    LPAREN          shift and go to state 37
 
-    expression_logique             shift and go to state 38
-    valeur                         shift and go to state 39
+    arg                            shift and go to state 45
+    expression_arithmetic          shift and go to state 43
 
 state 31
 
-    (37) boucle -> FOR LPAREN . assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
-    (22) assignation -> . VARIABLE IDENTIFIER EQUALS valeur
+    (35) assignation -> VARIABLE IDENTIFIER . EQUALS arg
 
-    VARIABLE        shift and go to state 15
+    EQUALS          shift and go to state 46
 
-    assignation                    shift and go to state 44
 
 state 32
 
-    (27) bloc -> LBRACE programme . RBRACE
+    (36) modification -> IDENTIFIER EQUALS . arg
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
+
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
+
+    arg                            shift and go to state 47
+    expression_arithmetic          shift and go to state 43
+
+state 33
+
+    (42) conditionnelle -> IF LPAREN . expression_logique RPAREN bloc ELSE bloc
+    (43) conditionnelle -> IF LPAREN . expression_logique RPAREN bloc
+    (44) expression_logique -> . valeur operateur_comparaison valeur
+    (45) expression_logique -> . BOOLEAN
+    (37) valeur -> . NUMBER
+    (38) valeur -> . IDENTIFIER
+    (39) valeur -> . STRING
+    (40) valeur -> . BOOLEAN
+
+    BOOLEAN         shift and go to state 50
+    NUMBER          shift and go to state 51
+    IDENTIFIER      shift and go to state 52
+    STRING          shift and go to state 53
+
+    expression_logique             shift and go to state 48
+    valeur                         shift and go to state 49
+
+state 34
+
+    (52) boucle -> FOR LPAREN . assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+    (35) assignation -> . VARIABLE IDENTIFIER EQUALS arg
+
+    VARIABLE        shift and go to state 16
+
+    assignation                    shift and go to state 54
+
+state 35
+
+    (41) bloc -> LBRACE programme . RBRACE
     (2) programme -> programme . instruction
     (3) instruction -> . dessin
     (4) instruction -> . deplacement
     (5) instruction -> . rotation
     (6) instruction -> . couleur
     (7) instruction -> . assignation
-    (8) instruction -> . conditionnelle
-    (9) instruction -> . boucle
-    (10) instruction -> . bloc
-    (11) dessin -> . DRAW forme LPAREN parametres RPAREN
-    (19) deplacement -> . MOVE LPAREN NUMBER COMMA NUMBER RPAREN
-    (20) rotation -> . ROTATE LPAREN NUMBER RPAREN
-    (21) couleur -> . COLOR LPAREN STRING RPAREN
-    (22) assignation -> . VARIABLE IDENTIFIER EQUALS valeur
-    (28) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
-    (29) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
-    (37) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (8) instruction -> . modification
+    (9) instruction -> . conditionnelle
+    (10) instruction -> . boucle
+    (11) instruction -> . bloc
+    (12) dessin -> . DRAW forme LPAREN parametres RPAREN
+    (32) deplacement -> . MOVE LPAREN arg COMMA arg RPAREN
+    (33) rotation -> . ROTATE LPAREN arg RPAREN
+    (34) couleur -> . COLOR LPAREN arg RPAREN
+    (35) assignation -> . VARIABLE IDENTIFIER EQUALS arg
+    (36) modification -> . IDENTIFIER EQUALS arg
+    (42) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc ELSE bloc
+    (43) conditionnelle -> . IF LPAREN expression_logique RPAREN bloc
+    (52) boucle -> . FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+    (41) bloc -> . LBRACE programme RBRACE
 
-    RBRACE          shift and go to state 45
-    DRAW            shift and go to state 11
-    MOVE            shift and go to state 12
-    ROTATE          shift and go to state 13
-    COLOR           shift and go to state 14
-    VARIABLE        shift and go to state 15
-    IF              shift and go to state 16
-    FOR             shift and go to state 17
-    LBRACE          shift and go to state 18
+    RBRACE          shift and go to state 55
+    DRAW            shift and go to state 12
+    MOVE            shift and go to state 13
+    ROTATE          shift and go to state 14
+    COLOR           shift and go to state 15
+    VARIABLE        shift and go to state 16
+    IDENTIFIER      shift and go to state 17
+    IF              shift and go to state 18
+    FOR             shift and go to state 19
+    LBRACE          shift and go to state 20
 
-    instruction                    shift and go to state 19
+    instruction                    shift and go to state 21
     dessin                         shift and go to state 3
     deplacement                    shift and go to state 4
     rotation                       shift and go to state 5
     couleur                        shift and go to state 6
     assignation                    shift and go to state 7
-    conditionnelle                 shift and go to state 8
-    boucle                         shift and go to state 9
-    bloc                           shift and go to state 10
-
-state 33
-
-    (11) dessin -> DRAW forme LPAREN . parametres RPAREN
-    (17) parametres -> . parametres COMMA NUMBER
-    (18) parametres -> . NUMBER
-
-    NUMBER          shift and go to state 47
-
-    parametres                     shift and go to state 46
-
-state 34
-
-    (19) deplacement -> MOVE LPAREN NUMBER . COMMA NUMBER RPAREN
-
-    COMMA           shift and go to state 48
-
-
-state 35
-
-    (20) rotation -> ROTATE LPAREN NUMBER . RPAREN
-
-    RPAREN          shift and go to state 49
-
+    modification                   shift and go to state 8
+    conditionnelle                 shift and go to state 9
+    boucle                         shift and go to state 10
+    bloc                           shift and go to state 11
 
 state 36
 
-    (21) couleur -> COLOR LPAREN STRING . RPAREN
+    (12) dessin -> DRAW forme LPAREN . parametres RPAREN
+    (18) parametres -> . parametres COMMA arg
+    (19) parametres -> . arg
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    RPAREN          shift and go to state 50
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
 
+    parametres                     shift and go to state 56
+    arg                            shift and go to state 57
+    expression_arithmetic          shift and go to state 43
 
 state 37
 
-    (22) assignation -> VARIABLE IDENTIFIER EQUALS . valeur
-    (23) valeur -> . NUMBER
-    (24) valeur -> . STRING
-    (25) valeur -> . BOOLEAN
-    (26) valeur -> . IDENTIFIER
+    (29) expression_arithmetic -> LPAREN . expression_arithmetic RPAREN
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    NUMBER          shift and go to state 40
-    STRING          shift and go to state 41
-    BOOLEAN         shift and go to state 42
-    IDENTIFIER      shift and go to state 43
+    LPAREN          shift and go to state 37
+    NUMBER          shift and go to state 59
+    IDENTIFIER      shift and go to state 60
 
-    valeur                         shift and go to state 51
+    expression_arithmetic          shift and go to state 58
 
 state 38
 
-    (28) conditionnelle -> IF LPAREN expression_logique . RPAREN bloc ELSE bloc
-    (29) conditionnelle -> IF LPAREN expression_logique . RPAREN bloc
+    (32) deplacement -> MOVE LPAREN arg . COMMA arg RPAREN
 
-    RPAREN          shift and go to state 52
+    COMMA           shift and go to state 61
 
 
 state 39
 
-    (30) expression_logique -> valeur . operateur_comparaison valeur
-    (31) operateur_comparaison -> . EQ
-    (32) operateur_comparaison -> . NEQ
-    (33) operateur_comparaison -> . LT
-    (34) operateur_comparaison -> . GT
-    (35) operateur_comparaison -> . LE
-    (36) operateur_comparaison -> . GE
+    (20) arg -> NUMBER .
+    (30) expression_arithmetic -> NUMBER .
 
-    EQ              shift and go to state 54
-    NEQ             shift and go to state 55
-    LT              shift and go to state 56
-    GT              shift and go to state 57
-    LE              shift and go to state 58
-    GE              shift and go to state 59
+  ! reduce/reduce conflict for COMMA resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for RPAREN resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for DRAW resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for MOVE resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for ROTATE resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for COLOR resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for VARIABLE resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for IDENTIFIER resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for IF resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for FOR resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for LBRACE resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for $end resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for RBRACE resolved using rule 20 (arg -> NUMBER .)
+  ! reduce/reduce conflict for SEMICOLON resolved using rule 20 (arg -> NUMBER .)
+    COMMA           reduce using rule 20 (arg -> NUMBER .)
+    RPAREN          reduce using rule 20 (arg -> NUMBER .)
+    DRAW            reduce using rule 20 (arg -> NUMBER .)
+    MOVE            reduce using rule 20 (arg -> NUMBER .)
+    ROTATE          reduce using rule 20 (arg -> NUMBER .)
+    COLOR           reduce using rule 20 (arg -> NUMBER .)
+    VARIABLE        reduce using rule 20 (arg -> NUMBER .)
+    IDENTIFIER      reduce using rule 20 (arg -> NUMBER .)
+    IF              reduce using rule 20 (arg -> NUMBER .)
+    FOR             reduce using rule 20 (arg -> NUMBER .)
+    LBRACE          reduce using rule 20 (arg -> NUMBER .)
+    $end            reduce using rule 20 (arg -> NUMBER .)
+    RBRACE          reduce using rule 20 (arg -> NUMBER .)
+    SEMICOLON       reduce using rule 20 (arg -> NUMBER .)
+    PLUS            reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    MINUS           reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    TIMES           reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    DIVIDE          reduce using rule 30 (expression_arithmetic -> NUMBER .)
 
-    operateur_comparaison          shift and go to state 53
+  ! COMMA           [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! RPAREN          [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! DRAW            [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! MOVE            [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! ROTATE          [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! COLOR           [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! VARIABLE        [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! IDENTIFIER      [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! IF              [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! FOR             [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! LBRACE          [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! $end            [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! RBRACE          [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+  ! SEMICOLON       [ reduce using rule 30 (expression_arithmetic -> NUMBER .) ]
+
 
 state 40
 
-    (23) valeur -> NUMBER .
+    (21) arg -> IDENTIFIER .
+    (31) expression_arithmetic -> IDENTIFIER .
 
-    EQ              reduce using rule 23 (valeur -> NUMBER .)
-    NEQ             reduce using rule 23 (valeur -> NUMBER .)
-    LT              reduce using rule 23 (valeur -> NUMBER .)
-    GT              reduce using rule 23 (valeur -> NUMBER .)
-    LE              reduce using rule 23 (valeur -> NUMBER .)
-    GE              reduce using rule 23 (valeur -> NUMBER .)
-    DRAW            reduce using rule 23 (valeur -> NUMBER .)
-    MOVE            reduce using rule 23 (valeur -> NUMBER .)
-    ROTATE          reduce using rule 23 (valeur -> NUMBER .)
-    COLOR           reduce using rule 23 (valeur -> NUMBER .)
-    VARIABLE        reduce using rule 23 (valeur -> NUMBER .)
-    IF              reduce using rule 23 (valeur -> NUMBER .)
-    FOR             reduce using rule 23 (valeur -> NUMBER .)
-    LBRACE          reduce using rule 23 (valeur -> NUMBER .)
-    $end            reduce using rule 23 (valeur -> NUMBER .)
-    RBRACE          reduce using rule 23 (valeur -> NUMBER .)
-    SEMICOLON       reduce using rule 23 (valeur -> NUMBER .)
-    RPAREN          reduce using rule 23 (valeur -> NUMBER .)
+  ! reduce/reduce conflict for COMMA resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for RPAREN resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for DRAW resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for MOVE resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for ROTATE resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for COLOR resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for VARIABLE resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for IDENTIFIER resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for IF resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for FOR resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for LBRACE resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for $end resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for RBRACE resolved using rule 21 (arg -> IDENTIFIER .)
+  ! reduce/reduce conflict for SEMICOLON resolved using rule 21 (arg -> IDENTIFIER .)
+    COMMA           reduce using rule 21 (arg -> IDENTIFIER .)
+    RPAREN          reduce using rule 21 (arg -> IDENTIFIER .)
+    DRAW            reduce using rule 21 (arg -> IDENTIFIER .)
+    MOVE            reduce using rule 21 (arg -> IDENTIFIER .)
+    ROTATE          reduce using rule 21 (arg -> IDENTIFIER .)
+    COLOR           reduce using rule 21 (arg -> IDENTIFIER .)
+    VARIABLE        reduce using rule 21 (arg -> IDENTIFIER .)
+    IDENTIFIER      reduce using rule 21 (arg -> IDENTIFIER .)
+    IF              reduce using rule 21 (arg -> IDENTIFIER .)
+    FOR             reduce using rule 21 (arg -> IDENTIFIER .)
+    LBRACE          reduce using rule 21 (arg -> IDENTIFIER .)
+    $end            reduce using rule 21 (arg -> IDENTIFIER .)
+    RBRACE          reduce using rule 21 (arg -> IDENTIFIER .)
+    SEMICOLON       reduce using rule 21 (arg -> IDENTIFIER .)
+    PLUS            reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    MINUS           reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    TIMES           reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    DIVIDE          reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+
+  ! COMMA           [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! RPAREN          [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! DRAW            [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! MOVE            [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! ROTATE          [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! COLOR           [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! VARIABLE        [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! IDENTIFIER      [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! IF              [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! FOR             [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! LBRACE          [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! $end            [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! RBRACE          [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
+  ! SEMICOLON       [ reduce using rule 31 (expression_arithmetic -> IDENTIFIER .) ]
 
 
 state 41
 
-    (24) valeur -> STRING .
+    (22) arg -> STRING .
 
-    EQ              reduce using rule 24 (valeur -> STRING .)
-    NEQ             reduce using rule 24 (valeur -> STRING .)
-    LT              reduce using rule 24 (valeur -> STRING .)
-    GT              reduce using rule 24 (valeur -> STRING .)
-    LE              reduce using rule 24 (valeur -> STRING .)
-    GE              reduce using rule 24 (valeur -> STRING .)
-    DRAW            reduce using rule 24 (valeur -> STRING .)
-    MOVE            reduce using rule 24 (valeur -> STRING .)
-    ROTATE          reduce using rule 24 (valeur -> STRING .)
-    COLOR           reduce using rule 24 (valeur -> STRING .)
-    VARIABLE        reduce using rule 24 (valeur -> STRING .)
-    IF              reduce using rule 24 (valeur -> STRING .)
-    FOR             reduce using rule 24 (valeur -> STRING .)
-    LBRACE          reduce using rule 24 (valeur -> STRING .)
-    $end            reduce using rule 24 (valeur -> STRING .)
-    RBRACE          reduce using rule 24 (valeur -> STRING .)
-    SEMICOLON       reduce using rule 24 (valeur -> STRING .)
-    RPAREN          reduce using rule 24 (valeur -> STRING .)
+    COMMA           reduce using rule 22 (arg -> STRING .)
+    RPAREN          reduce using rule 22 (arg -> STRING .)
+    DRAW            reduce using rule 22 (arg -> STRING .)
+    MOVE            reduce using rule 22 (arg -> STRING .)
+    ROTATE          reduce using rule 22 (arg -> STRING .)
+    COLOR           reduce using rule 22 (arg -> STRING .)
+    VARIABLE        reduce using rule 22 (arg -> STRING .)
+    IDENTIFIER      reduce using rule 22 (arg -> STRING .)
+    IF              reduce using rule 22 (arg -> STRING .)
+    FOR             reduce using rule 22 (arg -> STRING .)
+    LBRACE          reduce using rule 22 (arg -> STRING .)
+    $end            reduce using rule 22 (arg -> STRING .)
+    RBRACE          reduce using rule 22 (arg -> STRING .)
+    SEMICOLON       reduce using rule 22 (arg -> STRING .)
 
 
 state 42
 
-    (25) valeur -> BOOLEAN .
+    (23) arg -> BOOLEAN .
 
-    EQ              reduce using rule 25 (valeur -> BOOLEAN .)
-    NEQ             reduce using rule 25 (valeur -> BOOLEAN .)
-    LT              reduce using rule 25 (valeur -> BOOLEAN .)
-    GT              reduce using rule 25 (valeur -> BOOLEAN .)
-    LE              reduce using rule 25 (valeur -> BOOLEAN .)
-    GE              reduce using rule 25 (valeur -> BOOLEAN .)
-    DRAW            reduce using rule 25 (valeur -> BOOLEAN .)
-    MOVE            reduce using rule 25 (valeur -> BOOLEAN .)
-    ROTATE          reduce using rule 25 (valeur -> BOOLEAN .)
-    COLOR           reduce using rule 25 (valeur -> BOOLEAN .)
-    VARIABLE        reduce using rule 25 (valeur -> BOOLEAN .)
-    IF              reduce using rule 25 (valeur -> BOOLEAN .)
-    FOR             reduce using rule 25 (valeur -> BOOLEAN .)
-    LBRACE          reduce using rule 25 (valeur -> BOOLEAN .)
-    $end            reduce using rule 25 (valeur -> BOOLEAN .)
-    RBRACE          reduce using rule 25 (valeur -> BOOLEAN .)
-    SEMICOLON       reduce using rule 25 (valeur -> BOOLEAN .)
-    RPAREN          reduce using rule 25 (valeur -> BOOLEAN .)
+    COMMA           reduce using rule 23 (arg -> BOOLEAN .)
+    RPAREN          reduce using rule 23 (arg -> BOOLEAN .)
+    DRAW            reduce using rule 23 (arg -> BOOLEAN .)
+    MOVE            reduce using rule 23 (arg -> BOOLEAN .)
+    ROTATE          reduce using rule 23 (arg -> BOOLEAN .)
+    COLOR           reduce using rule 23 (arg -> BOOLEAN .)
+    VARIABLE        reduce using rule 23 (arg -> BOOLEAN .)
+    IDENTIFIER      reduce using rule 23 (arg -> BOOLEAN .)
+    IF              reduce using rule 23 (arg -> BOOLEAN .)
+    FOR             reduce using rule 23 (arg -> BOOLEAN .)
+    LBRACE          reduce using rule 23 (arg -> BOOLEAN .)
+    $end            reduce using rule 23 (arg -> BOOLEAN .)
+    RBRACE          reduce using rule 23 (arg -> BOOLEAN .)
+    SEMICOLON       reduce using rule 23 (arg -> BOOLEAN .)
 
 
 state 43
 
-    (26) valeur -> IDENTIFIER .
+    (24) arg -> expression_arithmetic .
+    (25) expression_arithmetic -> expression_arithmetic . PLUS expression_arithmetic
+    (26) expression_arithmetic -> expression_arithmetic . MINUS expression_arithmetic
+    (27) expression_arithmetic -> expression_arithmetic . TIMES expression_arithmetic
+    (28) expression_arithmetic -> expression_arithmetic . DIVIDE expression_arithmetic
 
-    EQ              reduce using rule 26 (valeur -> IDENTIFIER .)
-    NEQ             reduce using rule 26 (valeur -> IDENTIFIER .)
-    LT              reduce using rule 26 (valeur -> IDENTIFIER .)
-    GT              reduce using rule 26 (valeur -> IDENTIFIER .)
-    LE              reduce using rule 26 (valeur -> IDENTIFIER .)
-    GE              reduce using rule 26 (valeur -> IDENTIFIER .)
-    DRAW            reduce using rule 26 (valeur -> IDENTIFIER .)
-    MOVE            reduce using rule 26 (valeur -> IDENTIFIER .)
-    ROTATE          reduce using rule 26 (valeur -> IDENTIFIER .)
-    COLOR           reduce using rule 26 (valeur -> IDENTIFIER .)
-    VARIABLE        reduce using rule 26 (valeur -> IDENTIFIER .)
-    IF              reduce using rule 26 (valeur -> IDENTIFIER .)
-    FOR             reduce using rule 26 (valeur -> IDENTIFIER .)
-    LBRACE          reduce using rule 26 (valeur -> IDENTIFIER .)
-    $end            reduce using rule 26 (valeur -> IDENTIFIER .)
-    RBRACE          reduce using rule 26 (valeur -> IDENTIFIER .)
-    SEMICOLON       reduce using rule 26 (valeur -> IDENTIFIER .)
-    RPAREN          reduce using rule 26 (valeur -> IDENTIFIER .)
+    COMMA           reduce using rule 24 (arg -> expression_arithmetic .)
+    RPAREN          reduce using rule 24 (arg -> expression_arithmetic .)
+    DRAW            reduce using rule 24 (arg -> expression_arithmetic .)
+    MOVE            reduce using rule 24 (arg -> expression_arithmetic .)
+    ROTATE          reduce using rule 24 (arg -> expression_arithmetic .)
+    COLOR           reduce using rule 24 (arg -> expression_arithmetic .)
+    VARIABLE        reduce using rule 24 (arg -> expression_arithmetic .)
+    IDENTIFIER      reduce using rule 24 (arg -> expression_arithmetic .)
+    IF              reduce using rule 24 (arg -> expression_arithmetic .)
+    FOR             reduce using rule 24 (arg -> expression_arithmetic .)
+    LBRACE          reduce using rule 24 (arg -> expression_arithmetic .)
+    $end            reduce using rule 24 (arg -> expression_arithmetic .)
+    RBRACE          reduce using rule 24 (arg -> expression_arithmetic .)
+    SEMICOLON       reduce using rule 24 (arg -> expression_arithmetic .)
+    PLUS            shift and go to state 62
+    MINUS           shift and go to state 63
+    TIMES           shift and go to state 64
+    DIVIDE          shift and go to state 65
 
 
 state 44
 
-    (37) boucle -> FOR LPAREN assignation . SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc
+    (33) rotation -> ROTATE LPAREN arg . RPAREN
 
-    SEMICOLON       shift and go to state 60
+    RPAREN          shift and go to state 66
 
 
 state 45
 
-    (27) bloc -> LBRACE programme RBRACE .
+    (34) couleur -> COLOR LPAREN arg . RPAREN
 
-    DRAW            reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    MOVE            reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    ROTATE          reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    COLOR           reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    VARIABLE        reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    IF              reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    FOR             reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    LBRACE          reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    $end            reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    RBRACE          reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
-    ELSE            reduce using rule 27 (bloc -> LBRACE programme RBRACE .)
+    RPAREN          shift and go to state 67
 
 
 state 46
 
-    (11) dessin -> DRAW forme LPAREN parametres . RPAREN
-    (17) parametres -> parametres . COMMA NUMBER
+    (35) assignation -> VARIABLE IDENTIFIER EQUALS . arg
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    RPAREN          shift and go to state 61
-    COMMA           shift and go to state 62
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
 
+    arg                            shift and go to state 68
+    expression_arithmetic          shift and go to state 43
 
 state 47
 
-    (18) parametres -> NUMBER .
+    (36) modification -> IDENTIFIER EQUALS arg .
 
-    RPAREN          reduce using rule 18 (parametres -> NUMBER .)
-    COMMA           reduce using rule 18 (parametres -> NUMBER .)
+    DRAW            reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    MOVE            reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    ROTATE          reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    COLOR           reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    VARIABLE        reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    IDENTIFIER      reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    IF              reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    FOR             reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    LBRACE          reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    $end            reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    RBRACE          reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
+    RPAREN          reduce using rule 36 (modification -> IDENTIFIER EQUALS arg .)
 
 
 state 48
 
-    (19) deplacement -> MOVE LPAREN NUMBER COMMA . NUMBER RPAREN
+    (42) conditionnelle -> IF LPAREN expression_logique . RPAREN bloc ELSE bloc
+    (43) conditionnelle -> IF LPAREN expression_logique . RPAREN bloc
 
-    NUMBER          shift and go to state 63
+    RPAREN          shift and go to state 69
 
 
 state 49
 
-    (20) rotation -> ROTATE LPAREN NUMBER RPAREN .
+    (44) expression_logique -> valeur . operateur_comparaison valeur
+    (46) operateur_comparaison -> . EQ
+    (47) operateur_comparaison -> . NEQ
+    (48) operateur_comparaison -> . LT
+    (49) operateur_comparaison -> . GT
+    (50) operateur_comparaison -> . LE
+    (51) operateur_comparaison -> . GE
 
-    DRAW            reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    MOVE            reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    ROTATE          reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    COLOR           reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    VARIABLE        reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    IF              reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    FOR             reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    LBRACE          reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    $end            reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
-    RBRACE          reduce using rule 20 (rotation -> ROTATE LPAREN NUMBER RPAREN .)
+    EQ              shift and go to state 71
+    NEQ             shift and go to state 72
+    LT              shift and go to state 73
+    GT              shift and go to state 74
+    LE              shift and go to state 75
+    GE              shift and go to state 76
 
+    operateur_comparaison          shift and go to state 70
 
 state 50
 
-    (21) couleur -> COLOR LPAREN STRING RPAREN .
+    (45) expression_logique -> BOOLEAN .
+    (40) valeur -> BOOLEAN .
 
-    DRAW            reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    MOVE            reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    ROTATE          reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    COLOR           reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    VARIABLE        reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    IF              reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    FOR             reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    LBRACE          reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    $end            reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
-    RBRACE          reduce using rule 21 (couleur -> COLOR LPAREN STRING RPAREN .)
+    RPAREN          reduce using rule 45 (expression_logique -> BOOLEAN .)
+    SEMICOLON       reduce using rule 45 (expression_logique -> BOOLEAN .)
+    EQ              reduce using rule 40 (valeur -> BOOLEAN .)
+    NEQ             reduce using rule 40 (valeur -> BOOLEAN .)
+    LT              reduce using rule 40 (valeur -> BOOLEAN .)
+    GT              reduce using rule 40 (valeur -> BOOLEAN .)
+    LE              reduce using rule 40 (valeur -> BOOLEAN .)
+    GE              reduce using rule 40 (valeur -> BOOLEAN .)
 
 
 state 51
 
-    (22) assignation -> VARIABLE IDENTIFIER EQUALS valeur .
+    (37) valeur -> NUMBER .
 
-    DRAW            reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    MOVE            reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    ROTATE          reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    COLOR           reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    VARIABLE        reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    IF              reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    FOR             reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    LBRACE          reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    $end            reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    RBRACE          reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    SEMICOLON       reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
-    RPAREN          reduce using rule 22 (assignation -> VARIABLE IDENTIFIER EQUALS valeur .)
+    EQ              reduce using rule 37 (valeur -> NUMBER .)
+    NEQ             reduce using rule 37 (valeur -> NUMBER .)
+    LT              reduce using rule 37 (valeur -> NUMBER .)
+    GT              reduce using rule 37 (valeur -> NUMBER .)
+    LE              reduce using rule 37 (valeur -> NUMBER .)
+    GE              reduce using rule 37 (valeur -> NUMBER .)
+    RPAREN          reduce using rule 37 (valeur -> NUMBER .)
+    SEMICOLON       reduce using rule 37 (valeur -> NUMBER .)
 
 
 state 52
 
-    (28) conditionnelle -> IF LPAREN expression_logique RPAREN . bloc ELSE bloc
-    (29) conditionnelle -> IF LPAREN expression_logique RPAREN . bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (38) valeur -> IDENTIFIER .
 
-    LBRACE          shift and go to state 18
+    EQ              reduce using rule 38 (valeur -> IDENTIFIER .)
+    NEQ             reduce using rule 38 (valeur -> IDENTIFIER .)
+    LT              reduce using rule 38 (valeur -> IDENTIFIER .)
+    GT              reduce using rule 38 (valeur -> IDENTIFIER .)
+    LE              reduce using rule 38 (valeur -> IDENTIFIER .)
+    GE              reduce using rule 38 (valeur -> IDENTIFIER .)
+    RPAREN          reduce using rule 38 (valeur -> IDENTIFIER .)
+    SEMICOLON       reduce using rule 38 (valeur -> IDENTIFIER .)
 
-    bloc                           shift and go to state 64
 
 state 53
 
-    (30) expression_logique -> valeur operateur_comparaison . valeur
-    (23) valeur -> . NUMBER
-    (24) valeur -> . STRING
-    (25) valeur -> . BOOLEAN
-    (26) valeur -> . IDENTIFIER
+    (39) valeur -> STRING .
 
-    NUMBER          shift and go to state 40
-    STRING          shift and go to state 41
-    BOOLEAN         shift and go to state 42
-    IDENTIFIER      shift and go to state 43
+    EQ              reduce using rule 39 (valeur -> STRING .)
+    NEQ             reduce using rule 39 (valeur -> STRING .)
+    LT              reduce using rule 39 (valeur -> STRING .)
+    GT              reduce using rule 39 (valeur -> STRING .)
+    LE              reduce using rule 39 (valeur -> STRING .)
+    GE              reduce using rule 39 (valeur -> STRING .)
+    RPAREN          reduce using rule 39 (valeur -> STRING .)
+    SEMICOLON       reduce using rule 39 (valeur -> STRING .)
 
-    valeur                         shift and go to state 65
 
 state 54
 
-    (31) operateur_comparaison -> EQ .
+    (52) boucle -> FOR LPAREN assignation . SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
 
-    NUMBER          reduce using rule 31 (operateur_comparaison -> EQ .)
-    STRING          reduce using rule 31 (operateur_comparaison -> EQ .)
-    BOOLEAN         reduce using rule 31 (operateur_comparaison -> EQ .)
-    IDENTIFIER      reduce using rule 31 (operateur_comparaison -> EQ .)
+    SEMICOLON       shift and go to state 77
 
 
 state 55
 
-    (32) operateur_comparaison -> NEQ .
+    (41) bloc -> LBRACE programme RBRACE .
 
-    NUMBER          reduce using rule 32 (operateur_comparaison -> NEQ .)
-    STRING          reduce using rule 32 (operateur_comparaison -> NEQ .)
-    BOOLEAN         reduce using rule 32 (operateur_comparaison -> NEQ .)
-    IDENTIFIER      reduce using rule 32 (operateur_comparaison -> NEQ .)
+    DRAW            reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    MOVE            reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    ROTATE          reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    COLOR           reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    VARIABLE        reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    IDENTIFIER      reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    IF              reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    FOR             reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    LBRACE          reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    $end            reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    RBRACE          reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
+    ELSE            reduce using rule 41 (bloc -> LBRACE programme RBRACE .)
 
 
 state 56
 
-    (33) operateur_comparaison -> LT .
+    (12) dessin -> DRAW forme LPAREN parametres . RPAREN
+    (18) parametres -> parametres . COMMA arg
 
-    NUMBER          reduce using rule 33 (operateur_comparaison -> LT .)
-    STRING          reduce using rule 33 (operateur_comparaison -> LT .)
-    BOOLEAN         reduce using rule 33 (operateur_comparaison -> LT .)
-    IDENTIFIER      reduce using rule 33 (operateur_comparaison -> LT .)
+    RPAREN          shift and go to state 78
+    COMMA           shift and go to state 79
 
 
 state 57
 
-    (34) operateur_comparaison -> GT .
+    (19) parametres -> arg .
 
-    NUMBER          reduce using rule 34 (operateur_comparaison -> GT .)
-    STRING          reduce using rule 34 (operateur_comparaison -> GT .)
-    BOOLEAN         reduce using rule 34 (operateur_comparaison -> GT .)
-    IDENTIFIER      reduce using rule 34 (operateur_comparaison -> GT .)
+    RPAREN          reduce using rule 19 (parametres -> arg .)
+    COMMA           reduce using rule 19 (parametres -> arg .)
 
 
 state 58
 
-    (35) operateur_comparaison -> LE .
+    (29) expression_arithmetic -> LPAREN expression_arithmetic . RPAREN
+    (25) expression_arithmetic -> expression_arithmetic . PLUS expression_arithmetic
+    (26) expression_arithmetic -> expression_arithmetic . MINUS expression_arithmetic
+    (27) expression_arithmetic -> expression_arithmetic . TIMES expression_arithmetic
+    (28) expression_arithmetic -> expression_arithmetic . DIVIDE expression_arithmetic
 
-    NUMBER          reduce using rule 35 (operateur_comparaison -> LE .)
-    STRING          reduce using rule 35 (operateur_comparaison -> LE .)
-    BOOLEAN         reduce using rule 35 (operateur_comparaison -> LE .)
-    IDENTIFIER      reduce using rule 35 (operateur_comparaison -> LE .)
+    RPAREN          shift and go to state 80
+    PLUS            shift and go to state 62
+    MINUS           shift and go to state 63
+    TIMES           shift and go to state 64
+    DIVIDE          shift and go to state 65
 
 
 state 59
 
-    (36) operateur_comparaison -> GE .
+    (30) expression_arithmetic -> NUMBER .
 
-    NUMBER          reduce using rule 36 (operateur_comparaison -> GE .)
-    STRING          reduce using rule 36 (operateur_comparaison -> GE .)
-    BOOLEAN         reduce using rule 36 (operateur_comparaison -> GE .)
-    IDENTIFIER      reduce using rule 36 (operateur_comparaison -> GE .)
+    RPAREN          reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    PLUS            reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    MINUS           reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    TIMES           reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    DIVIDE          reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    COMMA           reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    DRAW            reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    MOVE            reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    ROTATE          reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    COLOR           reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    VARIABLE        reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    IDENTIFIER      reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    IF              reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    FOR             reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    LBRACE          reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    $end            reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    RBRACE          reduce using rule 30 (expression_arithmetic -> NUMBER .)
+    SEMICOLON       reduce using rule 30 (expression_arithmetic -> NUMBER .)
 
 
 state 60
 
-    (37) boucle -> FOR LPAREN assignation SEMICOLON . expression_logique SEMICOLON assignation RPAREN bloc
-    (30) expression_logique -> . valeur operateur_comparaison valeur
-    (23) valeur -> . NUMBER
-    (24) valeur -> . STRING
-    (25) valeur -> . BOOLEAN
-    (26) valeur -> . IDENTIFIER
+    (31) expression_arithmetic -> IDENTIFIER .
 
-    NUMBER          shift and go to state 40
-    STRING          shift and go to state 41
-    BOOLEAN         shift and go to state 42
-    IDENTIFIER      shift and go to state 43
+    RPAREN          reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    PLUS            reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    MINUS           reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    TIMES           reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    DIVIDE          reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    COMMA           reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    DRAW            reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    MOVE            reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    ROTATE          reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    COLOR           reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    VARIABLE        reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    IDENTIFIER      reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    IF              reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    FOR             reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    LBRACE          reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    $end            reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    RBRACE          reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
+    SEMICOLON       reduce using rule 31 (expression_arithmetic -> IDENTIFIER .)
 
-    expression_logique             shift and go to state 66
-    valeur                         shift and go to state 39
 
 state 61
 
-    (11) dessin -> DRAW forme LPAREN parametres RPAREN .
+    (32) deplacement -> MOVE LPAREN arg COMMA . arg RPAREN
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    DRAW            reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    MOVE            reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    ROTATE          reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    COLOR           reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    VARIABLE        reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    IF              reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    FOR             reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    LBRACE          reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    $end            reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
-    RBRACE          reduce using rule 11 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
 
+    arg                            shift and go to state 81
+    expression_arithmetic          shift and go to state 43
 
 state 62
 
-    (17) parametres -> parametres COMMA . NUMBER
+    (25) expression_arithmetic -> expression_arithmetic PLUS . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    NUMBER          shift and go to state 67
+    LPAREN          shift and go to state 37
+    NUMBER          shift and go to state 59
+    IDENTIFIER      shift and go to state 60
 
+    expression_arithmetic          shift and go to state 82
 
 state 63
 
-    (19) deplacement -> MOVE LPAREN NUMBER COMMA NUMBER . RPAREN
+    (26) expression_arithmetic -> expression_arithmetic MINUS . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    RPAREN          shift and go to state 68
+    LPAREN          shift and go to state 37
+    NUMBER          shift and go to state 59
+    IDENTIFIER      shift and go to state 60
 
+    expression_arithmetic          shift and go to state 83
 
 state 64
 
-    (28) conditionnelle -> IF LPAREN expression_logique RPAREN bloc . ELSE bloc
-    (29) conditionnelle -> IF LPAREN expression_logique RPAREN bloc .
+    (27) expression_arithmetic -> expression_arithmetic TIMES . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    ELSE            shift and go to state 69
-    DRAW            reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    MOVE            reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    ROTATE          reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    COLOR           reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    VARIABLE        reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    IF              reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    FOR             reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    LBRACE          reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    $end            reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
-    RBRACE          reduce using rule 29 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    LPAREN          shift and go to state 37
+    NUMBER          shift and go to state 59
+    IDENTIFIER      shift and go to state 60
 
+    expression_arithmetic          shift and go to state 84
 
 state 65
 
-    (30) expression_logique -> valeur operateur_comparaison valeur .
+    (28) expression_arithmetic -> expression_arithmetic DIVIDE . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
 
-    RPAREN          reduce using rule 30 (expression_logique -> valeur operateur_comparaison valeur .)
-    SEMICOLON       reduce using rule 30 (expression_logique -> valeur operateur_comparaison valeur .)
+    LPAREN          shift and go to state 37
+    NUMBER          shift and go to state 59
+    IDENTIFIER      shift and go to state 60
 
+    expression_arithmetic          shift and go to state 85
 
 state 66
 
-    (37) boucle -> FOR LPAREN assignation SEMICOLON expression_logique . SEMICOLON assignation RPAREN bloc
+    (33) rotation -> ROTATE LPAREN arg RPAREN .
 
-    SEMICOLON       shift and go to state 70
+    DRAW            reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    MOVE            reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    ROTATE          reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    COLOR           reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    VARIABLE        reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    IDENTIFIER      reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    IF              reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    FOR             reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    LBRACE          reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    $end            reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
+    RBRACE          reduce using rule 33 (rotation -> ROTATE LPAREN arg RPAREN .)
 
 
 state 67
 
-    (17) parametres -> parametres COMMA NUMBER .
+    (34) couleur -> COLOR LPAREN arg RPAREN .
 
-    RPAREN          reduce using rule 17 (parametres -> parametres COMMA NUMBER .)
-    COMMA           reduce using rule 17 (parametres -> parametres COMMA NUMBER .)
+    DRAW            reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    MOVE            reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    ROTATE          reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    COLOR           reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    VARIABLE        reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    IDENTIFIER      reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    IF              reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    FOR             reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    LBRACE          reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    $end            reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
+    RBRACE          reduce using rule 34 (couleur -> COLOR LPAREN arg RPAREN .)
 
 
 state 68
 
-    (19) deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .
+    (35) assignation -> VARIABLE IDENTIFIER EQUALS arg .
 
-    DRAW            reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    MOVE            reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    ROTATE          reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    COLOR           reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    VARIABLE        reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    IF              reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    FOR             reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    LBRACE          reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    $end            reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
-    RBRACE          reduce using rule 19 (deplacement -> MOVE LPAREN NUMBER COMMA NUMBER RPAREN .)
+    DRAW            reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    MOVE            reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    ROTATE          reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    COLOR           reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    VARIABLE        reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    IDENTIFIER      reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    IF              reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    FOR             reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    LBRACE          reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    $end            reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    RBRACE          reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
+    SEMICOLON       reduce using rule 35 (assignation -> VARIABLE IDENTIFIER EQUALS arg .)
 
 
 state 69
 
-    (28) conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE . bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (42) conditionnelle -> IF LPAREN expression_logique RPAREN . bloc ELSE bloc
+    (43) conditionnelle -> IF LPAREN expression_logique RPAREN . bloc
+    (41) bloc -> . LBRACE programme RBRACE
 
-    LBRACE          shift and go to state 18
+    LBRACE          shift and go to state 20
 
-    bloc                           shift and go to state 71
+    bloc                           shift and go to state 86
 
 state 70
 
-    (37) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON . assignation RPAREN bloc
-    (22) assignation -> . VARIABLE IDENTIFIER EQUALS valeur
+    (44) expression_logique -> valeur operateur_comparaison . valeur
+    (37) valeur -> . NUMBER
+    (38) valeur -> . IDENTIFIER
+    (39) valeur -> . STRING
+    (40) valeur -> . BOOLEAN
 
-    VARIABLE        shift and go to state 15
+    NUMBER          shift and go to state 51
+    IDENTIFIER      shift and go to state 52
+    STRING          shift and go to state 53
+    BOOLEAN         shift and go to state 88
 
-    assignation                    shift and go to state 72
+    valeur                         shift and go to state 87
 
 state 71
 
-    (28) conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .
+    (46) operateur_comparaison -> EQ .
 
-    DRAW            reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    MOVE            reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    ROTATE          reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    COLOR           reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    VARIABLE        reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    IF              reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    FOR             reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    LBRACE          reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    $end            reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
-    RBRACE          reduce using rule 28 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    NUMBER          reduce using rule 46 (operateur_comparaison -> EQ .)
+    IDENTIFIER      reduce using rule 46 (operateur_comparaison -> EQ .)
+    STRING          reduce using rule 46 (operateur_comparaison -> EQ .)
+    BOOLEAN         reduce using rule 46 (operateur_comparaison -> EQ .)
 
 
 state 72
 
-    (37) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation . RPAREN bloc
+    (47) operateur_comparaison -> NEQ .
 
-    RPAREN          shift and go to state 73
+    NUMBER          reduce using rule 47 (operateur_comparaison -> NEQ .)
+    IDENTIFIER      reduce using rule 47 (operateur_comparaison -> NEQ .)
+    STRING          reduce using rule 47 (operateur_comparaison -> NEQ .)
+    BOOLEAN         reduce using rule 47 (operateur_comparaison -> NEQ .)
 
 
 state 73
 
-    (37) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN . bloc
-    (27) bloc -> . LBRACE programme RBRACE
+    (48) operateur_comparaison -> LT .
 
-    LBRACE          shift and go to state 18
+    NUMBER          reduce using rule 48 (operateur_comparaison -> LT .)
+    IDENTIFIER      reduce using rule 48 (operateur_comparaison -> LT .)
+    STRING          reduce using rule 48 (operateur_comparaison -> LT .)
+    BOOLEAN         reduce using rule 48 (operateur_comparaison -> LT .)
 
-    bloc                           shift and go to state 74
 
 state 74
 
-    (37) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .
+    (49) operateur_comparaison -> GT .
 
-    DRAW            reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    MOVE            reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    ROTATE          reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    COLOR           reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    VARIABLE        reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    IF              reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    FOR             reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    LBRACE          reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    $end            reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
-    RBRACE          reduce using rule 37 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON assignation RPAREN bloc .)
+    NUMBER          reduce using rule 49 (operateur_comparaison -> GT .)
+    IDENTIFIER      reduce using rule 49 (operateur_comparaison -> GT .)
+    STRING          reduce using rule 49 (operateur_comparaison -> GT .)
+    BOOLEAN         reduce using rule 49 (operateur_comparaison -> GT .)
 
+
+state 75
+
+    (50) operateur_comparaison -> LE .
+
+    NUMBER          reduce using rule 50 (operateur_comparaison -> LE .)
+    IDENTIFIER      reduce using rule 50 (operateur_comparaison -> LE .)
+    STRING          reduce using rule 50 (operateur_comparaison -> LE .)
+    BOOLEAN         reduce using rule 50 (operateur_comparaison -> LE .)
+
+
+state 76
+
+    (51) operateur_comparaison -> GE .
+
+    NUMBER          reduce using rule 51 (operateur_comparaison -> GE .)
+    IDENTIFIER      reduce using rule 51 (operateur_comparaison -> GE .)
+    STRING          reduce using rule 51 (operateur_comparaison -> GE .)
+    BOOLEAN         reduce using rule 51 (operateur_comparaison -> GE .)
+
+
+state 77
+
+    (52) boucle -> FOR LPAREN assignation SEMICOLON . expression_logique SEMICOLON modification RPAREN bloc
+    (44) expression_logique -> . valeur operateur_comparaison valeur
+    (45) expression_logique -> . BOOLEAN
+    (37) valeur -> . NUMBER
+    (38) valeur -> . IDENTIFIER
+    (39) valeur -> . STRING
+    (40) valeur -> . BOOLEAN
+
+    BOOLEAN         shift and go to state 50
+    NUMBER          shift and go to state 51
+    IDENTIFIER      shift and go to state 52
+    STRING          shift and go to state 53
+
+    expression_logique             shift and go to state 89
+    valeur                         shift and go to state 49
+
+state 78
+
+    (12) dessin -> DRAW forme LPAREN parametres RPAREN .
+
+    DRAW            reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    MOVE            reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    ROTATE          reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    COLOR           reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    VARIABLE        reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    IDENTIFIER      reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    IF              reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    FOR             reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    LBRACE          reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    $end            reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+    RBRACE          reduce using rule 12 (dessin -> DRAW forme LPAREN parametres RPAREN .)
+
+
+state 79
+
+    (18) parametres -> parametres COMMA . arg
+    (20) arg -> . NUMBER
+    (21) arg -> . IDENTIFIER
+    (22) arg -> . STRING
+    (23) arg -> . BOOLEAN
+    (24) arg -> . expression_arithmetic
+    (25) expression_arithmetic -> . expression_arithmetic PLUS expression_arithmetic
+    (26) expression_arithmetic -> . expression_arithmetic MINUS expression_arithmetic
+    (27) expression_arithmetic -> . expression_arithmetic TIMES expression_arithmetic
+    (28) expression_arithmetic -> . expression_arithmetic DIVIDE expression_arithmetic
+    (29) expression_arithmetic -> . LPAREN expression_arithmetic RPAREN
+    (30) expression_arithmetic -> . NUMBER
+    (31) expression_arithmetic -> . IDENTIFIER
+
+    NUMBER          shift and go to state 39
+    IDENTIFIER      shift and go to state 40
+    STRING          shift and go to state 41
+    BOOLEAN         shift and go to state 42
+    LPAREN          shift and go to state 37
+
+    arg                            shift and go to state 90
+    expression_arithmetic          shift and go to state 43
+
+state 80
+
+    (29) expression_arithmetic -> LPAREN expression_arithmetic RPAREN .
+
+    PLUS            reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    MINUS           reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    TIMES           reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    DIVIDE          reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    COMMA           reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    RPAREN          reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    DRAW            reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    MOVE            reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    ROTATE          reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    COLOR           reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    VARIABLE        reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    IDENTIFIER      reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    IF              reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    FOR             reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    LBRACE          reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    $end            reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    RBRACE          reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+    SEMICOLON       reduce using rule 29 (expression_arithmetic -> LPAREN expression_arithmetic RPAREN .)
+
+
+state 81
+
+    (32) deplacement -> MOVE LPAREN arg COMMA arg . RPAREN
+
+    RPAREN          shift and go to state 91
+
+
+state 82
+
+    (25) expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .
+    (25) expression_arithmetic -> expression_arithmetic . PLUS expression_arithmetic
+    (26) expression_arithmetic -> expression_arithmetic . MINUS expression_arithmetic
+    (27) expression_arithmetic -> expression_arithmetic . TIMES expression_arithmetic
+    (28) expression_arithmetic -> expression_arithmetic . DIVIDE expression_arithmetic
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+    COMMA           reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    RPAREN          reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    DRAW            reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    MOVE            reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    ROTATE          reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    COLOR           reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    VARIABLE        reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    IDENTIFIER      reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    IF              reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    FOR             reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    LBRACE          reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    $end            reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    RBRACE          reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    SEMICOLON       reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .)
+    PLUS            shift and go to state 62
+    MINUS           shift and go to state 63
+    TIMES           shift and go to state 64
+    DIVIDE          shift and go to state 65
+
+  ! PLUS            [ reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .) ]
+  ! MINUS           [ reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .) ]
+  ! TIMES           [ reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .) ]
+  ! DIVIDE          [ reduce using rule 25 (expression_arithmetic -> expression_arithmetic PLUS expression_arithmetic .) ]
+
+
+state 83
+
+    (26) expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .
+    (25) expression_arithmetic -> expression_arithmetic . PLUS expression_arithmetic
+    (26) expression_arithmetic -> expression_arithmetic . MINUS expression_arithmetic
+    (27) expression_arithmetic -> expression_arithmetic . TIMES expression_arithmetic
+    (28) expression_arithmetic -> expression_arithmetic . DIVIDE expression_arithmetic
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+    COMMA           reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    RPAREN          reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    DRAW            reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    MOVE            reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    ROTATE          reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    COLOR           reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    VARIABLE        reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    IDENTIFIER      reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    IF              reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    FOR             reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    LBRACE          reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    $end            reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    RBRACE          reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    SEMICOLON       reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .)
+    PLUS            shift and go to state 62
+    MINUS           shift and go to state 63
+    TIMES           shift and go to state 64
+    DIVIDE          shift and go to state 65
+
+  ! PLUS            [ reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .) ]
+  ! MINUS           [ reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .) ]
+  ! TIMES           [ reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .) ]
+  ! DIVIDE          [ reduce using rule 26 (expression_arithmetic -> expression_arithmetic MINUS expression_arithmetic .) ]
+
+
+state 84
+
+    (27) expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .
+    (25) expression_arithmetic -> expression_arithmetic . PLUS expression_arithmetic
+    (26) expression_arithmetic -> expression_arithmetic . MINUS expression_arithmetic
+    (27) expression_arithmetic -> expression_arithmetic . TIMES expression_arithmetic
+    (28) expression_arithmetic -> expression_arithmetic . DIVIDE expression_arithmetic
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+    COMMA           reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    RPAREN          reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    DRAW            reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    MOVE            reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    ROTATE          reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    COLOR           reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    VARIABLE        reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    IDENTIFIER      reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    IF              reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    FOR             reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    LBRACE          reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    $end            reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    RBRACE          reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    SEMICOLON       reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .)
+    PLUS            shift and go to state 62
+    MINUS           shift and go to state 63
+    TIMES           shift and go to state 64
+    DIVIDE          shift and go to state 65
+
+  ! PLUS            [ reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .) ]
+  ! MINUS           [ reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .) ]
+  ! TIMES           [ reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .) ]
+  ! DIVIDE          [ reduce using rule 27 (expression_arithmetic -> expression_arithmetic TIMES expression_arithmetic .) ]
+
+
+state 85
+
+    (28) expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .
+    (25) expression_arithmetic -> expression_arithmetic . PLUS expression_arithmetic
+    (26) expression_arithmetic -> expression_arithmetic . MINUS expression_arithmetic
+    (27) expression_arithmetic -> expression_arithmetic . TIMES expression_arithmetic
+    (28) expression_arithmetic -> expression_arithmetic . DIVIDE expression_arithmetic
+
+  ! shift/reduce conflict for PLUS resolved as shift
+  ! shift/reduce conflict for MINUS resolved as shift
+  ! shift/reduce conflict for TIMES resolved as shift
+  ! shift/reduce conflict for DIVIDE resolved as shift
+    COMMA           reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    RPAREN          reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    DRAW            reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    MOVE            reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    ROTATE          reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    COLOR           reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    VARIABLE        reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    IDENTIFIER      reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    IF              reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    FOR             reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    LBRACE          reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    $end            reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    RBRACE          reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    SEMICOLON       reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .)
+    PLUS            shift and go to state 62
+    MINUS           shift and go to state 63
+    TIMES           shift and go to state 64
+    DIVIDE          shift and go to state 65
+
+  ! PLUS            [ reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .) ]
+  ! MINUS           [ reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .) ]
+  ! TIMES           [ reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .) ]
+  ! DIVIDE          [ reduce using rule 28 (expression_arithmetic -> expression_arithmetic DIVIDE expression_arithmetic .) ]
+
+
+state 86
+
+    (42) conditionnelle -> IF LPAREN expression_logique RPAREN bloc . ELSE bloc
+    (43) conditionnelle -> IF LPAREN expression_logique RPAREN bloc .
+
+    ELSE            shift and go to state 92
+    DRAW            reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    MOVE            reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    ROTATE          reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    COLOR           reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    VARIABLE        reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    IDENTIFIER      reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    IF              reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    FOR             reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    LBRACE          reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    $end            reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+    RBRACE          reduce using rule 43 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc .)
+
+
+state 87
+
+    (44) expression_logique -> valeur operateur_comparaison valeur .
+
+    RPAREN          reduce using rule 44 (expression_logique -> valeur operateur_comparaison valeur .)
+    SEMICOLON       reduce using rule 44 (expression_logique -> valeur operateur_comparaison valeur .)
+
+
+state 88
+
+    (40) valeur -> BOOLEAN .
+
+    RPAREN          reduce using rule 40 (valeur -> BOOLEAN .)
+    SEMICOLON       reduce using rule 40 (valeur -> BOOLEAN .)
+
+
+state 89
+
+    (52) boucle -> FOR LPAREN assignation SEMICOLON expression_logique . SEMICOLON modification RPAREN bloc
+
+    SEMICOLON       shift and go to state 93
+
+
+state 90
+
+    (18) parametres -> parametres COMMA arg .
+
+    RPAREN          reduce using rule 18 (parametres -> parametres COMMA arg .)
+    COMMA           reduce using rule 18 (parametres -> parametres COMMA arg .)
+
+
+state 91
+
+    (32) deplacement -> MOVE LPAREN arg COMMA arg RPAREN .
+
+    DRAW            reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    MOVE            reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    ROTATE          reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    COLOR           reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    VARIABLE        reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    IDENTIFIER      reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    IF              reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    FOR             reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    LBRACE          reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    $end            reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+    RBRACE          reduce using rule 32 (deplacement -> MOVE LPAREN arg COMMA arg RPAREN .)
+
+
+state 92
+
+    (42) conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE . bloc
+    (41) bloc -> . LBRACE programme RBRACE
+
+    LBRACE          shift and go to state 20
+
+    bloc                           shift and go to state 94
+
+state 93
+
+    (52) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON . modification RPAREN bloc
+    (36) modification -> . IDENTIFIER EQUALS arg
+
+    IDENTIFIER      shift and go to state 17
+
+    modification                   shift and go to state 95
+
+state 94
+
+    (42) conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .
+
+    DRAW            reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    MOVE            reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    ROTATE          reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    COLOR           reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    VARIABLE        reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    IDENTIFIER      reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    IF              reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    FOR             reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    LBRACE          reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    $end            reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+    RBRACE          reduce using rule 42 (conditionnelle -> IF LPAREN expression_logique RPAREN bloc ELSE bloc .)
+
+
+state 95
+
+    (52) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification . RPAREN bloc
+
+    RPAREN          shift and go to state 96
+
+
+state 96
+
+    (52) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN . bloc
+    (41) bloc -> . LBRACE programme RBRACE
+
+    LBRACE          shift and go to state 20
+
+    bloc                           shift and go to state 97
+
+state 97
+
+    (52) boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .
+
+    DRAW            reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    MOVE            reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    ROTATE          reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    COLOR           reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    VARIABLE        reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    IDENTIFIER      reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    IF              reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    FOR             reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    LBRACE          reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    $end            reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+    RBRACE          reduce using rule 52 (boucle -> FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc .)
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for PLUS in state 82 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 82 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 82 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 82 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 83 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 83 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 83 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 83 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 84 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 84 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 84 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 84 resolved as shift
+WARNING: shift/reduce conflict for PLUS in state 85 resolved as shift
+WARNING: shift/reduce conflict for MINUS in state 85 resolved as shift
+WARNING: shift/reduce conflict for TIMES in state 85 resolved as shift
+WARNING: shift/reduce conflict for DIVIDE in state 85 resolved as shift
+WARNING: reduce/reduce conflict in state 39 resolved using rule (arg -> NUMBER)
+WARNING: rejected rule (expression_arithmetic -> NUMBER) in state 39
+WARNING: reduce/reduce conflict in state 40 resolved using rule (arg -> IDENTIFIER)
+WARNING: rejected rule (expression_arithmetic -> IDENTIFIER) in state 40

@@ -1,15 +1,12 @@
-var a = d
-var x = a # assignation de la var x
-draw circle(2)
-draw line(1,23,3.8)
-# var b = 2
+var i = 2
+var a = 2
+i = 7 - a
 
-if (a>2) {
-    draw line(2)
-    if(x<3) {
-        draw circle(3)
-        for(var i = 0; i < 5; var i = 5){
-            color("red")
-        }
-    }
-}
+draw square(a, i, 2, 12 + a)
+var c = "red"
+color("a")
+
+var v = 1
+move(v ,1 )
+
+rotate(1+2-2+v )
