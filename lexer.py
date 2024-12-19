@@ -7,7 +7,6 @@ keywords = {
     'else': 'ELSE',
     'for': 'FOR',
     'while': 'WHILE',
-    'do': 'DO',
     'draw': 'DRAW',
     'cursor': 'CURSOR',
     'move': 'MOVE',
