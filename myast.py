@@ -12,31 +12,59 @@ def resolve_value_and_type(ast, value):
     """
     Resolve the type and value of a variable or literal.
     - Handles literals, variables, and operations within the AST.
+    - Recursively traverses nested structures (e.g., for, if, while).
     """
     if isinstance(value, (int, float)):  # Literal Numbers
         return type(value).__name__, value
     elif isinstance(value, str) and '"' in value:  # Literal String
         return "char*", value.strip('"')
     elif isinstance(value, str):  # Variable name
+        # Search the AST for the variable declaration or assignment
         for node in ast:
             if isinstance(node, tuple):
+                # Check direct assignments or modifications
                 if node[0] in ('assign', 'modify') and node[1] == value:
-                    return resolve_value_and_type(ast, node[2])
+                    resolved_type, resolved_value = resolve_value_and_type(ast, node[2])
+                    return resolved_type, value
+                # Handle sub-AST structures (e.g., for, while, if)
+                elif node[0] == 'if':
+                    sub_ast = node[2] if len(node) > 2 else []  # bloc
+                    try:
+                        # Recursively search in the sub-AST
+                        return resolve_value_and_type(sub_ast, value)
+                    except Exception:
+                        continue  # If not found, continue searching other nodes
+                elif node[0] == "for":
+                    sub_ast = node[4] if len(node) > 2 else []  # bloc
+                    try:
+                        # Recursively search in the sub-AST
+                        return resolve_value_and_type(sub_ast, value)
+                    except Exception:
+                        try:
+                            return resolve_value_and_type([node[1]], value) # maybe the itterator
+                        except Exception:
+                            continue
         raise Exception(f"Variable '{value}' not initialized.")
     elif isinstance(value, tuple):  # Operation Node
         if value[0] == "op":
             # Resolve operation result type and expression
-            _, left_c = resolve_value_and_type(ast, value[2])
-            _, right_c = resolve_value_and_type(ast, value[3])
+            left_type, left_c = resolve_value_and_type(ast, value[2])
+            right_type, right_c = resolve_value_and_type(ast, value[3])
             operator = value[1]
 
+            # Determine result type
+            if left_type == "float" or right_type == "float":
+                result_type = "float"
+            else:
+                result_type = "int"
+
             # Generate a flat expression
-            expr = f"({left_c} {operator} {right_c})"
-            return "operation", expr
+            expr = f"{left_c} {operator} {right_c}"
+            return result_type, expr
         else:
             raise Exception(f"Unsupported operation type: {value[0]}")
     return None, None  # Unresolved
-    
+
 def find_variable_in_ast(var_name, ast_tree):
     """
     Search the AST for the declaration (initialize), assignment (assign), or modification of a given variable name.
@@ -116,7 +144,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
         if expected_args == len(parametres) and ok:
             c_code += f"draw_{forme}("
             for i, param in enumerate(parametres):
-                c_code += f"{translate_node_to_c(ast, param, 0, 0, 0)[1]}" if isinstance(param, tuple) and param[0] == "op" else f"{translate_node_to_c(ast, param, 0, 0, 0)}"
+                c_code += f"{translate_node_to_c(ast, param, 0, 0, 0)}"
                 if i<len(parametres) - 1:
                     c_code += ', '
             c_code += ')'
@@ -161,14 +189,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
                     ok = False
             
         if ok:
-            if (isinstance(y, tuple) and y[0] == "op") and (isinstance(x, tuple) and x[0] == "op"):
-                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)[1]}, {translate_node_to_c(ast,y,0,0,0)[1]})"
-            elif isinstance(x, tuple) and x[0] == "op":
-                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)[1]}, {translate_node_to_c(ast,y,0,0,0)})"
-            elif isinstance(y, tuple) and y[0] == "op":
-                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)}, {translate_node_to_c(ast,y,0,0,0)[1]})"
-            else:
-                c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)}, {translate_node_to_c(ast,y,0,0,0)})"
+            c_code += f"move_to({translate_node_to_c(ast,x,0,0,0)}, {translate_node_to_c(ast,y,0,0,0)})"
 
         if semicolon:
             c_code += ";"
@@ -247,32 +268,12 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
     # Case: Operation artihmetic
     elif isinstance(node, tuple) and node[0] == 'op':
         operator = node[1]
-        left_type, left_value = resolve_value_and_type(ast, node[2])
-        right_type, right_value = resolve_value_and_type(ast, node[3])
-
-        # Resolve operation types
-        if left_type == "float" or right_type == "float":
-            result_type = "float"
-        else:
-            result_type = "int"
 
         # Generate code for the operation
         left_c = translate_node_to_c(ast, node[2], 0, 0, 0)
         right_c = translate_node_to_c(ast, node[3], 0, 0, 0)
 
-        # If values are known, calculate the result
-        result_value = None
-        if isinstance(left_value, (int, float)) and isinstance(right_value, (int, float)):
-            if operator == '+':
-                result_value = left_value + right_value
-            elif operator == '-':
-                result_value = left_value - right_value
-            elif operator == '*':
-                result_value = left_value * right_value
-            elif operator == '/':
-                result_value = left_value / right_value
-
-        return result_type, f"{left_c} {operator} {right_c}"
+        return f"{left_c} {operator} {right_c}"
 
     # Case: Modification (Assigning a value to a previously declared variable)
     elif isinstance(node, tuple) and node[0] == 'modify':
@@ -301,11 +302,11 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
                 c_code += f"// Error: Unsupported type for variable '{value}'"
         # Case: Operation artihmetic
         elif isinstance(value, tuple) and value[0] == 'op':
-            op = translate_node_to_c(ast, node[2], 0, 0, 0)
-            if op[0] != var_type:
-                c_code += f"// Error: {var_name} is {var_type} and {op[1]} returns {op[0]}"
+            op_type, op = resolve_value_and_type(ast, value)
+            if op_type != var_type:
+                c_code += f"// Error: {var_name} is {var_type} and {op} returns {op_type}"
             else:
-                c_code += f"{var_name} = {op[1]}" # 0 = result type, 1 = string op 
+                c_code += f"{var_name} = {op}" # 0 = result type, 1 = string op 
         else:
             c_code += f"// Error: Unsupported value type"
 
@@ -338,9 +339,8 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
                 c_code += f"// Error: Variable '{value}' not found"
         # Case: Operation artihmetic
         elif isinstance(value, tuple) and value[0] == 'op':
-            operator = value[1]
-            op = translate_node_to_c(ast, node[2], 0, 0, 0)
-            c_code += f"{op[0]} {var_name} = {op[1]}"
+            op_type, op = resolve_value_and_type(ast, value)
+            c_code += f"{op_type} {var_name} = {op}"
         else:
             c_code += f"// Error: Unsupported value type"
 
@@ -362,7 +362,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
         c_code += f"if ({condition_to_c(condition)}) {{"
         
         for instr in bloc_true:
-            c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, 0)}"
+            c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, True)}"
         
         if tabulation > 0: 
             c_code += "\t" * tabulation
@@ -375,14 +375,14 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
             c_code += f"else {{"
             
             for instr in bloc_false:
-                c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, 0)}"
+                c_code += f"\n{translate_node_to_c(ast, instr, 1, tabulation+1, True)}"
             
             if tabulation > 0: 
                 c_code += "\t" * tabulation
             c_code += f"}}"
 
         if newline > 0: 
-            c_code += "\n" * newline
+            c_code += "\n" * (newline+1)
 
     # Handle loop (for)
     elif isinstance(node, tuple) and node[0] == 'for':
@@ -397,14 +397,14 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
         c_code += f"for ({translate_node_to_c(ast, init, 0, 0, 0)}; {condition_to_c(condition)}; {translate_node_to_c(ast, increment, 0, 0, 0)}) {{\n"
         
         for instr in bloc:
-            c_code += f"{translate_node_to_c(ast, instr, 1, tabulation+1, 0)}"
+            c_code += f"{translate_node_to_c(ast, instr, 1, tabulation+1, True)}"
 
         if tabulation > 0: 
             c_code += "\t" * tabulation
         c_code += f"}}"
 
         if newline > 0: 
-            c_code += "\n" * newline
+            c_code += "\n" * (newline+1)
     
     # Default case (unsupported node)
     else:
@@ -423,7 +423,13 @@ def translate_ast_to_c(ast):
     # Includes
     c_code += "#include <stdio.h>\n"
     c_code += "#include <stdlib.h>\n"
+    c_code += "#include <string.h>\n"
     c_code += "#include <math.h>\n\n"
+
+    c_code += "/////////////////////////////////////////////////////////////////////////////////////////////////////\n"
+    c_code += "// This is a generated file. It is useless to edit it as it will be regenerated at each compilation//\n"
+    c_code += "/////////////////////////////////////////////////////////////////////////////////////////////////////\n\n"
+
     c_code += f"int main() {{\n\n"
 
     if DEBUG:

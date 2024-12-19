@@ -1,12 +1,13 @@
-var i = 2
+var i = 2 + a * 2 / 8 + a
 var a = 2
-i = 7 - a
+a = i + a
 
-draw square(a, i, 2, 12 + a)
-var c = "red"
-color("a")
+draw line(1+1, a * 8)
 
-var v = 1
-move(v ,1 )
+if(a == TRUE){
+        draw square(i, a, 1, 2+5)
+}
 
-rotate(1+2-2+v )
+for(var inc = 0; inc < 5; inc = inc +1) {
+    color("pink")
+}

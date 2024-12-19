@@ -1,19 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// This is a generated file. It is useless to edit it as it will be regenerated at each compilation//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main() {
 
-	int i = 2;
+	int i = 2 + a * 2 / 8 + a;
 	int a = 2;
-	i = 7 - a;
-	draw_square(a, i, 2, 12 + a);
-	char[3] c;
-	strcpy(c, "red");
-	set_color("a");
-	int v = 1;
-	move_to(v, 1);
-	rotate(('int', '1 + (\'int\', "2 - (\'int\', \'2 + v\')")'));
+	a = i + a;
+	draw_line(1 + 1, a * 8);
+	if (a == TRUE) {
+		draw_square(i, a, 1, 2 + 5);
+	}
+
+	for (int inc = 0; inc < 5; inc = inc + 1) {
+		set_color("pink");
+	}
+
 
 	return 0;
 }

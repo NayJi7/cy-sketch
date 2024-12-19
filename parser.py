@@ -100,6 +100,8 @@ def p_conditionnelle(p):
 
 def p_expression_logique(p):
     '''expression_logique : valeur operateur_comparaison valeur
+                          | valeur operateur_comparaison BOOLEAN
+                          | BOOLEAN operateur_comparaison valeur
                           | BOOLEAN'''
     p[0] = (p[2], p[1], p[3]) if len(p) == 4 else p[1]
 
