@@ -8,48 +8,46 @@ def print_error(error):
 def condition_to_c(condition):
     return f"{condition[1]} {condition[0]} {condition[2]}"
 
-def resolve_value_and_type(ast, value):
+def resolve_value_and_find_variable(ast, value):
     """
     Resolve the type and value of a variable or literal.
-    - Handles literals, variables, and operations within the AST.
-    - Recursively traverses nested structures (e.g., for, if, while).
+    - Handles literals, variables, operations, and nested AST structures.
     """
     if isinstance(value, (int, float)):  # Literal Numbers
         return type(value).__name__, value
     elif isinstance(value, str) and '"' in value:  # Literal String
         return "char*", value.strip('"')
     elif isinstance(value, str):  # Variable name
-        # Search the AST for the variable declaration or assignment
+        # Search the AST for the variable declaration, assignment, or modification
         for node in ast:
             if isinstance(node, tuple):
-                # Check direct assignments or modifications
+                # Direct assignment or modification
                 if node[0] in ('assign', 'modify') and node[1] == value:
-                    resolved_type, resolved_value = resolve_value_and_type(ast, node[2])
-                    return resolved_type, value
-                # Handle sub-AST structures (e.g., for, while, if)
+                    return resolve_value_and_find_variable(ast, node[2])[0], value
+                # Handle nested structures (if, for, while)
                 elif node[0] == 'if':
                     sub_ast = node[2] if len(node) > 2 else []  # bloc
                     try:
                         # Recursively search in the sub-AST
-                        return resolve_value_and_type(sub_ast, value)
+                        return resolve_value_and_find_variable(sub_ast, value)
                     except Exception:
                         continue  # If not found, continue searching other nodes
                 elif node[0] == "for":
                     sub_ast = node[4] if len(node) > 2 else []  # bloc
                     try:
                         # Recursively search in the sub-AST
-                        return resolve_value_and_type(sub_ast, value)
+                        return resolve_value_and_find_variable(sub_ast, value)
                     except Exception:
                         try:
-                            return resolve_value_and_type([node[1]], value) # maybe the itterator
+                            return resolve_value_and_find_variable([node[1]], value) # maybe the itterator
                         except Exception:
                             continue
         raise Exception(f"Variable '{value}' not initialized.")
     elif isinstance(value, tuple):  # Operation Node
         if value[0] == "op":
             # Resolve operation result type and expression
-            left_type, left_c = resolve_value_and_type(ast, value[2])
-            right_type, right_c = resolve_value_and_type(ast, value[3])
+            left_type, left_c = resolve_value_and_find_variable(ast, value[2])
+            right_type, right_c = resolve_value_and_find_variable(ast, value[3])
             operator = value[1]
 
             # Determine result type
@@ -64,46 +62,6 @@ def resolve_value_and_type(ast, value):
         else:
             raise Exception(f"Unsupported operation type: {value[0]}")
     return None, None  # Unresolved
-
-def find_variable_in_ast(var_name, ast_tree):
-    """
-    Search the AST for the declaration (initialize), assignment (assign), or modification of a given variable name.
-    Returns the type and value of the variable.
-    """
-    for node in ast_tree:
-        if isinstance(node, tuple):
-            # Case 1: Assignment node
-            if node[0] == 'assign':
-                assigned_var_name = node[1]
-                assigned_value = node[2]
-
-                if assigned_var_name == var_name:
-                    # Return the type and value of the variable in the assignment
-                    if isinstance(assigned_value, str) and '"' in assigned_value:
-                        size = len(assigned_value) - 2  # Removing quotes
-                        return f"char[{size}]", assigned_value.strip('"')
-                    elif isinstance(assigned_value, (int, float)):
-                        return type(assigned_value).__name__, assigned_value
-                    elif isinstance(assigned_value, str):  # Another identifier
-                        return find_variable_in_ast(assigned_value, ast_tree)
-                    elif isinstance(assigned_value, tuple) and assigned_value[0] == "op":
-                        op = translate_node_to_c(ast_tree,assigned_value,0,0,0)
-                        return op[0], op[1]
-
-            # Case 2: Modify node (variable being modified)
-            elif node[0] == 'modify':
-                modified_var_name = node[1]
-                new_value = node[2]
-
-                if modified_var_name == var_name:
-                    # Return the type and value of the modified variable
-                    if isinstance(new_value, str) and '"' in new_value:
-                        size = len(new_value) - 2  # Removing quotes
-                        return f"char[{size}]", new_value.strip('"')
-                    elif isinstance(new_value, (int, float)):
-                        return type(new_value).__name__, new_value
-                    elif isinstance(new_value, str):  # Another identifier
-                        return find_variable_in_ast(new_value, ast_tree)
 
 # === 2. Traduction des nodes vers C ===
 def translate_node_to_c(ast, node, newline, tabulation, semicolon):
@@ -135,7 +93,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
 
         for test in parametres:
             if type(test) == str and '"' not in test:
-                t = find_variable_in_ast(test, ast)
+                t = resolve_value_and_find_variable(ast, test)
 
                 if t == None:
                     c_code += f"// ERROR : {test} variable not initialized"
@@ -168,7 +126,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
 
         if type(x) != int or float:
             if type(x) == str and '"' not in x:
-                t = find_variable_in_ast(x, ast)
+                t = resolve_value_and_find_variable(ast, x)
 
                 if t == None:
                     c_code += f"// ERROR : {x} variable not initialized"
@@ -179,7 +137,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
 
         if type(y) != int or float:
             if type(y) == str and '"' not in y:
-                t = find_variable_in_ast(y, ast)
+                t = resolve_value_and_find_variable(ast, y)
 
                 if t == None:
                     c_code += f"// ERROR : {y} variable not initialized"
@@ -207,7 +165,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
 
         if type(angle) != int:
             if type(angle) == str and '"' not in angle:
-                t = find_variable_in_ast(angle, ast)
+                t = resolve_value_and_find_variable(ast, angle)
 
                 if t == None:
                     c_code += f"// ERROR : {angle} variable not initialized"
@@ -234,7 +192,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
             c_code += "\t" * tabulation
 
         if type(color) == str and '"' not in color:
-            t = find_variable_in_ast(color, ast)
+            t = resolve_value_and_find_variable(ast, color)
 
             if t == None:
                 c_code += f"// ERROR : {color} variable not initialized"
@@ -279,7 +237,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
     elif isinstance(node, tuple) and node[0] == 'modify':
         var_name = node[1]
         value = node[2]
-        var_type, var_val = resolve_value_and_type(ast,var_name)
+        var_type, var_val = resolve_value_and_find_variable(ast,var_name)
 
         if tabulation > 0:
             c_code += "\t" * tabulation
@@ -293,7 +251,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
         elif isinstance(value, float):  # Float case
             c_code += f'{var_name} = {value}'
         elif isinstance(value, str):  # Identifier case (a string variable)
-            var_type, value = find_variable_in_ast(value, ast)
+            var_type, value = resolve_value_and_find_variable(ast, value)
             if "char" in var_type:
                 c_code += "\t" * tabulation + f'strcpy({var_name},{value})'  # Copy the string value
             elif var_type == ("int" or "float"):
@@ -302,7 +260,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
                 c_code += f"// Error: Unsupported type for variable '{value}'"
         # Case: Operation artihmetic
         elif isinstance(value, tuple) and value[0] == 'op':
-            op_type, op = resolve_value_and_type(ast, value)
+            op_type, op = resolve_value_and_find_variable(ast, value)
             if op_type != var_type:
                 c_code += f"// Error: {var_name} is {var_type} and {op} returns {op_type}"
             else:
@@ -332,14 +290,14 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon):
         elif isinstance(value, (int, float)):  # Number case
             c_code += f"{type(value).__name__} {var_name} = {value}"
         elif isinstance(value, str):  # Identifier
-            var_type, var_value = find_variable_in_ast(value, ast)
+            var_type, var_value = resolve_value_and_find_variable(ast, value)
             if var_type:
                 c_code += f"{var_type} {var_name} = {value}"
             else:
                 c_code += f"// Error: Variable '{value}' not found"
         # Case: Operation artihmetic
         elif isinstance(value, tuple) and value[0] == 'op':
-            op_type, op = resolve_value_and_type(ast, value)
+            op_type, op = resolve_value_and_find_variable(ast, value)
             c_code += f"{op_type} {var_name} = {op}"
         else:
             c_code += f"// Error: Unsupported value type"
