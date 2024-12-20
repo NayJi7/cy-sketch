@@ -1,6 +1,6 @@
-# Draw++ Interpreter
+# Draw++ Compilator
 
-Draw++ is a lightweight, Python-based interpreter for a custom scripting language designed for creating simple graphical drawings. This interpreter converts Draw++ code into C code and executes it. It features file-based execution and an interactive mode for real-time drawing commands.
+Python-based compilator for a custom scripting language designed for creating simple graphical drawings. This interpreter converts Draw++ code into C code and executes it. It features file-based execution and an interactive mode for real-time drawing commands.
 
 ---
 
