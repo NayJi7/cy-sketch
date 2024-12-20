@@ -1,10 +1,18 @@
 import os
 
-# === 1. Gestion des erreurs ===
-def print_error(error):
-    """Affiche un message d'erreur formaté."""
-    print(f"\033[31mErreur : {error}\033[0m")
+# === 1. Error Handling ===
 
+# @{
+# @brief Displays a formatted error message.
+# @param error The error message to be displayed.
+def print_error(error):
+    print(f"\033[31mErreur : {error}\033[0m")
+# @}
+
+# @{
+# @brief Converts a condition to its C representation.
+# @param condition The condition to convert (boolean or tuple).
+# @return A string representing the condition in C syntax.
 def condition_to_c(condition):
     if type(condition) == bool:
         return 'TRUE' if condition else 'FALSE'
@@ -14,7 +22,16 @@ def condition_to_c(condition):
         return f"{condition[1]} {condition[0]} TRUE" if condition[2] else f"{condition[1]} {condition[0]} FALSE"
     else:
         return f"{condition[1]} {condition[0]} {condition[2]}"
+# @}
 
+# === 2. AST Node Resolution ===
+
+# @{
+# @brief Resolves the type and value of a variable or literal.
+# @param ast The abstract syntax tree containing program instructions.
+# @param value The value or variable to resolve.
+# @param current_position The current position in the AST (default: None).
+# @return A tuple containing the type and value of the resolved variable or literal.
 def resolve_value_and_find_variable(ast, value, current_position=None):
     """
     Resolve the type and value of a variable or literal.
@@ -75,8 +92,19 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
         else:
             raise Exception(f"Unsupported operation type: {value[0]}")
     return None, None  # Unresolved
+# @}
 
-# === 2. Traduction des nodes vers C ===
+# === 3. AST Node Translation ===
+
+# @{
+# @brief Translates a single AST node to C code.
+# @param ast The abstract syntax tree containing program instructions.
+# @param node The AST node to translate.
+# @param newline Number of newlines to append after the code.
+# @param tabulation Number of tabulations to prepend to the code.
+# @param semicolon Whether to append a semicolon after the code.
+# @param current_position The current position in the AST (default: None).
+# @return A string containing the translated C code.
 def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_position=None):
     """Traduire une node en code C."""
     c_code = ""
@@ -405,8 +433,14 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
     print(f"[DEBUG] Translated successfully: {c_code}\n")
 
     return c_code
+# @}
 
-# === 2. Traduction de l'AST vers C ===
+# === 4. AST to C Code Translation ===
+
+# @{
+# @brief Translates the entire AST into a C program.
+# @param ast The abstract syntax tree containing program instructions.
+# @return A string containing the translated C program.
 def translate_ast_to_c(ast):
     """Traduire l'AST en code C."""
     c_code = ""
@@ -445,8 +479,14 @@ def translate_ast_to_c(ast):
 
 
     return c_code
+# @}
 
-# === 3. Exécution de l'AST ===
+# === 5. AST Execution ===
+
+# @{
+# @brief Executes the AST by translating it to C and writing it to a file.
+# @param ast The abstract syntax tree containing program instructions.
+# @param debug A flag to enable or disable debug output.
 def execute_ast(ast, debug):
     """Exécute l'AST généré par le parser."""
     if not ast:
@@ -459,16 +499,15 @@ def execute_ast(ast, debug):
     # Traduction de l'AST en code C
     c_code = translate_ast_to_c(ast)
 
-    filename = "generated_code.c"
-    
-    # Crée le fichier s'il n'existe pas
-    if not os.path.exists(filename):
-        with open(filename, 'w') as f:
-            pass
-    else:
-        with open(filename, 'w') as f:
-            pass
+    # Determine the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Écriture du code C dans le fichier
-    with open(filename, 'a') as f:
+    # Set the file path for generated_code.c
+    filename = os.path.join(script_dir, "../.to_compil.c")
+    
+    # Write the generated C code to the file
+    with open(filename, 'w') as f:
         f.write(c_code)
+
+    print(f"\n[DEBUG] Generated C code written to: {filename}")
+# @}

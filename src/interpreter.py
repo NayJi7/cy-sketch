@@ -9,15 +9,19 @@ from myast import *
 
 DEBUG = False  # Debug mode is off by default
 
-# === 4. Analyse et exécution d'un fichier source ===
+# === 4. File Analysis and Execution ===
+
+# @{
+# @brief Executes a source file written in the Draw++ language.
+# @param file_path The path to the Draw++ source file.
 def run_file(file_path):
-    """Exécute un fichier source draw++."""
+    """Executes a Draw++ source file."""
 
     lexer = init_lexer()
     parser = init_parser()
 
     if not os.path.exists(file_path):
-        print_error(f"Le fichier '{file_path}' n'existe pas.")
+        print_error(f"The file '{file_path}' does not exist.")
         return
 
     with open(file_path, 'r') as file:
@@ -26,22 +30,21 @@ def run_file(file_path):
     if DEBUG:
         print(f"[DEBUG] File : {file_path}")
         print(f"[DEBUG] Content :\n")
-
         lines = filetxt.splitlines()
-        for i,line in enumerate(lines, start=1):
+        for i, line in enumerate(lines, start=1):
             print(f"[DEBUG] {i}\t{line}")
 
-    # Analyse lexicale
+    # Lexical Analysis
     lexer.input(filetxt)
     tokens = list(lexer)
 
     if DEBUG:
         print(f"\n[DEBUG] TOKENS :")
         for token in tokens:
-            print(f"[DEBUG] {str(token).replace("LexToken","")}") # Simple way to print tokens
-        
-    # Analyse syntaxique
-    lexer.lineno = 1 # reset the lineno as it will tokenize again
+            print(f"[DEBUG] {str(token).replace('LexToken', '')}")  # Print tokens
+
+    # Syntax Analysis
+    lexer.lineno = 1  # Reset the line number
     try:
         ast = parser.parse(filetxt, lexer)
         if DEBUG:
@@ -52,22 +55,26 @@ def run_file(file_path):
         elif ast is not None:
             print(f"[DEBUG] Single AST Node: {ast}")
     except Exception as e:
-        print_error(f"Erreur pendant le parsing : {e}")
+        print_error(f"Error during parsing: {e}")
         return
 
     if ast:
-        # Exécution de l'AST
+        # Execute the AST
         execute_ast(ast, DEBUG)
+# @}
 
-# === 5. Mode interactif ===
+# === 5. Interactive Mode ===
+
+# @{
+# @brief Launches an interactive mode for on-the-fly drawing.
 def run_interactive():
-    """Mode interactif pour dessiner à la volée."""
-    print("Mode interactif : tapez 'e ou q' pour quitter.")
-    print("Commandes spéciales :")
-    print("  - 'c' : Effacer l'écran")
-    print("  - 'r' : Relancer l'interpréteur")
+    """Interactive mode for on-the-fly drawing."""
+    print("Interactive mode: type 'e' or 'q' to quit.")
+    print("Special commands:")
+    print("  - 'c' : Clear the screen")
+    print("  - 'r' : Restart the interpreter")
 
-    # Configuration de l'historique
+    # History configuration
     history_file = os.path.expanduser("~/.drawpp_history")
     if os.path.exists(history_file):
         readline.read_history_file(history_file)
@@ -94,27 +101,34 @@ def run_interactive():
         elif text.strip() == "":
             continue
 
-        # Analyse lexicale
+        # Lexical Analysis
         lexer.input(text)
         tokens = list(lexer)
 
         if DEBUG:
             print(f"[DEBUG] Tokens : {tokens}")
 
-        # Analyse syntaxique
+        # Syntax Analysis
         try:
             ast = parser.parse(text, lexer=lexer)
             if DEBUG:
                 print(f"[DEBUG] AST : {ast}")
         except Exception as e:
-            print_error(f"Erreur pendant le parsing : {e}")
+            print_error(f"Error during parsing: {e}")
             continue
+# @}
 
-# === 6. Point d'entrée principal ===
+# === 6. Main Entry Point ===
+
+# @{
+# @brief Main entry point of the Draw++ interpreter.
+# @details Handles command-line arguments for file execution or interactive mode.
 def main():
+    # DEBUG
     sys.argv.append("-d")
-    sys.argv.append("test.dpp")
+    sys.argv.append(".to_run.dpp")
 
+    """Main entry point for the Draw++ interpreter."""
     argparser = argparse.ArgumentParser(description="Draw++ Language Interpreter")
     argparser.add_argument("file", nargs="?", help="Source file to execute (optional)")
     argparser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
@@ -132,6 +146,7 @@ def main():
         run_file(file_path)
     else:  # Interactive mode
         run_interactive()
+# @}
 
 if __name__ == "__main__":
     main()
