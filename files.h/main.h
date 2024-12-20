@@ -10,11 +10,8 @@
 #include <unistd.h>
 
 #include "form.h"
-#include "clickEvents.h"
+#include "formEvents.h"
 
-
-
-void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode);
 
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color);
 

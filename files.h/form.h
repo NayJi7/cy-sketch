@@ -2,7 +2,8 @@
 #define FORM_H
 
 #include "main.h"
-#include "structForms.h"
+#include "cursorEvents.h"
+#include "formEvents.h"
 #define PI 3.14159265
 
 int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, Uint32 color, char *type);
@@ -35,5 +36,8 @@ int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, 
 int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int cx, int cy, int radius, int sides, Uint32 color, char *type);
 
 int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, Uint32 color, int thickness, char *type);
+
+
+int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *shape, ...);
 
 #endif

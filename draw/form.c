@@ -306,7 +306,6 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
 
 
 
-
 // Fonction pour dessiner un cercle de manière progressive 
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, Uint32 color, char *type) { 
 
@@ -347,6 +346,7 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int 
     }
     // Rétablir la cible de rendu par défaut
     SDL_SetRenderTarget(renderer, NULL);
+
 }
 
 
@@ -784,3 +784,243 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
     }
 }
 
+
+
+int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *shape, ...) {
+    va_list args;
+    va_start(args, shape);
+
+    // Définir la texture comme cible temporaire
+    SDL_SetRenderTarget(renderer, texture);
+
+
+    // Vérification du mode
+    int isAnimated = (strcmp(mode, "animated") == 0);
+
+    // Sélection du type de forme
+    if (strcmp(shape, "circle") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int radius = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedCircle(renderer, texture, x, y, radius, color, type) == -1) return -1;
+        } else {
+            if(drawCircle(renderer, texture, x, y, radius, color, type) == -1) return -1;
+        }
+
+        // Enregistrer la forme
+        Shape newShape;
+        newShape.type = SHAPE_CIRCLE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.rotation = 0;
+        newShape.data.circle.x = x;
+        newShape.data.circle.y = y;
+        newShape.data.circle.radius = radius;
+        addShape(newShape);
+
+    } 
+    else if (strcmp(shape, "rectangle") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int w = va_arg(args, int);
+        int h = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedRectangle(renderer, texture, x, y, w, h, color, type) == -1) return -1;
+        } else {
+            if(drawRectangle(renderer, texture, x, y, w, h, color, type) == -1) return -1;
+        }
+
+        // Enregistrer la forme
+        Shape newShape;
+        newShape.type = SHAPE_RECTANGLE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.rotation = 0;
+        newShape.data.rectangle.x = x;
+        newShape.data.rectangle.y = y;
+        newShape.data.rectangle.width = w;
+        newShape.data.rectangle.height = h;
+        addShape(newShape);
+
+    } 
+    else if (strcmp(shape, "arc") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int radius = va_arg(args, int);
+        int start_angle = va_arg(args, int);
+        int end_angle = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedArc(renderer, texture, x, y, radius, start_angle, end_angle, color, type) == -1) return -1;
+        } else {
+            if(drawArc(renderer, texture, x, y, radius, start_angle, end_angle, color) == -1) return -1;
+        }
+
+        // Enregistrer la forme
+        Shape newShape;
+        newShape.type = SHAPE_ARC;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.rotation = 0;
+        newShape.data.arc.x = x;
+        newShape.data.arc.y = y;
+        newShape.data.arc.radius = radius;
+        newShape.data.arc.start_angle = start_angle;
+        newShape.data.arc.end_angle = end_angle;
+        addShape(newShape);
+
+    } 
+    else if (strcmp(shape, "roundedRectangle") == 0) {
+        
+        if (isAnimated) {
+            int x = va_arg(args, int);
+            int y = va_arg(args, int);
+            int w = va_arg(args, int);
+            int h = va_arg(args, int);
+            int rad = va_arg(args, int);
+            Uint32 color = va_arg(args, Uint32);
+            char *type = va_arg(args, char*);
+            printf("%d", rad);
+            
+            if(drawAnimatedRoundedRectangle(renderer, texture, x, y, w, h, rad, color, type) == -1) return -1;
+
+            // Enregistrer la forme
+            Shape newShape;
+            newShape.type = SHAPE_ROUNDED_RECTANGLE;
+            newShape.selected = false;
+            newShape.color = color;
+            newShape.rotation = 0;
+            newShape.data.rounded_rectangle.x = x;
+            newShape.data.rounded_rectangle.y = y;
+            newShape.data.rounded_rectangle.w = w;
+            newShape.data.rounded_rectangle.h = h;
+            newShape.data.rounded_rectangle.rad = rad;
+            addShape(newShape);
+
+        } else {
+            Sint16 x1 = va_arg(args, int);
+            Sint16 y1 = va_arg(args, int);
+            Sint16 x2 = va_arg(args, int);
+            Sint16 y2 = va_arg(args, int);
+            Sint16 radius = va_arg(args, int);
+            Uint32 color = va_arg(args, Uint32);
+            char *type = va_arg(args, char*);
+
+            if(drawRoundedRectangle(renderer, texture, x1, y1, x2, y2, radius, color, type) == -1) return -1;
+
+            // Enregistrer la forme
+            Shape newShape;
+            newShape.type = SHAPE_ROUNDED_RECTANGLE;
+            newShape.selected = false;
+            newShape.color = color;
+            newShape.rotation = 0;
+            newShape.data.rounded_rectangle.x1 = x1;
+            newShape.data.rounded_rectangle.y1 = y1;
+            newShape.data.rounded_rectangle.x2 = x2;
+            newShape.data.rounded_rectangle.y2 = y2;
+            newShape.data.rounded_rectangle.radius = radius;
+            addShape(newShape);
+
+        }
+    } 
+    else if (strcmp(shape, "ellipse") == 0) {
+        int x = va_arg(args, int);
+        int y = va_arg(args, int);
+        int rx = va_arg(args, int);
+        int ry = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedEllipse(renderer, texture, x, y, rx, ry, color, type) == -1) return -1;
+        } else {
+            if(drawEllipse(renderer, texture, x, y, rx, ry, color, type) == -1) return -1;
+        }
+
+        // Enregistrer la forme
+        Shape newShape;
+        newShape.type = SHAPE_ELLIPSE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.rotation = 0;
+        newShape.data.ellipse.x = x;
+        newShape.data.ellipse.y = y;
+        newShape.data.ellipse.rx = rx;
+        newShape.data.ellipse.ry = ry;
+        addShape(newShape);
+        
+    } 
+    else if (strcmp(shape, "line") == 0) {
+        Sint16 x1 = va_arg(args, int);
+        Sint16 y1 = va_arg(args, int);
+        Sint16 x2 = va_arg(args, int);
+        Sint16 y2 = va_arg(args, int);
+        Uint8 thick = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedLine(renderer, texture, x1, y1, x2, y2, color, thick, type) == -1) return -1;
+        } else {
+            if(drawLine(renderer, texture, x1, y1, x2, y2, color, thick, type) == -1) return -1;
+        }
+
+        // Enregistrer la forme
+        Shape newShape;
+        newShape.type = SHAPE_LINE;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.rotation = 0;
+        newShape.data.line.x1 = x1;
+        newShape.data.line.y1 = y1;
+        newShape.data.line.x2 = x2;
+        newShape.data.line.y2 = y2;
+        newShape.data.line.thickness = thick;
+        addShape(newShape);
+
+    } 
+    else if (strcmp(shape, "polygon") == 0) {
+        int cx = va_arg(args, int);
+        int cy = va_arg(args, int);
+        int radius = va_arg(args, int);
+        int sides = va_arg(args, int);
+        Uint32 color = va_arg(args, Uint32);
+        char *type = va_arg(args, char*);
+
+        if (isAnimated) {
+            if(drawAnimatedCustomPolygon(renderer, texture, cx, cy, radius, sides, color, type) == -1) return -1;
+        } else {
+            if(drawCustomPolygon(renderer, texture, cx, cy, radius, sides, color, type) == -1) return -1;
+        }
+
+        // Enregistrer la forme
+        Shape newShape;
+        newShape.type = SHAPE_POLYGON;
+        newShape.selected = false;
+        newShape.color = color;
+        newShape.rotation = 0;
+        newShape.data.polygon.cx = cx;
+        newShape.data.polygon.cy = cy;
+        newShape.data.polygon.radius = radius;
+        newShape.data.polygon.sides = sides;
+        addShape(newShape);
+
+    } 
+    else {
+        printf("Invalid shape type: %s\n", shape);
+    }
+
+    // Rétablir le rendu par défaut
+    SDL_SetRenderTarget(renderer, NULL);
+
+    va_end(args);
+}

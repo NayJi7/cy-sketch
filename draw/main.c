@@ -1,35 +1,6 @@
 #include "../files.h/main.h"
 
 /**
- * @brief Cleans up and releases SDL resources as specified.
- * 
- * @param renderer The SDL renderer to be destroyed if `freeRenderer` is true.
- * @param window The SDL window to be destroyed if `freeWindow` is true.
- * @param freeRenderer A boolean indicating whether to free the renderer.
- * @param freeWindow A boolean indicating whether to free the window.
- * @param exitCode The exit code to terminate the program with if not -1.
- * 
- * @details 
- * This function is used to clean up SDL resources like the renderer and the window. 
- * If `freeRenderer` is true and `renderer` is valid, the renderer is destroyed.
- * Similarly, if `freeWindow` is true and `window` is valid, the window is destroyed.
- * After cleanup, SDL is properly quit, and if `exitCode` is not -1, the program 
- * exits with the specified exit code.
- */
-void cleanResources(SDL_Renderer *renderer, SDL_Window *window, bool freeRenderer, bool freeWindow, int exitCode) 
-{
-    
-    if(freeRenderer && renderer) SDL_DestroyRenderer(renderer);
-    if(freeWindow && window) SDL_DestroyWindow(window);
-    
-    SDL_Quit();
-
-    if(exitCode != -1) exit(exitCode);
-
-}
-
-
-/**
  * @brief Sets the background color of the SDL window.
  * 
  * @param renderer The SDL renderer used to set the color.
@@ -83,11 +54,9 @@ int main(){
     }
     SDL_SetWindowTitle(window, "Animated Shapes");
 
-        // Couleur de fond
+    // Couleur de fond
     SDL_Color backgroundColor = {0, 0, 0, 255};
 
-    // Définir un cercle
-    Circle circle = {400, 300, 50, {0, 255, 0, 255}, false};
 
     // Définir un curseur
     SDL_Color cursorColor = {255, 0, 0, 255};
@@ -104,13 +73,13 @@ int main(){
 
     
     if(drawShape(renderer, mainTexture, "instant", "circle", 400, 270, 60, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "animated", "line", 100, 100, 400, 300, 2, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 100, 50, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "animated", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "instant", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "animated", "arc", 400, 300, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "instant", "polygon", 630, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
-    
+    if(drawShape(renderer, mainTexture, "animated", "rectangle", 200, 200, 100, 50, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "arc", 400, 300, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "polygon", 630, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "line", 100, 100, 400, 300, 2, 0xFF00FF00, "filled") == -1) return 0;
+
     // Rétablir la cible de rendu et afficher la texture
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderCopy(renderer, mainTexture, NULL, NULL);
@@ -119,119 +88,161 @@ int main(){
 
     // Boucle d'événements pour fermer la fenêtre
     int running = 1;
+
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = 0;
             } else if (event.type == SDL_KEYDOWN) {
-                // Désélectionner avec la touche ÉCHAP
-                if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    circle.selected = false;
-                } else if (circle.selected) {
-                    // Déplacer la forme sélectionnée
-                    switch (event.key.keysym.sym) {
-                        case SDLK_UP:
-                            circle.y -= 10;
-                            break;
-                        case SDLK_DOWN:
-                            circle.y += 10;
-                            break;
-                        case SDLK_LEFT:
-                            circle.x -= 10;
-                            break;
-                        case SDLK_RIGHT:
-                            circle.x += 10;
-                            break;
-                        case SDLK_PLUS:    // Zoomer
-                        case SDLK_KP_PLUS: // Touche "+" du pavé numérique
-                            circle.radius += 5; // Augmenter le rayon
-                            break;
-                        case SDLK_MINUS:   // Dézoomer
-                        case SDLK_KP_MINUS:// Touche "-" du pavé numérique
-                            if (circle.radius > 5) { // Empêcher un rayon négatif ou nul
-                                circle.radius -= 5;
-                            }
-                            break;
+                for (int i = 0; i < shapeCount; i++) {
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        shapes[i].selected = false;
                     }
-                } else {
-                    // Déplacer le curseur
-                    switch (event.key.keysym.sym) {
-                        case SDLK_UP:
-                            moveCursor(&cursor, 0, -10);
-                            break;
-                        case SDLK_DOWN:
-                            moveCursor(&cursor, 0, 10);
-                            break;
-                        case SDLK_LEFT:
-                            moveCursor(&cursor, -10, 0);
-                            break;
-                        case SDLK_RIGHT:
-                            moveCursor(&cursor, 10, 0);
-                            break;
-                        case SDLK_RETURN: // Sélectionner la forme
-                            if (isCursorInCircle(&cursor, &circle)) {
-                                circle.selected = !circle.selected; // Alterner l'état sélectionné
-                            }
-                            break;
-                        case SDLK_DELETE:  // Supprimer la forme
-                            // Réinitialiser les propriétés du cercle
-                            if (circle.selected) {
-                                // Supprimer complètement la forme
-                                circle.x = -100;      // Déplacer le cercle hors de l'écran
-                                circle.y = -100;
-                                circle.radius = 0;    // Réduire le rayon à 0
-                                circle.selected = false; // Désélectionner
-                                // Ici vous pouvez aussi complètement réinitialiser la structure
-                                circle = (Circle){-100, -100, 0, {0, 0, 0, 255}, false};
-                            }
-                            break;
+                    else if(shapes[i].selected)
+                    {
+                        switch (event.key.keysym.sym) {
+                            Shape *shape = &shapes[i];
+                            case SDLK_UP:
+                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.y -= 10;
+                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.y -= 10;
+                                break;
+                            case SDLK_DOWN:
+                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.y += 10;
+                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.y += 10;
+                                break;
+                            case SDLK_LEFT:
+                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.x -= 10;
+                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.x -= 10;
+                                break;
+                            case SDLK_RIGHT:
+                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.x += 10;
+                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.x += 10;
+                                break;
+                            case SDLK_PLUS: // Zoomer
+                            case SDLK_KP_PLUS: // Touche "+" du pavé numérique
+                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.radius += 5;
+                                if (shape->type == SHAPE_RECTANGLE) {
+                                    shape->data.rectangle.width += 10;
+                                    shape->data.rectangle.height += 10;
+                                }
+                                break;
+                            case SDLK_MINUS: // Dézoomer
+                            case SDLK_KP_MINUS:// Touche "-" du pavé numérique 
+                                if (shape->type == SHAPE_CIRCLE && shape->data.circle.radius > 5) {
+                                    shape->data.circle.radius -= 5;
+                                }
+                                if (shape->type == SHAPE_RECTANGLE &&
+                                    shape->data.rectangle.width > 10 &&
+                                    shape->data.rectangle.height > 10) {
+                                    shape->data.rectangle.width -= 10;
+                                    shape->data.rectangle.height -= 10;
+                                }
+                                break;
+                            updateShapeOnTexture(renderer, mainTexture, shape);
+                        }  
                     }
-                }
-            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                // Désélectionner si clic en dehors du cercle
-                if (circle.selected) {
-                    int dx = event.button.x - circle.x;
-                    int dy = event.button.y - circle.y;
-                    if ((dx * dx + dy * dy) > (circle.radius * circle.radius)) {
-                        circle.selected = false; // Désélectionner
+                    else
+                    {
+                        switch (event.key.keysym.sym) {
+                            // Déplacer le curseur
+                            case SDLK_UP: moveCursor(&cursor, 0, -10); break;
+                            case SDLK_DOWN: moveCursor(&cursor, 0, 10); break;
+                            case SDLK_LEFT: moveCursor(&cursor, -10, 0); break;
+                            case SDLK_RIGHT: moveCursor(&cursor, 10, 0); break;
+                            // Sélectionner ou désélectionner une forme
+                            case SDLK_RETURN:
+                                handleCursorSelection(cursor.x, cursor.y);
+                                break;
+
+                            // Supprimer une forme sélectionnée
+                            case SDLK_DELETE:
+                                int selectedIndex = findShapeAtCursor(cursor.x, cursor.y);
+                                if (selectedIndex != -1) {
+                                    deleteShape(selectedIndex);
+                                }
+                            break;
+                        }
                     }
                 }
             }
+            else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                if (event.button.button == SDLK_RETURN) {
+                    int index = findShapeAtCursor(event.button.x, event.button.y);
+
+                    // Si une forme est sélectionnée et le clic est à l'extérieur, désélectionner
+                    for (int i = 0; i < shapeCount; i++) {
+                        if (shapes[i].selected) {
+                            Shape *shape = &shapes[i];
+                            bool isOutside = false;
+
+                            switch (shape->type) {
+                                case SHAPE_CIRCLE:
+                                    isOutside = !isPointInCircle(event.button.x, event.button.y, 
+                                                                shape->data.circle.x, 
+                                                                shape->data.circle.y, 
+                                                                shape->data.circle.radius);
+                                    break;
+
+                                case SHAPE_RECTANGLE:
+                                    isOutside = !isPointInRectangle(event.button.x, event.button.y, 
+                                                                    shape->data.rectangle.x, 
+                                                                    shape->data.rectangle.y, 
+                                                                    shape->data.rectangle.width, 
+                                                                    shape->data.rectangle.height);
+                                    break;
+                            }
+
+                            if (isOutside) {
+                                shape->selected = false; // Désélectionner
+                            }
+                        }
+                    }
+
+                    // Sélectionner une nouvelle forme si cliqué dessus
+                    if (index != -1) {
+                        shapes[index].selected = !shapes[index].selected; // Alterner la sélection
+                    }
+                }
+            }   
+
+            // **Effacer l'écran (sans effacer les formes existantes)**
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, mainTexture, NULL, NULL); // Afficher les formes déjà dessinées
+
+
+            // Redessiner toutes les formes
+            for (int i = 0; i < shapeCount; i++) {
+                Shape *shape = &shapes[i];
+
+                // Dessiner un rectangle jaune autour des formes sélectionnées
+                if (shape->selected) {
+                    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Couleur jaune
+                    SDL_Rect selectionRect;
+                    switch (shape->type) {
+                        case SHAPE_CIRCLE:
+                            selectionRect.x = shape->data.circle.x - shape->data.circle.radius - 5;
+                            selectionRect.y = shape->data.circle.y - shape->data.circle.radius - 5;
+                            selectionRect.w = (shape->data.circle.radius * 2) + 10;
+                            selectionRect.h = (shape->data.circle.radius * 2) + 10;
+                            break;
+                        case SHAPE_RECTANGLE:
+                            selectionRect.x = shape->data.rectangle.x - 5;
+                            selectionRect.y = shape->data.rectangle.y - 5;
+                            selectionRect.w = shape->data.rectangle.width + 10;
+                            selectionRect.h = shape->data.rectangle.height + 10;
+                            break;
+                    }
+                    SDL_RenderDrawRect(renderer, &selectionRect);
+                }
+            }
+            // Dessiner le curseur
+            renderCursor(renderer, &cursor);
+
+            // Mettre à jour l'écran
+            SDL_RenderPresent(renderer);
         }
-
-        // Effacer l'écran
-        setWindowColor(renderer, backgroundColor);
-
-        // Dessiner le cercle uniquement si il n'est pas supprimé
-        if (circle.radius > 0) {
-            SDL_SetRenderDrawColor(renderer, circle.color.r, circle.color.g, circle.color.b, circle.color.a);
-            for (int w = 0; w < circle.radius * 2; w++) {
-                for (int h = 0; h < circle.radius * 2; h++) {
-                    int dx = circle.radius - w; // Distance horizontale
-                    int dy = circle.radius - h; // Distance verticale
-                    if ((dx * dx + dy * dy) <= (circle.radius * circle.radius)) {
-                        SDL_RenderDrawPoint(renderer, circle.x + dx, circle.y + dy);
-                    }
-                }
-            }
-
-            // Indiquer si le cercle est sélectionné
-            if (circle.selected) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Couleur jaune pour indiquer la sélection
-                SDL_Rect selectionRect = {circle.x - circle.radius - 5, circle.y - circle.radius - 5, 
-                                           2 * circle.radius + 10, 2 * circle.radius + 10};
-                SDL_RenderDrawRect(renderer, &selectionRect);
-            }
-        }
-
-        // Dessiner le curseur
-        renderCursor(renderer, &cursor);
-
-        // Afficher le rendu
-        SDL_RenderPresent(renderer);
     }
-
-
+ 
     // Libérer les ressources
     SDL_DestroyTexture(mainTexture);
     SDL_DestroyRenderer(renderer);
