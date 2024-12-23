@@ -20,6 +20,45 @@ int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
     }
     return 0;
 }
+
+
+void renderShape(SDL_Renderer *renderer, Shape *shape) {
+    Uint8 r = (shape->color & 0xFF000000) >> 24; // Extract red
+    Uint8 g = (shape->color & 0x00FF0000) >> 16; // Extract green
+    Uint8 b = (shape->color & 0x0000FF00) >> 8;  // Extract blue
+
+    // Définir la couleur de remplissage
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+
+    if (shape->type == SHAPE_CIRCLE) {
+        // Remplir le cercle
+        filledCircleColor(renderer, 
+                          shape->data.circle.x, 
+                          shape->data.circle.y, 
+                          shape->data.circle.radius, 
+                          shape->color);
+        if (shape->selected) {
+            // Contour circulaire
+            circleColor(renderer, 
+                        shape->data.circle.x, 
+                        shape->data.circle.y, 
+                        shape->data.circle.radius + 5, 
+                        0xFFFFFF00); // Contour jaune
+        }
+    } else if (shape->type == SHAPE_RECTANGLE) {
+        // Dessiner le rectangle
+        SDL_Rect rect = {shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height};
+        SDL_RenderFillRect(renderer, &rect);
+
+        if (shape->selected) {
+            // Contour rectangulaire en jaune
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+            SDL_Rect selectionRect = {rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10};
+            SDL_RenderDrawRect(renderer, &selectionRect);
+        }
+    }
+}
+
 void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
@@ -27,6 +66,7 @@ void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
     SDL_RenderPresent(renderer);
     SDL_SetRenderTarget(renderer, texture);
 }
+
 void updateShapeOnTexture(SDL_Renderer *renderer, SDL_Texture *texture, Shape *shape) {
     // Définir la texture comme cible de rendu
     SDL_SetRenderTarget(renderer, texture);
