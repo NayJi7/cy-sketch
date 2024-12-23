@@ -45,7 +45,7 @@ void updateShapeOnTexture(SDL_Renderer *renderer, SDL_Texture *texture, Shape *s
 void addShape(Shape shape);
 void deleteShape(int index);
 void rotatePoint(int *x, int *y, int cx, int cy, double angle);
-
+void renderShape(SDL_Renderer *renderer, Shape *shape);
 int isPointInCircle(int x, int y, int cx, int cy, int radius);
 int isPointInEllipse(int x, int y, int cx, int cy, int rx, int ry);
 int isPointInArc(int x, int y, int cx, int cy, int radius, int startAngle, int endAngle);
