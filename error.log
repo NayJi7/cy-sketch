@@ -70,3 +70,18 @@ draw/clickEvents.c: In function ‘drawShape’:
 draw/clickEvents.c:230:1: warning: control reaches end of non-void function [-Wreturn-type]
   230 | }
       | ^
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+   76 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+   96 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]

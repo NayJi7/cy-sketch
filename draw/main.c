@@ -67,7 +67,7 @@ int main(){
     SDL_RenderPresent(renderer);
 
     int running = 1;
-while (running) {
+    while (running) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
