@@ -7,12 +7,6 @@
  * @param color The SDL_Color struct representing the color (RGBA) to be set.
  * 
  * @return int Returns 0 on success, -1 on failure.
- * 
- * @details 
- * This function sets the rendering color of the given SDL renderer using the 
- * RGBA values in `color`. It then clears the window to fill it with this color.
- * If either the color setting or the clearing fails, the function returns -1. 
- * Otherwise, it returns 0.
  */
 int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
 {
@@ -26,7 +20,6 @@ int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
     }
     return 0;
 }
-
 
 
 /**
@@ -55,13 +48,8 @@ int main(){
     SDL_SetWindowTitle(window, "Animated Shapes");
 
     // Couleur de fond
-    SDL_Color backgroundColor = {0, 0, 0, 255};
-
-
-    // Définir un curseur
     SDL_Color cursorColor = {255, 0, 0, 255};
     Cursor cursor = createCursor(400, 300, cursorColor, 5, true);
-
 
     // Créer une texture principale pour dessiner
     SDL_Texture* mainTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
@@ -71,184 +59,190 @@ int main(){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    
     if(drawShape(renderer, mainTexture, "instant", "circle", 400, 270, 60, 0xFF00FF00, "filled") == -1) return 0;
     if(drawShape(renderer, mainTexture, "animated", "rectangle", 200, 200, 100, 50, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "animated", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "animated", "arc", 400, 300, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "polygon", 630, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "animated", "line", 100, 100, 400, 300, 2, 0xFF00FF00, "filled") == -1) return 0;
 
-    // Rétablir la cible de rendu et afficher la texture
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderCopy(renderer, mainTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
-    
 
-    // Boucle d'événements pour fermer la fenêtre
     int running = 1;
-
-    while (running) {
+while (running) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = 0;
-            } else if (event.type == SDL_KEYDOWN) {
-                for (int i = 0; i < shapeCount; i++) {
-                    if (event.key.keysym.sym == SDLK_ESCAPE) {
-                        shapes[i].selected = false;
-                    }
-                    else if(shapes[i].selected)
-                    {
-                        switch (event.key.keysym.sym) {
-                            Shape *shape = &shapes[i];
-                            case SDLK_UP:
-                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.y -= 10;
-                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.y -= 10;
-                                break;
-                            case SDLK_DOWN:
-                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.y += 10;
-                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.y += 10;
-                                break;
-                            case SDLK_LEFT:
-                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.x -= 10;
-                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.x -= 10;
-                                break;
-                            case SDLK_RIGHT:
-                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.x += 10;
-                                if (shape->type == SHAPE_RECTANGLE) shape->data.rectangle.x += 10;
-                                break;
-                            case SDLK_PLUS: // Zoomer
-                            case SDLK_KP_PLUS: // Touche "+" du pavé numérique
-                                if (shape->type == SHAPE_CIRCLE) shape->data.circle.radius += 5;
-                                if (shape->type == SHAPE_RECTANGLE) {
-                                    shape->data.rectangle.width += 10;
-                                    shape->data.rectangle.height += 10;
-                                }
-                                break;
-                            case SDLK_MINUS: // Dézoomer
-                            case SDLK_KP_MINUS:// Touche "-" du pavé numérique 
-                                if (shape->type == SHAPE_CIRCLE && shape->data.circle.radius > 5) {
-                                    shape->data.circle.radius -= 5;
-                                }
-                                if (shape->type == SHAPE_RECTANGLE &&
-                                    shape->data.rectangle.width > 10 &&
-                                    shape->data.rectangle.height > 10) {
-                                    shape->data.rectangle.width -= 10;
-                                    shape->data.rectangle.height -= 10;
-                                }
-                                break;
-                            updateShapeOnTexture(renderer, mainTexture, shape);
-                        }  
-                    }
-                    else
-                    {
-                        switch (event.key.keysym.sym) {
-                            // Déplacer le curseur
-                            case SDLK_UP: moveCursor(&cursor, 0, -10); break;
-                            case SDLK_DOWN: moveCursor(&cursor, 0, 10); break;
-                            case SDLK_LEFT: moveCursor(&cursor, -10, 0); break;
-                            case SDLK_RIGHT: moveCursor(&cursor, 10, 0); break;
-                            // Sélectionner ou désélectionner une forme
-                            case SDLK_RETURN:
-                                handleCursorSelection(cursor.x, cursor.y);
-                                break;
+            switch (event.type) {
+                case SDL_QUIT:
+                    running = 0;
+                    break;
 
-                            // Supprimer une forme sélectionnée
-                            case SDLK_DELETE:
-                                int selectedIndex = findShapeAtCursor(cursor.x, cursor.y);
-                                if (selectedIndex != -1) {
-                                    deleteShape(selectedIndex);
-                                }
+                case SDL_KEYDOWN:
+                    int dx = 0, dy = 0;
+
+                    switch (event.key.keysym.sym) {
+                        case SDLK_UP: // deplace le curseur 
+                            dy = -10;
                             break;
+                        case SDLK_DOWN:
+                            dy = 10;
+                            break;
+                        case SDLK_LEFT:
+                            dx = -10;
+                            break;
+                        case SDLK_RIGHT:
+                            dx = 10;
+                            break;
+                        case SDLK_ESCAPE:
+                            // Désélectionner toutes les formes
+                            for (int i = 0; i < shapeCount; i++) {
+                                shapes[i].selected = false;
+                            }
+                            break;
+
+                        case SDLK_PLUS: // zoom 
+                        case SDLK_KP_PLUS:
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    if (shapes[i].type == SHAPE_RECTANGLE) {
+                                        shapes[i].data.rectangle.width += 10;
+                                        shapes[i].data.rectangle.height += 10;
+                                    } else if (shapes[i].type == SHAPE_CIRCLE) {
+                                        shapes[i].data.circle.radius += 5;
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SDLK_MINUS: // rapeticis
+                        case SDLK_KP_MINUS:
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    if (shapes[i].type == SHAPE_RECTANGLE) {
+                                        if (shapes[i].data.rectangle.width > 10 && shapes[i].data.rectangle.height > 10) {
+                                            shapes[i].data.rectangle.width -= 10;
+                                            shapes[i].data.rectangle.height -= 10;
+                                        }
+                                    } else if (shapes[i].type == SHAPE_CIRCLE) {
+                                        if (shapes[i].data.circle.radius > 10) {
+                                            shapes[i].data.circle.radius -= 5;
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        //marche pas 
+                        case SDLK_a: // Rotation anti-horaire
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    shapes[i].rotation -= 10;
+                                    if (shapes[i].rotation < 0) shapes[i].rotation += 360; // Gérer la rotation négative
+                                }
+                            }
+                            break;
+
+                        case SDLK_d: // Rotation horaire
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    shapes[i].rotation += 50;
+                                    if (shapes[i].rotation >= 360) shapes[i].rotation -= 360; // Gérer les dépassements
+                                }
+                            }
+                            break;
+
+                        case SDLK_RETURN: // selectionne ma forme
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].type == SHAPE_RECTANGLE) {
+                                    if (cursor.x >= shapes[i].data.rectangle.x &&
+                                        cursor.x <= shapes[i].data.rectangle.x + shapes[i].data.rectangle.width &&
+                                        cursor.y >= shapes[i].data.rectangle.y &&
+                                        cursor.y <= shapes[i].data.rectangle.y + shapes[i].data.rectangle.height) {
+                                        shapes[i].selected = true;
+                                    } else {
+                                        shapes[i].selected = false;
+                                    }
+                                } else if (shapes[i].type == SHAPE_CIRCLE) {
+                                    int dx = cursor.x - shapes[i].data.circle.x;
+                                    int dy = cursor.y - shapes[i].data.circle.y;
+                                    if ((dx * dx + dy * dy) <= (shapes[i].data.circle.radius * shapes[i].data.circle.radius)) {
+                                        shapes[i].selected = true;
+                                    } else {
+                                        shapes[i].selected = false;
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SDLK_BACKSPACE: // Supprimer la forme sélectionnée
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    deleteShape(i);
+                                    break;
+                                }
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    moveCursor(&cursor, dx, dy);
+
+                    for (int i = 0; i < shapeCount; i++) { // deplacement des formes 
+                        if (shapes[i].selected) {
+                            if (shapes[i].type == SHAPE_RECTANGLE) {
+                                shapes[i].data.rectangle.x += dx;
+                                shapes[i].data.rectangle.y += dy;
+                            } else if (shapes[i].type == SHAPE_CIRCLE) {
+                                shapes[i].data.circle.x += dx;
+                                shapes[i].data.circle.y += dy;
+                            }
                         }
                     }
-                }
-            }
-            else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                if (event.button.button == SDLK_RETURN) {
-                    int index = findShapeAtCursor(event.button.x, event.button.y);
+                    break;
 
-                    // Si une forme est sélectionnée et le clic est à l'extérieur, désélectionner
+                case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        handleCursorSelection(event.button.x, event.button.y);
+                    }
+                    break;
+
+                case SDL_MOUSEMOTION: // deplacement forme avec souris 
                     for (int i = 0; i < shapeCount; i++) {
                         if (shapes[i].selected) {
-                            Shape *shape = &shapes[i];
-                            bool isOutside = false;
+                            if (shapes[i].type == SHAPE_RECTANGLE) {
+                                shapes[i].data.rectangle.x = event.motion.x - shapes[i].data.rectangle.width / 2;
+                                shapes[i].data.rectangle.y = event.motion.y - shapes[i].data.rectangle.height / 2;
 
-                            switch (shape->type) {
-                                case SHAPE_CIRCLE:
-                                    isOutside = !isPointInCircle(event.button.x, event.button.y, 
-                                                                shape->data.circle.x, 
-                                                                shape->data.circle.y, 
-                                                                shape->data.circle.radius);
-                                    break;
+                                cursor.x = shapes[i].data.rectangle.x + shapes[i].data.rectangle.width / 2;
+                                cursor.y = shapes[i].data.rectangle.y + shapes[i].data.rectangle.height / 2;
+                            } else if (shapes[i].type == SHAPE_CIRCLE) {
+                                shapes[i].data.circle.x = event.motion.x;
+                                shapes[i].data.circle.y = event.motion.y;
 
-                                case SHAPE_RECTANGLE:
-                                    isOutside = !isPointInRectangle(event.button.x, event.button.y, 
-                                                                    shape->data.rectangle.x, 
-                                                                    shape->data.rectangle.y, 
-                                                                    shape->data.rectangle.width, 
-                                                                    shape->data.rectangle.height);
-                                    break;
-                            }
-
-                            if (isOutside) {
-                                shape->selected = false; // Désélectionner
+                                cursor.x = shapes[i].data.circle.x;
+                                cursor.y = shapes[i].data.circle.y;
                             }
                         }
                     }
-
-                    // Sélectionner une nouvelle forme si cliqué dessus
-                    if (index != -1) {
-                        shapes[index].selected = !shapes[index].selected; // Alterner la sélection
-                    }
-                }
-            }   
-
-            // **Effacer l'écran (sans effacer les formes existantes)**
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, mainTexture, NULL, NULL); // Afficher les formes déjà dessinées
-
-
-            // Redessiner toutes les formes
-            for (int i = 0; i < shapeCount; i++) {
-                Shape *shape = &shapes[i];
-
-                // Dessiner un rectangle jaune autour des formes sélectionnées
-                if (shape->selected) {
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Couleur jaune
-                    SDL_Rect selectionRect;
-                    switch (shape->type) {
-                        case SHAPE_CIRCLE:
-                            selectionRect.x = shape->data.circle.x - shape->data.circle.radius - 5;
-                            selectionRect.y = shape->data.circle.y - shape->data.circle.radius - 5;
-                            selectionRect.w = (shape->data.circle.radius * 2) + 10;
-                            selectionRect.h = (shape->data.circle.radius * 2) + 10;
-                            break;
-                        case SHAPE_RECTANGLE:
-                            selectionRect.x = shape->data.rectangle.x - 5;
-                            selectionRect.y = shape->data.rectangle.y - 5;
-                            selectionRect.w = shape->data.rectangle.width + 10;
-                            selectionRect.h = shape->data.rectangle.height + 10;
-                            break;
-                    }
-                    SDL_RenderDrawRect(renderer, &selectionRect);
-                }
+                    break;
             }
-            // Dessiner le curseur
-            renderCursor(renderer, &cursor);
-
-            // Mettre à jour l'écran
-            SDL_RenderPresent(renderer);
         }
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        for (int i = 0; i < shapeCount; i++) {
+            renderShape(renderer, &shapes[i]);
+        }
+
+        renderCursor(renderer, &cursor);
+
+        SDL_RenderPresent(renderer);
     }
- 
-    // Libérer les ressources
+
     SDL_DestroyTexture(mainTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;
-}
 
+}
