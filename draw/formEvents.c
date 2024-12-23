@@ -21,41 +21,123 @@ int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
     return 0;
 }
 
-
 void renderShape(SDL_Renderer *renderer, Shape *shape) {
-    Uint8 r = (shape->color & 0xFF000000) >> 24; // Extract red
-    Uint8 g = (shape->color & 0x00FF0000) >> 16; // Extract green
-    Uint8 b = (shape->color & 0x0000FF00) >> 8;  // Extract blue
 
-    // Définir la couleur de remplissage
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+    switch (shape->type) {
+        
 
-    if (shape->type == SHAPE_CIRCLE) {
-        // Remplir le cercle
-        filledCircleColor(renderer, 
-                          shape->data.circle.x, 
-                          shape->data.circle.y, 
-                          shape->data.circle.radius, 
-                          shape->color);
-        if (shape->selected) {
-            // Contour circulaire
-            circleColor(renderer, 
-                        shape->data.circle.x, 
-                        shape->data.circle.y, 
-                        shape->data.circle.radius + 5, 
-                        0xFFFFFF00); // Contour jaune
-        }
-    } else if (shape->type == SHAPE_RECTANGLE) {
-        // Dessiner le rectangle
-        SDL_Rect rect = {shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height};
-        SDL_RenderFillRect(renderer, &rect);
+        case SHAPE_CIRCLE:
+            Uint8 rC = (shape->color >> 24) & 0xFF; // Rouge
+            Uint8 gC = (shape->color >> 16) & 0xFF; // Vert
+            Uint8 bC = (shape->color >> 8) & 0xFF;  // Bleu
+            Uint8 aC = shape->color & 0xFF;         // Alpha
+            
+            // Appliquer la couleur par défaut pour le remplissage
+            SDL_SetRenderDrawColor(renderer, rC, gC, bC, aC);
 
-        if (shape->selected) {
-            // Contour rectangulaire en jaune
-            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-            SDL_Rect selectionRect = {rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10};
-            SDL_RenderDrawRect(renderer, &selectionRect);
-        }
+            if (strcmp(shape->typeForm, "filled") == 0) {
+                filledCircleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, shape->color);
+            } else if (strcmp(shape->typeForm, "empty") == 0) {
+                circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, shape->color);
+            }
+
+            if (shape->selected) {
+                circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, 0xFFFFFF00);
+            }
+            break;
+    
+        case SHAPE_RECTANGLE:
+
+            Uint8 rR = (shape->color >> 24) & 0xFF; // Rouge
+            Uint8 gR = (shape->color >> 16) & 0xFF; // Vert
+            Uint8 bR = (shape->color >> 8) & 0xFF;  // Bleu
+            Uint8 aR = shape->color & 0xFF;         // Alpha
+            
+            SDL_SetRenderDrawColor(renderer, rR, gR, bR, aR);
+
+            // Dessiner le rectangle
+            SDL_Rect rect = {shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height};
+            if (strcmp(shape->typeForm, "filled") == 0) {
+                SDL_RenderFillRect(renderer, &rect);
+            } else if (strcmp(shape->typeForm, "empty") == 0) {
+                SDL_RenderDrawRect(renderer, &rect);
+            }
+
+            if (shape->selected) {
+                // Contour rectangulaire en jaune
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                SDL_Rect selectionRect = {rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10};
+                SDL_RenderDrawRect(renderer, &selectionRect);
+            }
+            break;
+
+        case SHAPE_ROUNDED_RECTANGLE:
+            Uint8 rRR = (shape->color >> 24) & 0xFF; // Rouge
+            Uint8 gRR = (shape->color >> 16) & 0xFF; // Vert
+            Uint8 bRR = (shape->color >> 8) & 0xFF;  // Bleu
+            Uint8 aRR = shape->color & 0xFF;         // Alpha
+
+            SDL_SetRenderDrawColor(renderer, rRR, gRR, bRR, aRR);
+
+            if (strcmp(shape->typeForm, "filled") == 0) {
+                // Dessiner un rectangle arrondi rempli
+                roundedBoxColor(renderer,
+                                shape->data.rounded_rectangle.x1,
+                                shape->data.rounded_rectangle.y1,
+                                shape->data.rounded_rectangle.x2,
+                                shape->data.rounded_rectangle.y2,
+                                shape->data.rounded_rectangle.radius,
+                                shape->color);
+            } else if (strcmp(shape->typeForm, "empty") == 0) {
+                // Dessiner le contour d'un rectangle arrondi
+                roundedRectangleColor(renderer,
+                                    shape->data.rounded_rectangle.x1,
+                                    shape->data.rounded_rectangle.y1,
+                                    shape->data.rounded_rectangle.x2,
+                                    shape->data.rounded_rectangle.y2,
+                                    shape->data.rounded_rectangle.radius,
+                                    shape->color);
+            }
+
+            if (shape->selected) {
+                // Dessiner un contour jaune autour du rectangle arrondi
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+                roundedRectangleColor(renderer,
+                                    shape->data.rounded_rectangle.x1 - 5,
+                                    shape->data.rounded_rectangle.y1 - 5,
+                                    shape->data.rounded_rectangle.x2 + 5,
+                                    shape->data.rounded_rectangle.y2 + 5,
+                                    shape->data.rounded_rectangle.radius + 5,
+                                    0xFFFFFF00); // Jaune
+            }
+            break;
+
+
+        case SHAPE_ELLIPSE:
+            Uint8 rE = (shape->color >> 24) & 0xFF; // Rouge
+            Uint8 gE = (shape->color >> 16) & 0xFF; // Vert
+            Uint8 bE = (shape->color >> 8) & 0xFF;  // Bleu
+            Uint8 aE = shape->color & 0xFF;         // Alpha
+            
+            SDL_SetRenderDrawColor(renderer, rE, gE, bE, aE);
+            
+            if (strcmp(shape->typeForm, "filled") == 0) {
+                filledEllipseColor(renderer, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry, shape->color);
+            } 
+            else if (strcmp(shape->typeForm, "empty") == 0) {
+                ellipseColor(renderer, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry, shape->color);
+            }
+            
+            if (shape->selected) {
+                ellipseColor(renderer, 
+                     shape->data.ellipse.x, 
+                     shape->data.ellipse.y, 
+                     shape->data.ellipse.rx + 5, // Agrandir rx
+                     shape->data.ellipse.ry + 5, // Agrandir ry
+                     0xFFFFFF00); // Couleur jaune
+            }
+            break;
+            
     }
 }
 
@@ -118,6 +200,7 @@ void addShape(Shape shape) {
     }
     shapes[shapeCount++] = shape;
 }
+
 void deleteShape(int index) {
     if (index < 0 || index >= shapeCount) return;
     for (int i = index; i < shapeCount - 1; i++) {
@@ -176,7 +259,7 @@ int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH)
     return (x >= rectX && x <= rectX + rectW && y >= rectY && y <= rectY + rectH);
 }
 // Vérifie si un point (px, py) est à l'intérieur d'un rectangle arrondi
-int isPointInRoundedRectangle(int px, int py, int rx, int ry, int width, int height, int radius) {
+int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 rx, Sint16 ry, Sint16 width, Sint16 height, Sint16 radius) {
     // Vérification si le point est dans la partie du rectangle sans arrondi
     if (px >= rx && px <= rx + width && py >= ry && py <= ry + height) {
         return 1; // Le point est dans le rectangle principal

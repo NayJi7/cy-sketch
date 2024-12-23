@@ -80,6 +80,9 @@ int findShapeAtCursor(int x, int y) {
             case SHAPE_RECTANGLE:
                 if (isPointInRectangle(x, y, shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height)) return i;
                 break;
+            case SHAPE_ELLIPSE:
+                if (isPointInEllipse(x, y, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry)) return i;
+                break;
             case SHAPE_ARC:
                 if(isPointInArc(x, y, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius, shape->data.arc.start_angle, shape->data.arc.end_angle))return i;
                 break;

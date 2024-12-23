@@ -12,7 +12,7 @@ int drawEllipse(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int 
 
 int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color);
 
-int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint32 color, char *type);
+int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, Uint32 color, char *type);
 
 int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint32 color, char *type);
 

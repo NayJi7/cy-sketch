@@ -17,6 +17,7 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
     }
     else
     {
+        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
         
         if (handleEvents(renderer, texture) == -1) return -1;
 
@@ -35,7 +36,8 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
         renderTexture(renderer, texture, 750);
         if (handleEvents(renderer, texture) == -1) return -1;
         // Rétablir la cible de rendu par défaut
-        SDL_SetRenderTarget(renderer, NULL); 
+        SDL_SetRenderTarget(renderer, NULL);
+ 
     }
 }
 
@@ -116,27 +118,36 @@ int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radi
  * @param color The color of the rectangle in Uint32 format (0xRRGGBBAA).
  * @param type Specifies the type of rectangle ("empty" for outline, "filled" for solid).
  */
-int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint32 color, char *type) {
+int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, Uint32 color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid instantRectangle type: %s\n", type);
     }
     else
     {
+        // Définir la couleur de dessin
+        Uint8 r = (color & 0xFF000000) >> 24; // Rouge
+        Uint8 g = (color & 0x00FF0000) >> 16; // Vert
+        Uint8 b = (color & 0x0000FF00) >> 8;  // Bleu
+        Uint8 a = (color & 0x000000FF);       // Alpha
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+        // Créer un SDL_Rect avec les dimensions fournies
+        SDL_Rect rect = {x, y, w, h};
+
         if (handleEvents(renderer, texture) == -1) return -1;
 
         if (strcmp(type, "empty") == 0) {
-            if (rectangleColor(renderer, x, y, w, h, color) != 0) {
+            if (SDL_RenderDrawRect(renderer, &rect) != 0) {
                 printf("Error in rectangleColor: %s\n", SDL_GetError());      
             }
         } else if (strcmp(type, "filled") == 0) {
-            if (boxColor(renderer, x, y, w, h, color) != 0) {
+            if (SDL_RenderFillRect(renderer, &rect) != 0) {
                 printf("Error in boxColor: %s\n", SDL_GetError());                
             }
         } 
         renderTexture(renderer, texture, 750);
         if (handleEvents(renderer, texture) == -1) return -1;  
-        // Rétablir la cible de rendu par défaut
-        SDL_SetRenderTarget(renderer, NULL); 
+        SDL_SetRenderTarget(renderer, NULL);
     }
 }
 
@@ -174,6 +185,7 @@ int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1
                  
             }
         } 
+        
         renderTexture(renderer, texture, 750);
         if (handleEvents(renderer, texture) == -1) return -1;
         // Rétablir la cible de rendu par défaut
@@ -817,6 +829,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         newShape.selected = false;
         newShape.color = color;
         newShape.rotation = 0;
+        newShape.typeForm = type;
         newShape.data.circle.x = x;
         newShape.data.circle.y = y;
         newShape.data.circle.radius = radius;
@@ -832,8 +845,12 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         char *type = va_arg(args, char*);
 
         if (isAnimated) {
+
             if(drawAnimatedRectangle(renderer, texture, x, y, w, h, color, type) == -1) return -1;
+
         } else {
+
+
             if(drawRectangle(renderer, texture, x, y, w, h, color, type) == -1) return -1;
         }
 
@@ -843,6 +860,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         newShape.selected = false;
         newShape.color = color;
         newShape.rotation = 0;
+        newShape.typeForm = type;
         newShape.data.rectangle.x = x;
         newShape.data.rectangle.y = y;
         newShape.data.rectangle.width = w;
@@ -871,6 +889,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         newShape.selected = false;
         newShape.color = color;
         newShape.rotation = 0;
+        newShape.typeForm = type;
         newShape.data.arc.x = x;
         newShape.data.arc.y = y;
         newShape.data.arc.radius = radius;
@@ -899,6 +918,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
             newShape.selected = false;
             newShape.color = color;
             newShape.rotation = 0;
+            newShape.typeForm = type;
             newShape.data.rounded_rectangle.x = x;
             newShape.data.rounded_rectangle.y = y;
             newShape.data.rounded_rectangle.w = w;
@@ -923,6 +943,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
             newShape.selected = false;
             newShape.color = color;
             newShape.rotation = 0;
+            newShape.typeForm = type;
             newShape.data.rounded_rectangle.x1 = x1;
             newShape.data.rounded_rectangle.y1 = y1;
             newShape.data.rounded_rectangle.x2 = x2;
@@ -952,6 +973,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         newShape.selected = false;
         newShape.color = color;
         newShape.rotation = 0;
+        newShape.typeForm = type;
         newShape.data.ellipse.x = x;
         newShape.data.ellipse.y = y;
         newShape.data.ellipse.rx = rx;
@@ -980,6 +1002,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         newShape.selected = false;
         newShape.color = color;
         newShape.rotation = 0;
+        newShape.typeForm = type;
         newShape.data.line.x1 = x1;
         newShape.data.line.y1 = y1;
         newShape.data.line.x2 = x2;
@@ -1008,6 +1031,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         newShape.selected = false;
         newShape.color = color;
         newShape.rotation = 0;
+        newShape.typeForm = type;
         newShape.data.polygon.cx = cx;
         newShape.data.polygon.cy = cy;
         newShape.data.polygon.radius = radius;

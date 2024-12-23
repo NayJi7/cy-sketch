@@ -21,11 +21,12 @@ typedef struct {
     bool selected;        // Indique si la forme est sélectionnée
     Uint32 color;         // Couleur de la forme
     double rotation;      // Rotation en degrés
+    char* typeForm;
     union {
         struct { int x, y, radius; } circle;           // Données pour un cercle
         struct { int x, y, rx, ry; } ellipse;          // Données pour une ellipse
         struct { int x, y, radius, start_angle, end_angle; } arc; // Données pour un arc
-        struct { int x, y, width, height; } rectangle; // Données pour un rectangle
+        struct { int x, y, width, height;} rectangle; // Données pour un rectangle
         struct { Sint16 x1, y1, x2, y2, radius; int x, y, w, h, rad ;} rounded_rectangle; // Rectangle arrondi
         struct { int cx, cy, radius, sides; } polygon; // Données pour un polygone
         struct { Sint16 x1, y1, x2, y2; Uint8 thickness; } line; // Données pour une ligne
@@ -50,7 +51,7 @@ int isPointInCircle(int x, int y, int cx, int cy, int radius);
 int isPointInEllipse(int x, int y, int cx, int cy, int rx, int ry);
 int isPointInArc(int x, int y, int cx, int cy, int radius, int startAngle, int endAngle);
 int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH);
-int isPointInRoundedRectangle(int px, int py, int rx, int ry, int width, int height, int radius);
+int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 rx, Sint16 ry, Sint16 width, Sint16 height, Sint16 radius);
 int isPointInPolygon(int px, int py, int cx, int cy, int radius, int sides);
 int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance);
 

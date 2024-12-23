@@ -1,87 +1,81 @@
 draw/form.c: In function ‘drawCircle’:
-draw/form.c:40:1: warning: control reaches end of non-void function [-Wreturn-type]
-   40 | }
+draw/form.c:42:1: warning: control reaches end of non-void function [-Wreturn-type]
+   42 | }
       | ^
 draw/form.c: In function ‘drawEllipse’:
-draw/form.c:79:1: warning: control reaches end of non-void function [-Wreturn-type]
-   79 | }
+draw/form.c:81:1: warning: control reaches end of non-void function [-Wreturn-type]
+   81 | }
       | ^
 draw/form.c: In function ‘drawArc’:
-draw/form.c:105:1: warning: control reaches end of non-void function [-Wreturn-type]
-  105 | }
+draw/form.c:107:1: warning: control reaches end of non-void function [-Wreturn-type]
+  107 | }
       | ^
 draw/form.c: In function ‘drawRectangle’:
-draw/form.c:141:1: warning: control reaches end of non-void function [-Wreturn-type]
-  141 | }
+draw/form.c:152:1: warning: control reaches end of non-void function [-Wreturn-type]
+  152 | }
       | ^
 draw/form.c: In function ‘drawRoundedRectangle’:
-draw/form.c:182:1: warning: control reaches end of non-void function [-Wreturn-type]
-  182 | }
+draw/form.c:194:1: warning: control reaches end of non-void function [-Wreturn-type]
+  194 | }
       | ^
 draw/form.c: In function ‘drawCustomPolygon’:
-draw/form.c:261:1: warning: control reaches end of non-void function [-Wreturn-type]
-  261 | }
+draw/form.c:273:1: warning: control reaches end of non-void function [-Wreturn-type]
+  273 | }
       | ^
 draw/form.c: In function ‘drawLine’:
-draw/form.c:304:1: warning: control reaches end of non-void function [-Wreturn-type]
-  304 | }
+draw/form.c:316:1: warning: control reaches end of non-void function [-Wreturn-type]
+  316 | }
       | ^
 draw/form.c: In function ‘drawAnimatedCircle’:
-draw/form.c:350:1: warning: control reaches end of non-void function [-Wreturn-type]
-  350 | }
+draw/form.c:362:1: warning: control reaches end of non-void function [-Wreturn-type]
+  362 | }
       | ^
 draw/form.c: In function ‘drawAnimatedRectangle’:
-draw/form.c:423:1: warning: control reaches end of non-void function [-Wreturn-type]
-  423 | }
+draw/form.c:435:1: warning: control reaches end of non-void function [-Wreturn-type]
+  435 | }
       | ^
 draw/form.c: In function ‘drawAnimatedRoundedRectangle’:
-draw/form.c:507:1: warning: control reaches end of non-void function [-Wreturn-type]
-  507 | }
+draw/form.c:519:1: warning: control reaches end of non-void function [-Wreturn-type]
+  519 | }
       | ^
 draw/form.c: In function ‘drawAnimatedEllipse’:
-draw/form.c:577:1: warning: control reaches end of non-void function [-Wreturn-type]
-  577 | }
+draw/form.c:589:1: warning: control reaches end of non-void function [-Wreturn-type]
+  589 | }
       | ^
 draw/form.c: In function ‘drawAnimatedArc’:
-draw/form.c:625:1: warning: control reaches end of non-void function [-Wreturn-type]
-  625 | }
+draw/form.c:637:1: warning: control reaches end of non-void function [-Wreturn-type]
+  637 | }
       | ^
 draw/form.c: In function ‘drawAnimatedCustomPolygon’:
-draw/form.c:732:1: warning: control reaches end of non-void function [-Wreturn-type]
-  732 | }
+draw/form.c:744:1: warning: control reaches end of non-void function [-Wreturn-type]
+  744 | }
       | ^
 draw/form.c: In function ‘drawAnimatedLine’:
-draw/form.c:785:1: warning: control reaches end of non-void function [-Wreturn-type]
-  785 | }
+draw/form.c:797:1: warning: control reaches end of non-void function [-Wreturn-type]
+  797 | }
       | ^
-draw/clickEvents.c: In function ‘drawShape’:
-draw/clickEvents.c:230:1: warning: control reaches end of non-void function [-Wreturn-type]
-  230 | }
+draw/form.c: In function ‘drawShape’:
+draw/form.c:1050:1: warning: control reaches end of non-void function [-Wreturn-type]
+ 1050 | }
       | ^
-draw/clickEvents.c: In function ‘drawShape’:
-draw/clickEvents.c:237:1: warning: control reaches end of non-void function [-Wreturn-type]
-  237 | }
-      | ^
-draw/clickEvents.c: In function ‘drawShape’:
-draw/clickEvents.c:237:1: warning: control reaches end of non-void function [-Wreturn-type]
-  237 | }
-      | ^
-draw/clickEvents.c: In function ‘drawShape’:
-draw/clickEvents.c:230:1: warning: control reaches end of non-void function [-Wreturn-type]
-  230 | }
-      | ^
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:26:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   26 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:26:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:26:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
 draw/formEvents.c: In function ‘updateShapeOnTexture’:
-draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
-   76 |     switch (shape->type) {
+draw/formEvents.c:158:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  158 |     switch (shape->type) {
       |     ^~~~~~
-draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
-draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
-draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
-draw/formEvents.c:76:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
-draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
-   96 |     switch (shape->type) {
+draw/formEvents.c:158:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:158:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:158:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:158:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:178:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  178 |     switch (shape->type) {
       |     ^~~~~~
-draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
-draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
-draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
-draw/formEvents.c:96:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:178:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:178:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:178:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:178:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
