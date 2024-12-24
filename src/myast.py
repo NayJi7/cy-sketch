@@ -48,10 +48,23 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
             if current_position is not None and i >= current_position:
                 # If the current position is reached and variable is not found, raise an error
                 raise Exception(f"Variable '{value}' is used before initialization.")
-
+            
             if isinstance(node, tuple):
+                # function parameters
+                if node[0] == 'func' and len(node) == 4:
+                    params = node[2]  # Parameters of the function
+                    for i, param in enumerate(params):
+                        if value in param:
+                            if "int" in param:
+                                return "int", None
+                            elif "float" in param:
+                                return "float", None
+                            elif "char" and "[" in param:
+                                return "char*", None
+                            elif "char" in param:
+                                return "char", None
                 # Direct assignment or modification
-                if node[0] in ('assign', 'modify') and node[1] == value:
+                elif node[0] in ('assign', 'modify') and node[1] == value:
                     return resolve_value_and_find_variable(ast, node[2])[0], value
                 # Handle nested structures (if, for, while)
                 elif node[0] == 'if':
@@ -264,6 +277,82 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
     elif isinstance(node, str):
         return node
     
+    elif isinstance(node, tuple) and node[0] == 'func':
+        name = node[1]
+        params = node[2] if len(node) == 4 else []
+        bloc = node[3][1] if len(node) == 4 else node[2][1]
+
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+
+        ret = None
+        for instr in bloc:
+            if isinstance(instr, tuple) and instr[0] == 'ret':
+                ret = instr[1]
+                break
+
+        if ret == None:
+            c_code += f"void {name}("
+        else:
+            tp, value = resolve_value_and_find_variable(ast, ret, None)
+            c_code += f"{tp} {name}("
+
+        if params:
+            for i, param in enumerate(params):
+                    c_code += f"{translate_node_to_c(ast, param, 0, 0, 0)}"
+                    if i<len(params) - 1:
+                        c_code += ', '
+        c_code += f'){{\n'
+
+        for instr in bloc:
+            c_code += f"{translate_node_to_c(ast, instr, 1, tabulation+1, True)}"
+
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+
+        c_code += f'}}'
+
+        if newline > 0:
+            c_code += "\n" * newline
+
+    elif isinstance(node, tuple) and node[0] == 'func_call':
+        name = node[1]
+        params = node[2] if len(node) == 3 else []
+
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+
+        c_code += f"{name}("
+
+        if params:
+            for i, param in enumerate(params):
+                    c_code += f"{translate_node_to_c(ast, param, 0, 0, 0)}"
+                    if i<len(params) - 1:
+                        c_code += ', '
+        c_code += f')'
+
+        if semicolon:
+            c_code += ";"
+
+        if newline > 0:
+            c_code += "\n" * newline
+
+    elif isinstance(node, tuple) and node[0] == 'ret':
+        value = node[1]
+
+        c_code += "\n"
+
+        if tabulation > 0: 
+            c_code += "\t" * tabulation
+
+        c_code += f"return {value}"
+
+        if semicolon:
+            c_code += ";"  # Only one semicolon is added here
+
+        if newline > 0:
+            c_code += "\n" * newline
+    
     # Case: Operation artihmetic
     elif isinstance(node, tuple) and node[0] == 'op':
         operator = node[1]
@@ -287,7 +376,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
 
         if isinstance(value, str) and '"' in value:  # String case
             # Allocate memory for the string in `a` (previously declared as void*)
-            c_code += "\t" * tabulation + f'strcpy({var_name}, "{value.strip("\"")}")'  # Copy the string value
+            c_code += f'strcpy({var_name}, "{value.strip("\"")}")'  # Copy the string value
         elif isinstance(value, int):  # Integer case
             c_code += f'{var_name} = {value}'
         elif isinstance(value, float):  # Float case
@@ -295,7 +384,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
         elif isinstance(value, str):  # Identifier case (a string variable)
             var_type, value = resolve_value_and_find_variable(ast, value, current_position)
             if "char" in var_type:
-                c_code += "\t" * tabulation + f'strcpy({var_name},{value})'  # Copy the string value
+                c_code += f'strcpy({var_name},{value})'  # Copy the string value
             elif var_type == ("int" or "float"):
                 c_code += f'{var_name} = {value}'
             else:
@@ -328,7 +417,7 @@ def translate_node_to_c(ast, node, newline, tabulation, semicolon, current_posit
         if isinstance(value, str) and '"' in value:  # String case
             size = len(value) - 2
             c_code += f'char[{size}] {var_name};\n'
-            c_code += "\t" * tabulation + f'strcpy({var_name}, "{value.strip("\"")}")'
+            c_code += f'strcpy({var_name}, "{value.strip("\"")}")'
         elif isinstance(value, (int, float)):  # Number case
             c_code += f"{type(value).__name__} {var_name} = {value}"
         elif isinstance(value, str):  # Identifier
@@ -451,14 +540,23 @@ def translate_ast_to_c(ast):
     c_code += "#include <string.h>\n"
     c_code += "#include <math.h>\n\n"
 
+    c_code += "#define TRUE 1\n"
+    c_code += "#define FALSE 0\n\n"
+
     c_code += "/////////////////////////////////////////////////////////////////////////////////////////////////////\n"
     c_code += "// This is a generated file. It is useless to edit it as it will be regenerated at each compilation//\n"
     c_code += "/////////////////////////////////////////////////////////////////////////////////////////////////////\n\n"
 
-    c_code += f"int main() {{\n\n"
 
     if DEBUG:
         print("\n[DEBUG] Translating AST to C code...")
+
+    for i, node in enumerate(ast):
+        if isinstance(node, tuple) and node[0] == "func":
+            c_code += translate_node_to_c(ast, node, 2, 0, 0, current_position=0)
+            ast.pop(i)
+
+    c_code += f"int main() {{\n\n"
 
     try:
         for i, node in enumerate(ast):

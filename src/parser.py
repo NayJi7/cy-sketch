@@ -25,7 +25,10 @@ def p_instruction(p):
                    | modification
                    | conditionnelle
                    | boucle
-                   | bloc'''
+                   | bloc
+                   | function
+                   | func
+                   | return'''
     p[0] = p[1]
 # @}
 
@@ -65,6 +68,42 @@ def p_arg(p):
            | BOOLEAN
            | expression_arithmetic'''
     p[0] = p[1]
+# @}
+
+def p_type(p):
+    '''type : INT
+            | FLOAT
+            | CHAR'''
+    p[0] = p[1]
+
+def p_func_param(p):
+    '''fparametres : fparametres COMMA type IDENTIFIER
+                   | fparametres COMMA type IDENTIFIER LBRACKET NUMBER RBRACKET
+                   | type IDENTIFIER
+                   | type IDENTIFIER LBRACKET NUMBER RBRACKET'''
+    if len(p) == 5:
+        p[0] = p[1] + [p[3] + ' ' + p[4]]
+    elif len(p) == 8:
+        p[0] = p[1] + [p[3] + ' ' + str(p[4] + p[5] + str(p[6]) + p[7])]
+    elif len(p) == 3:
+        p[0] = [p[1] + ' ' + p[2]]
+    elif len(p) == 6:
+        p[0] = [p[1] + ' ' + str(p[2] + p[3] + str(p[4]) + p[5])]
+
+# @{
+# @brief Handles function declaration
+def p_function(p):
+    '''function : FUNC IDENTIFIER LPAREN fparametres RPAREN bloc
+                | FUNC IDENTIFIER LPAREN RPAREN bloc'''
+    p[0] = ('func', p[2], p[4], p[6]) if len(p) == 7 else ('func', p[2], p[5]) 
+# @}
+
+# @{
+# @brief Handles function calls
+def p_func(p):
+    '''func : IDENTIFIER LPAREN parametres RPAREN
+            | IDENTIFIER LPAREN RPAREN'''
+    p[0] = ('func_call', p[1], p[3]) if len(p) == 5 else ('func_call', p[1]) 
 # @}
 
 # @{
@@ -129,6 +168,13 @@ def p_valeur(p):
               | STRING
               | BOOLEAN'''
     p[0] = p[1]
+# @}
+
+# @{
+# @brief Defines possible values: numbers, identifiers, strings, or booleans.
+def p_return(p):
+    '''return : RET valeur'''
+    p[0] = ('ret', p[2])
 # @}
 
 # @{
