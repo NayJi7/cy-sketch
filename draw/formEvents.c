@@ -31,7 +31,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             Uint8 gC = (shape->color >> 16) & 0xFF; // Vert
             Uint8 bC = (shape->color >> 8) & 0xFF;  // Bleu
             Uint8 aC = shape->color & 0xFF;         // Alpha
-            
+
             // Appliquer la couleur par défaut pour le remplissage
             SDL_SetRenderDrawColor(renderer, rC, gC, bC, aC);
 
@@ -44,32 +44,135 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             if (shape->selected) {
                 circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, 0xFFFFFF00);
             }
+
+            // Dessiner une "aiguille" ou un indicateur pour montrer la rotation
+            double angle1 = shape->rotation * M_PI / 180.0; // Convertir l'angle en radians
+            int endX = shape->data.circle.x + cos(angle1) * shape->data.circle.radius;
+            int endY = shape->data.circle.y + sin(angle1) * shape->data.circle.radius;
+
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Rouge pour l'aiguille
+            SDL_RenderDrawLine(renderer, shape->data.circle.x, shape->data.circle.y, endX, endY);
             break;
     
         case SHAPE_RECTANGLE:
 
-            Uint8 rR = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gR = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bR = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aR = shape->color & 0xFF;         // Alpha
-            
+            Uint8 rR = (shape->color >> 24) & 0xFF;
+            Uint8 gR = (shape->color >> 16) & 0xFF;
+            Uint8 bR = (shape->color >> 8) & 0xFF;
+            Uint8 aR = shape->color & 0xFF;
+
             SDL_SetRenderDrawColor(renderer, rR, gR, bR, aR);
 
+            int cx = shape->data.rectangle.x + shape->data.rectangle.width / 2;
+            int cy = shape->data.rectangle.y + shape->data.rectangle.height / 2;
+            double angle = shape->rotation * M_PI / 180.0;
+
+            SDL_Point points[5];
+            SDL_Point selectionPoints[5];
+            int offset = 5; // Espace autour pour le contour
+
+            // Calcul des points du rectangle
+            points[0].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
+            points[0].y = sin(angle) * (shape->data.rectangle.x - cx) + cos(angle) * (shape->data.rectangle.y - cy) + cy;
+
+            points[1].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
+            points[1].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) + cos(angle) * (shape->data.rectangle.y - cy) + cy;
+
+            points[2].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cx;
+            points[2].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cy;
+
+            points[3].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cx;
+            points[3].y = sin(angle) * (shape->data.rectangle.x - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cy;
+
+            points[4] = points[0]; // Fermer le rectangle
+
+            // Calcul des points pour le contour jaune
+            for (int i = 0; i < 4; i++) {
+                double dx = points[i].x - cx;
+                double dy = points[i].y - cy;
+
+                // Ajuster les points du contour
+                selectionPoints[i].x = points[i].x + (dx > 0 ? offset : -offset);
+                selectionPoints[i].y = points[i].y + (dy > 0 ? offset : -offset);
+            }
+            selectionPoints[4] = selectionPoints[0]; // Fermer le contour
+
             // Dessiner le rectangle
-            SDL_Rect rect = {shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height};
             if (strcmp(shape->typeForm, "filled") == 0) {
-                SDL_RenderFillRect(renderer, &rect);
+                filledPolygonColor(renderer, 
+                                    (Sint16[]){points[0].x, points[1].x, points[2].x, points[3].x}, 
+                                    (Sint16[]){points[0].y, points[1].y, points[2].y, points[3].y}, 
+                                    4, shape->color);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                SDL_RenderDrawRect(renderer, &rect);
+                SDL_RenderDrawLines(renderer, points, 5);
             }
 
+            // Dessiner le contour jaune si sélectionné
             if (shape->selected) {
-                // Contour rectangulaire en jaune
                 SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-                SDL_Rect selectionRect = {rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10};
-                SDL_RenderDrawRect(renderer, &selectionRect);
+                SDL_RenderDrawLines(renderer, selectionPoints, 5);
             }
             break;
+
+        case SHAPE_ELLIPSE:
+            Uint8 rE = (shape->color >> 24) & 0xFF; // Rouge
+            Uint8 gE = (shape->color >> 16) & 0xFF; // Vert
+            Uint8 bE = (shape->color >> 8) & 0xFF;  // Bleu
+            Uint8 aE = shape->color & 0xFF;         // Alpha
+
+            SDL_SetRenderDrawColor(renderer, rE, gE, bE, aE);
+
+            int cxE = shape->data.ellipse.x;
+            int cyE = shape->data.ellipse.y;
+            double angleE = shape->rotation * M_PI / 180.0; // Convertir l'angle en radians
+
+            // Points de l'ellipse pour la rotation
+            SDL_Point ellipsePoints[36]; // Points pour dessiner l'ellipse
+            int pointCount = 36; // Nombre de points pour approximer l'ellipse
+
+            for (int i = 0; i < pointCount; i++) {
+                double theta = (2 * M_PI * i) / pointCount;
+                double dx = shape->data.ellipse.rx * cos(theta);
+                double dy = shape->data.ellipse.ry * sin(theta);
+                ellipsePoints[i].x = cos(angleE) * dx - sin(angleE) * dy + cxE;
+                ellipsePoints[i].y = sin(angleE) * dx + cos(angleE) * dy + cyE;
+            }
+
+            // Dessiner l'ellipse
+            if (strcmp(shape->typeForm, "filled") == 0) {
+                // Remplir l'ellipse avec un polygone
+                Sint16 xCoords[36];
+                Sint16 yCoords[36];
+                for (int i = 0; i < pointCount; i++) {
+                    xCoords[i] = ellipsePoints[i].x;
+                    yCoords[i] = ellipsePoints[i].y;
+                }
+                filledPolygonColor(renderer, xCoords, yCoords, pointCount, shape->color);
+            } 
+            else if (strcmp(shape->typeForm, "empty") == 0) {
+                // Dessiner uniquement le contour
+                SDL_RenderDrawLines(renderer, ellipsePoints, pointCount);
+                SDL_RenderDrawLine(renderer, ellipsePoints[pointCount - 1].x, ellipsePoints[pointCount - 1].y, ellipsePoints[0].x, ellipsePoints[0].y);
+            }
+
+            // Contour jaune si sélectionné
+            if (shape->selected) {
+                SDL_Point selectionPoints[36];
+                for (int i = 0; i < pointCount; i++) {
+                    double theta = (2 * M_PI * i) / pointCount;
+                    double dx = (shape->data.ellipse.rx + 5) * cos(theta); // Augmenter les rayons
+                    double dy = (shape->data.ellipse.ry + 5) * sin(theta);
+                    selectionPoints[i].x = cos(angleE) * dx - sin(angleE) * dy + cxE;
+                    selectionPoints[i].y = sin(angleE) * dx + cos(angleE) * dy + cyE;
+                }
+
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Jaune
+                SDL_RenderDrawLines(renderer, selectionPoints, pointCount);
+                SDL_RenderDrawLine(renderer, selectionPoints[pointCount - 1].x, selectionPoints[pointCount - 1].y, selectionPoints[0].x, selectionPoints[0].y);
+            }
+            break;
+
+
 
         case SHAPE_ROUNDED_RECTANGLE:
             Uint8 rRR = (shape->color >> 24) & 0xFF; // Rouge
@@ -112,31 +215,6 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             }
             break;
 
-
-        case SHAPE_ELLIPSE:
-            Uint8 rE = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gE = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bE = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aE = shape->color & 0xFF;         // Alpha
-            
-            SDL_SetRenderDrawColor(renderer, rE, gE, bE, aE);
-            
-            if (strcmp(shape->typeForm, "filled") == 0) {
-                filledEllipseColor(renderer, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry, shape->color);
-            } 
-            else if (strcmp(shape->typeForm, "empty") == 0) {
-                ellipseColor(renderer, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry, shape->color);
-            }
-            
-            if (shape->selected) {
-                ellipseColor(renderer, 
-                     shape->data.ellipse.x, 
-                     shape->data.ellipse.y, 
-                     shape->data.ellipse.rx + 5, // Agrandir rx
-                     shape->data.ellipse.ry + 5, // Agrandir ry
-                     0xFFFFFF00); // Couleur jaune
-            }
-            break;
             
     }
 }

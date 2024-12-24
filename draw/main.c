@@ -60,10 +60,10 @@ int main(){
     SDL_RenderClear(renderer);
 
     
-    if(drawShape(renderer, mainTexture, "animated", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "filled") == -1) return 0;
     if(drawShape(renderer, mainTexture, "instant", "circle", 300, 270, 60, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "instant", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, mainTexture, "animated", "ellipse", 500, 370, 70, 50, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "animated", "arc", 400, 300, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "polygon", 630, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "animated", "line", 100, 100, 400, 300, 2, 0xFF00FF00, "filled") == -1) return 0;
@@ -160,10 +160,10 @@ int main(){
                             }
                             break;
                         //marche pas 
-                        case SDLK_a: // Rotation anti-horaire
+                        case SDLK_q: // Rotation anti-horaire
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
-                                    shapes[i].rotation -= 10;
+                                    shapes[i].rotation -= 5;
                                     if (shapes[i].rotation < 0) shapes[i].rotation += 360; // Gérer la rotation négative
                                 }
                             }
@@ -172,7 +172,7 @@ int main(){
                         case SDLK_d: // Rotation horaire
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
-                                    shapes[i].rotation += 50;
+                                    shapes[i].rotation += 5;
                                     if (shapes[i].rotation >= 360) shapes[i].rotation -= 360; // Gérer les dépassements
                                 }
                             }
