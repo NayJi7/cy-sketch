@@ -1,7 +1,7 @@
 import os
 import sys
 import ply.yacc as yacc
-from lexer import tokens, find_column
+from lexer import tokens, find_column, suggest_keyword
 
 # === 1. Parser Rules ===
 
@@ -226,15 +226,42 @@ def p_boucle(p):
 
 # @{
 # @brief Handles syntax errors and provides suggestions based on the error type.
+# List of valid keywords and tokens in your language
 def p_error(p):
     if p:
+        # Basic error message
         print(f"\033[31mSyntax error: '{p.value}' at line {p.lineno}, column {find_column(p.lexer.lexdata, p.lexpos)}\033[0m")
-        if p.type == "RPAREN":
-            print("\033[34mSuggestion: Check matching parentheses '('.\033[0m")
+        
+        # Provide specific suggestions based on token type
+        if p.type in ("LPAREN", "RPAREN"):
+            print("\033[34mSuggestion: Ensure parenthesis '(' and ')' are balanced.\033[0m")
+        elif p.type in ("LBRACE", "RBRACE"):
+            print("\033[34mSuggestion: Check that all braces '{' and '}' are properly matched.\033[0m")
         elif p.type == "SEMICOLON":
-            print("\033[34mSuggestion: Verify semicolons ';'.\033[0m")
+            print("\033[34mSuggestion: Remove the semicolons ';' at the end of each statement where it's not required.\033[0m")
+        elif p.type == "IDENTIFIER":
+            # Suggest corrections for identifiers
+            suggestions = suggest_keyword(p.value)
+            if suggestions:
+                print(f"\033[34mDid you mean: {', '.join(suggestions)}?\033[0m")
+            else:
+                print("\033[34mSuggestion: Check if '{p.value}' is declared or is a valid keyword.\033[0m")
+        elif p.type in ("NUMBER", "STRING", "BOOLEAN"):
+            print("\033[34mSuggestion: Check the format of the value or verify its context in the statement.\033[0m")
+        elif p.type in ("PLUS", "MINUS", "TIMES", "DIVIDE"):
+            print("\033[34mSuggestion: Ensure the arithmetic operation has valid operands.\033[0m")
+        elif p.type in ("EQ", "NEQ", "LT", "GT", "LE", "GE"):
+            print("\033[34mSuggestion: Verify the comparison expression and its operands.\033[0m")
+        elif p.type == "COMMA":
+            print("\033[34mSuggestion: Check the use of commas in parameter lists or argument separation.\033[0m")
+        else:
+            print("\033[34mSuggestion: Verify syntax and refer to the language grammar.\033[0m")
     else:
+        # Handle unexpected end of input
         print("\033[31mSyntax error: unexpected end of file.\033[0m")
+        print("\033[34mSuggestion: Ensure all blocks, parentheses, or braces are properly closed.\033[0m")
+
+    sys.exit(1)
 # @}
 
 # === 3. Parser Initialization ===

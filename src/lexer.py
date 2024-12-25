@@ -1,4 +1,9 @@
 import ply.lex as lex
+from difflib import get_close_matches
+
+def suggest_keyword(word):
+    suggestions = get_close_matches(word, keywords.keys(), n=1, cutoff=0.6)
+    return suggestions[0] if suggestions else None
 
 # === 1. Definition of Tokens ===
 
@@ -13,7 +18,6 @@ keywords = {
     'int' : 'INT',
     'float' : 'FLOAT',
     'char' : 'CHAR',
-    'str' : 'STR',
     'return': 'RET',
     'draw': 'DRAW',
     'cursor': 'CURSOR',
@@ -79,11 +83,21 @@ t_COLON = r':'
 # @return Token object with the correct type
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
-    if t.value in ['True', 'False']:  # Handle boolean literals
+    if t.value in keywords:
+        t.lexer.current_state = t.value
+        t.type = keywords[t.value]
+    elif t.lexer.current_state in ["var", "char", "float", "int", "func", "if", "for", "while"]:
+        # Skip suggestion checks in these contexts
+        t.type = 'IDENTIFIER'
+    elif t.value in ['True', 'False']:  # Handle boolean literals
         t.type = 'BOOLEAN'
         t.value = (t.value == 'True')
     else:
-        t.type = keywords.get(t.value, 'IDENTIFIER')
+        # Check for similarity with keywords
+        suggestion = suggest_keyword(t.value)
+        if suggestion:
+            raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}. Did you mean '{suggestion}'?")
+        t.type = 'IDENTIFIER'  # Default to identifier if no suggestion
     return t
 
 # @brief Matches numbers, both integers and floats
@@ -135,8 +149,7 @@ def t_COMMENT_MULTILINE(t):
 # @brief Handles lexical errors by printing the offending character and skipping it
 # @param t Token object containing the unmatched value
 def t_error(t):
-    print(f"\033[31mLexical error: illegal character '{t.value[0]}' at line {t.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}\033[0m")
-    t.lexer.skip(1)
+    raise Exception(f"LexicalError : illegal character '{t.value[0]}' at line {t.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
 
 # @brief Finds the column number of a given position in the input text
 # @param input_text The full input string

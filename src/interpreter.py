@@ -34,11 +34,17 @@ def run_file(file_path):
         for i, line in enumerate(lines, start=1):
             print(f"[DEBUG] {i}\t{line}")
 
+    if DEBUG:
+        print(f"\n[DEBUG] TOKENIZATION ...")
     # Lexical Analysis
-    lexer.input(filetxt)
-    tokens = list(lexer)
+    try:
+        lexer.input(filetxt)
+        tokens = list(lexer)
+    except Exception as e:
+        print_error(f"Error during tokenization : {e}")
 
     if DEBUG:
+        print(f"\n[DEBUG] SUCCESS !")
         print(f"\n[DEBUG] TOKENS :")
         for token in tokens:
             print(f"[DEBUG] {str(token).replace('LexToken', '')}")  # Print tokens
@@ -47,16 +53,16 @@ def run_file(file_path):
     lexer.lineno = 1  # Reset the line number
     try:
         ast = parser.parse(filetxt, lexer)
-        if DEBUG:
-            print(f"\n[DEBUG] AST :")
+    except Exception as e:
+        print_error(f"Error during parsing : {e}")
+        
+    if DEBUG:
+        print(f"\n[DEBUG] AST :")
         if isinstance(ast, list):
             for node in ast:
                 print(f"[DEBUG] {node}")
         elif ast is not None:
             print(f"[DEBUG] Single AST Node: {ast}")
-    except Exception as e:
-        print_error(f"Error during parsing: {e}")
-        return
 
     if ast:
         # Execute the AST
@@ -80,42 +86,69 @@ def run_interactive():
         readline.read_history_file(history_file)
     atexit.register(readline.write_history_file, history_file)
     readline.set_history_length(1000)
-
-    lexer = init_lexer()
-    parser = init_parser()
-
+    
     while True:
-        try:
-            text = input('draw++ > ')
-        except EOFError:
-            break
+        lexer = init_lexer()
+        parser = init_parser()
 
-        if text.lower() in ("e", "q"):
-            break
-        elif text.lower() == "c":
-            os.system('clear' if os.name == 'posix' else 'cls')
-            continue
-        elif text.lower() == "r":
-            os.system(f'python3 {__file__}')
-            break
-        elif text.strip() == "":
-            continue
+        while True:
+            try:
+                text = input('draw++ > ')
+            except EOFError:
+                break
 
-        # Lexical Analysis
-        lexer.input(text)
-        tokens = list(lexer)
+            if text.lower() in ("e", "q"):
+                sys.exit(0)
+            elif text.lower() == "c":
+                os.system('clear' if os.name == 'posix' else 'cls')
+                continue
+            elif text.lower() == "r":
+                os.system('clear' if os.name == 'posix' else 'cls')
+                if DEBUG : print("[DEBUG] Debug mode activated.\n")
+                break
+            elif text.strip() == "":
+                continue
 
-        if DEBUG:
-            print(f"[DEBUG] Tokens : {tokens}")
-
-        # Syntax Analysis
-        try:
-            ast = parser.parse(text, lexer=lexer)
             if DEBUG:
-                print(f"[DEBUG] AST : {ast}")
-        except Exception as e:
-            print_error(f"Error during parsing: {e}")
-            continue
+                print(f"\n[DEBUG] Input : stdin")
+                print(f"[DEBUG] Content :\n")
+                print(f"[DEBUG] 1\t{text}")
+
+            if DEBUG:
+                print(f"\n[DEBUG] TOKENIZATION ...")
+            # Lexical Analysis
+            try:
+                lexer.input(text)
+                tokens = list(lexer)
+            except Exception as e:
+                print_error_interractive(f"Error during tokenization : {e}")
+                break
+
+            if DEBUG:
+                print(f"\n[DEBUG] SUCCESS !")
+                print(f"\n[DEBUG] TOKENS :")
+                for token in tokens:
+                    print(f"[DEBUG] {str(token).replace('LexToken', '')}")  # Print tokens
+
+            # Syntax Analysis
+            lexer.lineno = 1  # Reset the line number
+            try:
+                ast = parser.parse(text, lexer)
+            except Exception as e:
+                print_error_interractive(f"Error during parsing : {e}")
+                break
+                
+            if DEBUG:
+                print(f"\n[DEBUG] AST :")
+            if isinstance(ast, list):
+                for node in ast:
+                    print(f"[DEBUG] {node}")
+            elif ast is not None:
+                print(f"[DEBUG] Single AST Node: {ast}")
+
+            if ast:
+                # Execute the AST
+                execute_ast(ast, DEBUG)
 # @}
 
 # === 6. Main Entry Point ===
