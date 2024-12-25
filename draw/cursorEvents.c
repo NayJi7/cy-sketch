@@ -72,6 +72,12 @@ void moveCursor(Cursor *cursor, int dx, int dy) {
 int findShapeAtCursor(int x, int y) {
     for (int i = 0; i < shapeCount; i++) {
         Shape *shape = &shapes[i];
+
+        // Vérifiez que le typeForm est valide pour éviter des formes incorrectes
+        if ((strcmp(shape->typeForm, "filled") != 0) && (strcmp(shape->typeForm, "empty") != 0)) {
+            continue; // Ignorer cette forme
+        }
+
         switch (shape->type) 
         {
             case SHAPE_CIRCLE:
@@ -88,8 +94,8 @@ int findShapeAtCursor(int x, int y) {
                 break;
             case SHAPE_ROUNDED_RECTANGLE:
                 if(isPointInRoundedRectangle(x, y, shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1, 
-                                                shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1, 
-                                                shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1, 
+                                                shape->data.rounded_rectangle.x2, 
+                                                shape->data.rounded_rectangle.y2, 
                                                 shape->data.rounded_rectangle.radius))return i;
                 break;
             case SHAPE_POLYGON:

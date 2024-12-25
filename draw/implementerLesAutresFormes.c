@@ -1,35 +1,4 @@
 switch (shape->type) {
-        case SHAPE_CIRCLE:
-            drawCircle(renderer, texture, 
-                       shape->data.circle.x, 
-                       shape->data.circle.y, 
-                       shape->data.circle.radius, 
-                       shape->color, 
-                       "filled");
-
-            if (shape->selected) {
-                drawCircle(renderer, texture, 
-                       shape->data.circle.x, 
-                       shape->data.circle.y, 
-                       shape->data.circle.radius + 5, 
-                       0xFFFFFF00, 
-                       "empty");
-            }
-
-        case SHAPE_RECTANGLE: {
-            SDL_Rect rect = {shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height};
-            if (strcmp(shape->typeForm, "filled") == 0) {
-                SDL_RenderFillRect(renderer, &rect);
-            } else if (strcmp(shape->typeForm, "empty") == 0) {
-                SDL_RenderDrawRect(renderer, &rect);
-            }
-
-            if (shape->selected) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-                SDL_Rect selectionRect = {rect.x - 5, rect.y - 5, rect.w + 10, rect.h + 10};
-                SDL_RenderDrawRect(renderer, &selectionRect);
-            }
-        }           
         case SHAPE_ELLIPSE:
             if (strcmp(shape->typeForm, "filled") == 0) {
                 filledEllipseColor(renderer, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry, shape->color);

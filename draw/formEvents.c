@@ -23,9 +23,13 @@ int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
 
 void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
-    switch (shape->type) {
-        
-
+    
+    if (shape->typeForm == NULL || 
+        (strcmp(shape->typeForm, "filled") != 0 && strcmp(shape->typeForm, "empty") != 0)) {
+        return; // Ne rien dessiner pour ce shape
+    }
+    
+    switch (shape->type) {  
         case SHAPE_CIRCLE:
             Uint8 rC = (shape->color >> 24) & 0xFF; // Rouge
             Uint8 gC = (shape->color >> 16) & 0xFF; // Vert
@@ -172,6 +176,49 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             }
             break;
 
+        case SHAPE_LINE:
+            Uint8 rL = (shape->color >> 24) & 0xFF; // Rouge
+            Uint8 gL = (shape->color >> 16) & 0xFF; // Vert
+            Uint8 bL = (shape->color >> 8) & 0xFF;  // Bleu
+            Uint8 aL = shape->color & 0xFF;         // Alpha
+
+            SDL_SetRenderDrawColor(renderer, rL, gL, bL, aL);
+
+            int x1 = shape->data.line.x1;
+            int y1 = shape->data.line.y1;
+            int x2 = shape->data.line.x2;
+            int y2 = shape->data.line.y2;
+            int thickness = shape->data.line.thickness;
+
+            // Calcul des nouveaux points de la ligne avec rotation accumulée
+            if (shape->rotation != 0) {
+                int cx = (shape->data.line.x1 + shape->data.line.x2) / 2; // Centre de rotation
+                int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
+                double angle = shape->rotation * M_PI / 180.0;
+
+                // Rotation autour du centre
+                int rotatedX1 = cos(angle) * (shape->data.line.x1 - cx) - sin(angle) * (shape->data.line.y1 - cy) + cx;
+                int rotatedY1 = sin(angle) * (shape->data.line.x1 - cx) + cos(angle) * (shape->data.line.y1 - cy) + cy;
+                int rotatedX2 = cos(angle) * (shape->data.line.x2 - cx) - sin(angle) * (shape->data.line.y2 - cy) + cx;
+                int rotatedY2 = sin(angle) * (shape->data.line.x2 - cx) + cos(angle) * (shape->data.line.y2 - cy) + cy;
+
+                // Mettre à jour les coordonnées pour conserver la rotation accumulée
+                x1 = rotatedX1;
+                y1 = rotatedY1;
+                x2 = rotatedX2;
+                y2 = rotatedY2;
+            }
+
+            // Dessiner la ligne
+            thickLineColor(renderer, x1, y1, x2, y2, thickness, shape->color);
+
+            // Dessiner un contour jaune si sélectionné
+            if (shape->selected) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Jaune
+                SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+            }
+            break;
+
 
 
         case SHAPE_ROUNDED_RECTANGLE:
@@ -218,6 +265,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             
     }
 }
+
 
 void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
     SDL_SetRenderTarget(renderer, NULL);
@@ -286,6 +334,157 @@ void deleteShape(int index) {
     }
     shapeCount--;
 }
+
+void zoomShape(Shape *shape, float zoomFactor) {
+    switch (shape->type) {
+        case SHAPE_RECTANGLE:
+            shape->data.rectangle.width += (int)(zoomFactor * 10);
+            shape->data.rectangle.height += (int)(zoomFactor * 10);
+            break;
+
+        case SHAPE_CIRCLE:
+            shape->data.circle.radius += (int)(zoomFactor * 5);
+            break;
+
+        case SHAPE_ELLIPSE:
+            shape->data.ellipse.rx += (int)(zoomFactor * 5);
+            shape->data.ellipse.ry += (int)(zoomFactor * 5);
+            break;
+
+        case SHAPE_LINE:
+            int cx = (shape->data.line.x1 + shape->data.line.x2) / 2;
+            int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
+
+            shape->data.line.x1 += (int)((shape->data.line.x1 - cx) * zoomFactor * 0.1);
+            shape->data.line.y1 += (int)((shape->data.line.y1 - cy) * zoomFactor * 0.1);
+            shape->data.line.x2 += (int)((shape->data.line.x2 - cx) * zoomFactor * 0.1);
+            shape->data.line.y2 += (int)((shape->data.line.y2 - cy) * zoomFactor * 0.1);
+            break;
+
+        case SHAPE_ROUNDED_RECTANGLE:
+            shape->data.rounded_rectangle.x2 += (int)(zoomFactor * 10);
+            shape->data.rounded_rectangle.y2 += (int)(zoomFactor * 10);
+            shape->data.rounded_rectangle.radius += (int)(zoomFactor * 2);
+            break;
+
+        default:
+            // Ajouter d'autres formes si nécessaire
+            break;
+    }
+}
+
+void moveShapesWithMouse(Shape *shapes, int shapeCount, SDL_Event *event, Cursor *cursor) {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].selected) {
+            switch (shapes[i].type) {
+                case SHAPE_RECTANGLE:
+                    shapes[i].data.rectangle.x = event->motion.x - shapes[i].data.rectangle.width / 2;
+                    shapes[i].data.rectangle.y = event->motion.y - shapes[i].data.rectangle.height / 2;
+
+                    cursor->x = shapes[i].data.rectangle.x + shapes[i].data.rectangle.width / 2;
+                    cursor->y = shapes[i].data.rectangle.y + shapes[i].data.rectangle.height / 2;
+                    break;
+
+                case SHAPE_CIRCLE:
+                    shapes[i].data.circle.x = event->motion.x;
+                    shapes[i].data.circle.y = event->motion.y;
+
+                    cursor->x = shapes[i].data.circle.x;
+                    cursor->y = shapes[i].data.circle.y;
+                    break;
+
+                case SHAPE_ELLIPSE:
+                    shapes[i].data.ellipse.x = event->motion.x;
+                    shapes[i].data.ellipse.y = event->motion.y;
+
+                    cursor->x = shapes[i].data.ellipse.x;
+                    cursor->y = shapes[i].data.ellipse.y;
+                    break;
+
+                case SHAPE_LINE: {
+                    int lineWidth = shapes[i].data.line.x2 - shapes[i].data.line.x1;
+                    int lineHeight = shapes[i].data.line.y2 - shapes[i].data.line.y1;
+
+                    shapes[i].data.line.x1 = event->motion.x - lineWidth / 2;
+                    shapes[i].data.line.y1 = event->motion.y - lineHeight / 2;
+                    shapes[i].data.line.x2 = event->motion.x + lineWidth / 2;
+                    shapes[i].data.line.y2 = event->motion.y + lineHeight / 2;
+
+                    cursor->x = event->motion.x;
+                    cursor->y = event->motion.y;
+                    break;
+                }
+
+                case SHAPE_ROUNDED_RECTANGLE:
+                    shapes[i].data.rounded_rectangle.x1 = event->motion.x - 50;
+                    shapes[i].data.rounded_rectangle.y1 = event->motion.y - 50;
+                    shapes[i].data.rounded_rectangle.x2 = event->motion.x + 50;
+                    shapes[i].data.rounded_rectangle.y2 = event->motion.y + 50;
+
+                    cursor->x = (shapes[i].data.rounded_rectangle.x1 + shapes[i].data.rounded_rectangle.x2) / 2;
+                    cursor->y = (shapes[i].data.rounded_rectangle.y1 + shapes[i].data.rounded_rectangle.y2) / 2;
+                    break;
+            }
+        }
+    }
+}
+
+void moveSelectedShapes(Shape *shapes, int shapeCount, int dx, int dy) {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].selected) {
+            switch (shapes[i].type) {
+                case SHAPE_RECTANGLE:
+                    shapes[i].data.rectangle.x += dx;
+                    shapes[i].data.rectangle.y += dy;
+                    break;
+
+                case SHAPE_CIRCLE:
+                    shapes[i].data.circle.x += dx;
+                    shapes[i].data.circle.y += dy;
+                    break;
+
+                case SHAPE_ELLIPSE:
+                    shapes[i].data.ellipse.x += dx;
+                    shapes[i].data.ellipse.y += dy;
+                    break;
+
+                case SHAPE_LINE:
+                    shapes[i].data.line.x1 += dx;
+                    shapes[i].data.line.y1 += dy;
+                    shapes[i].data.line.x2 += dx;
+                    shapes[i].data.line.y2 += dy;
+                    break;
+
+                case SHAPE_ROUNDED_RECTANGLE:
+                    shapes[i].data.rounded_rectangle.x1 += dx;
+                    shapes[i].data.rounded_rectangle.y1 += dy;
+                    shapes[i].data.rounded_rectangle.x2 += dx;
+                    shapes[i].data.rounded_rectangle.y2 += dy;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+
+
+
+void rotateShape(Shape *shape, int angle) {
+    if (!shape->selected) return;
+
+    shape->rotation += angle;
+    if (shape->rotation >= 360) {
+        shape->rotation -= 360;
+    } else if (shape->rotation < 0) {
+        shape->rotation += 360;
+    }
+}
+
+
+
 void rotatePoint(int *x, int *y, int cx, int cy, double angle) {
     double rad = angle * M_PI / 180.0;
     int newX = cos(rad) * (*x - cx) - sin(rad) * (*y - cy) + cx;
@@ -337,24 +536,35 @@ int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH)
     return (x >= rectX && x <= rectX + rectW && y >= rectY && y <= rectY + rectH);
 }
 // Vérifie si un point (px, py) est à l'intérieur d'un rectangle arrondi
-int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 rx, Sint16 ry, Sint16 width, Sint16 height, Sint16 radius) {
-    // Vérification si le point est dans la partie du rectangle sans arrondi
-    if (px >= rx && px <= rx + width && py >= ry && py <= ry + height) {
-        return 1; // Le point est dans le rectangle principal
+
+int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 radius) {
+    // Vérification si le point est dans la partie rectangulaire centrale (sans les coins arrondis)
+    if (px >= x1 + radius && px <= x2 - radius && py >= y1 && py <= y2) {
+        return 1; // Le point est dans la zone rectangulaire centrale
     }
-    
-    // Vérification des coins arrondis : en vérifiant si le point est à l'intérieur de chaque arc de cercle
+
+    if (px >= x1 && px <= x2 && py >= y1 + radius && py <= y2 - radius) {
+        return 1; // Le point est dans les zones rectangulaires gauche/droite
+    }
+
+
+    // Vérification des coins arrondis (par rapport à leurs centres)
     // Coin supérieur gauche
-    if (isPointInCircle(px, py, rx + radius, ry + radius, radius)) return 1;
+    if (isPointInCircle(px, py, x1 + radius, y1 + radius, radius)) return 1;
+
     // Coin supérieur droit
-    if (isPointInCircle(px, py, rx + width - radius, ry + radius, radius)) return 1;
+    if (isPointInCircle(px, py, x2 - radius, y1 + radius, radius)) return 1;
+
     // Coin inférieur gauche
-    if (isPointInCircle(px, py, rx + radius, ry + height - radius, radius)) return 1;
+    if (isPointInCircle(px, py, x1 + radius, y2 - radius, radius)) return 1;
+
     // Coin inférieur droit
-    if (isPointInCircle(px, py, rx + width - radius, ry + height - radius, radius)) return 1;
-    
-    return 0; // Le point n'est pas dans le rectangle arrondi
+    if (isPointInCircle(px, py, x2 - radius, y2 - radius, radius)) return 1;
+
+    return 0; // Le point n'est pas dans le RoundedRectangle
 }
+
+
 int isPointInPolygon(int px, int py, int cx, int cy, int radius, int sides) {
     int i, j, c = 0;
     float angle, x1, y1, x2, y2;
