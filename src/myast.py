@@ -109,6 +109,38 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
 
 # === 3. AST Node Translation ===
 
+def make_prototype(ast, node):
+    c_code = ""
+
+    if DEBUG:
+        print(f"[DEBUG] Writting the prototypes of the functions")
+
+    if isinstance(node, tuple) and node[0] == 'func':
+        name = node[1]
+        params = node[2] if len(node) == 4 else []
+        bloc = node[3][1] if len(node) == 4 else node[2][1]
+
+        ret = None
+        for instr in bloc:
+            if isinstance(instr, tuple) and instr[0] == 'ret':
+                ret = instr[1]
+                break
+
+        if ret == None:
+            c_code += f"void {name}("
+        else:
+            tp, value = resolve_value_and_find_variable(ast, ret, None)
+            c_code += f"{tp} {name}("
+
+        if params:
+            for i, param in enumerate(params):
+                    c_code += f"{translate_node_to_c(ast, param, 0, 0, 0)}"
+                    if i<len(params) - 1:
+                        c_code += ', '
+        c_code += f');\n'
+
+        return c_code
+
 # @{
 # @brief Translates a single AST node to C code.
 # @param ast The abstract syntax tree containing program instructions.
@@ -551,10 +583,40 @@ def translate_ast_to_c(ast):
     if DEBUG:
         print("\n[DEBUG] Translating AST to C code...")
 
-    for i, node in enumerate(ast):
-        if isinstance(node, tuple) and node[0] == "func":
-            c_code += translate_node_to_c(ast, node, 2, 0, 0, current_position=0)
-            ast.pop(i)
+    c_code += "///////////////////////////\n"
+    c_code += "// Function's prototypes //\n"
+    c_code += "///////////////////////////\n\n"
+
+    try:
+        for i, node in enumerate(ast):
+            if isinstance(node, tuple) and node[0] == "func": # Gets the functions in the ast
+                c_code += make_prototype(ast, node) # Traduce the functions
+        c_code += '\n'
+    except Exception as e:
+        print_error(f"Error during the traduction of the fucntions AST : {e}")
+        return None  # Signal an error occurred
+
+    c_code += "/////////////////////////////\n"
+    c_code += "// Function's declarations //\n"
+    c_code += "/////////////////////////////\n\n"
+
+    topop = []
+    try:
+        for i, node in enumerate(ast):
+            if isinstance(node, tuple) and node[0] == "func": # Gets the functions in the ast
+                c_code += translate_node_to_c(ast, node, 2, 0, 0, current_position=0) # Traduce the functions
+                topop.append(i) # Save the node's position
+    except Exception as e:
+        print_error(f"Error during the traduction of the fucntions AST : {e}")
+        return None  # Signal an error occurred
+    
+    if topop:
+        for i,nodeidx in enumerate(topop): # we enumerate the list to parse and pop the function's nodes that has been translated
+            ast.pop(nodeidx - i) # - i because when you pop a node every index goes - 1. We keep the track using i
+
+    c_code += "///////////////////\n"
+    c_code += "// Main function //\n"
+    c_code += "///////////////////\n\n"
 
     c_code += f"int main() {{\n\n"
 
@@ -563,7 +625,7 @@ def translate_ast_to_c(ast):
             c_code += translate_node_to_c(ast, node, 1, 1, 1, current_position=i)
 
     except Exception as e:
-        print_error(f"Erreur pendant la traduction de l'AST : {e}")
+        print_error(f"Error during the traduction of the main AST : {e}")
         return None  # Signal an error occurred
 
     c_code += f"\n\treturn 0;\n"
