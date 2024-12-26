@@ -60,32 +60,44 @@ int main(){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    //rectangles ------
-    if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
+
     //circles ------
-    
-    if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "empty") == -1) return 0;
+
     //ellipses ------
-    if(drawShape(renderer, mainTexture, "instant", "ellipse", 400, 270, 70, 50, 0xFF0000FF, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "ellipse", 400, 270, 70, 50, 0xFF0000FF, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "ellipse", 300, 370, 70, 50, 0xFF00FF00, "empty") == -1) return 0;
+
     //lines ------
     //if(drawShape(renderer, mainTexture, "instant", "line", 200, 200, 300, 200, 2, 0xFF00FF00, "filled") == -1) return 0;
-    if(drawShape(renderer, mainTexture, "instant", "line", 100, 100, 400, 300, 20, 0xFFFF0000, "empty") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "line", 100, 100, 400, 300, 20, 0xFFFF0000, "empty") == -1) return 0;
 
-    //roundedrectangles ------
-    //NE MARCHE PAS POUR SELECTIONNER
-        //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 20, 0xFF00FF00, "empty") == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
-
-    // A FAIRE : 
-        //arcs ------
-        //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "animated", "arc", 400, 200, 100, 0, 180, 0xFF00FF00, "empty") == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "instant", "polygon", 530, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "instant", "polygon", 330, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
+    //polygones
+    //if(drawShape(renderer, mainTexture, "animated", "polygon", 530, 130, 100, 3, 0xFF808080, "empty") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "polygon", 330, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
     
+    
+//PROBLEMES __________________________________________________________
+    //REGLER LES COULEURS POUR LES ANIMATED FORMES
+
+
+    //NE MARCHE PAS POUR SELECTIONNER
+        //roundedrectangles ------
+        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 20, 0xFF00FF00, "empty") == -1) return 0;
+        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
+
+    //LA FORME DISPARAIT PAR UNE AUTRE A SON OPPOSER + PAS DE ROTATION
+        //arcs ------
+        if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
+        if(drawShape(renderer, mainTexture, "animated", "arc", 400, 200, 100, 0, 180, 0xFF00FF00, "empty") == -1) return 0;
+    
+    //REGLER LE DEZOOM
+        //rectangles ------
+        if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
+        if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
+//____________________________________________________________________     
+
 
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderCopy(renderer, mainTexture, NULL, NULL);
@@ -199,6 +211,20 @@ int main(){
                                     shapes[i].data.rounded_rectangle.x2,
                                     shapes[i].data.rounded_rectangle.y2,
                                     shapes[i].data.rounded_rectangle.radius)) {
+                                        shapes[i].selected = true;
+                                    } else {
+                                        shapes[i].selected = false;
+                                    }
+                                }
+                                else if(shapes[i].type == SHAPE_POLYGON) {
+                                    if(isPointInPolygon(cursor.x, cursor.y, shapes[i].data.polygon.cx, shapes[i].data.polygon.cy, shapes[i].data.polygon.radius, shapes[i].data.polygon.sides)) {
+                                        shapes[i].selected = true;
+                                    } else {
+                                        shapes[i].selected = false;
+                                    }
+                                }
+                                else if(shapes[i].type == SHAPE_ARC) {
+                                    if(isPointInArc(cursor.x, cursor.y, shapes[i].data.arc.x, shapes[i].data.arc.y, shapes[i].data.arc.radius, shapes[i].data.arc.start_angle, shapes[i].data.arc.end_angle)) {
                                         shapes[i].selected = true;
                                     } else {
                                         shapes[i].selected = false;

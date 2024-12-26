@@ -111,3 +111,1016 @@ draw/main.c:221:21: warning: this statement may fall through [-Wimplicit-fallthr
 draw/main.c:223:17: note: here
   223 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
       |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:226:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  226 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:228:17: note: here
+  228 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:226:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  226 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:228:17: note: here
+  228 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:235:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  235 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:237:17: note: here
+  237 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:276:23: error: redeclaration of ‘points’ with no linkage
+  276 |             SDL_Point points[sides + 1]; // Points pour le contour fermé
+      |                       ^~~~~~
+draw/formEvents.c:74:23: note: previous declaration of ‘points’ with type ‘SDL_Point[5]’
+   74 |             SDL_Point points[5];
+      |                       ^~~~~~
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:438:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  438 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:438:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  438 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:235:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  235 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:237:17: note: here
+  237 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:235:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  235 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:237:17: note: here
+  237 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:235:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  235 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:237:17: note: here
+  237 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:430:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  430 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:453:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  453 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:453:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  453 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:453:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  453 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:453:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  453 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:453:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  453 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:453:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  453 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:235:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  235 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:237:17: note: here
+  237 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:235:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  235 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:237:17: note: here
+  237 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:456:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  456 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:456:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  456 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:462:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  462 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:469:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  469 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  325 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:325:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  345 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:345:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:469:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  469 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:306:9: error: switch jumps into scope of identifier with variably modified type
+  306 |         case SHAPE_ARC:
+      |         ^~~~
+draw/formEvents.c:32:5: note: switch starts here
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:276:23: note: ‘pointsP’ declared here
+  276 |             SDL_Point pointsP[sides + 1]; // Points pour le contour fermé
+      |                       ^~~~~~~
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:350:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  350 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:350:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:350:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:350:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:350:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:370:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  370 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:370:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:370:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:370:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:370:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:405:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  405 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:494:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  494 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  348 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  368 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘zoomShape’:
+draw/formEvents.c:403:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  403 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘moveShapesWithMouse’:
+draw/formEvents.c:492:13: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+  492 |             switch (shapes[i].type) {
+      |             ^~~~~~
+draw/main.c: In function ‘main’:
+draw/main.c:238:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  238 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:240:17: note: here
+  240 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:241:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  241 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:243:17: note: here
+  243 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  348 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  368 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/main.c: In function ‘main’:
+draw/main.c:241:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  241 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:243:17: note: here
+  243 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/main.c: In function ‘main’:
+draw/main.c:245:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  245 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:247:17: note: here
+  247 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  348 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  368 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  348 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:348:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  368 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:368:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  360 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c: In function ‘renderShape’:
+draw/formEvents.c:32:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+   32 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c: In function ‘updateShapeOnTexture’:
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  360 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:360:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ELLIPSE’ not handled in switch [-Wswitch]
+  380 |     switch (shape->type) {
+      |     ^~~~~~
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ARC’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_ROUNDED_RECTANGLE’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_POLYGON’ not handled in switch [-Wswitch]
+draw/formEvents.c:380:5: warning: enumeration value ‘SHAPE_LINE’ not handled in switch [-Wswitch]
+draw/main.c: In function ‘main’:
+draw/main.c:252:21: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  252 |                     moveSelectedShapes(shapes, shapeCount, dx, dy);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+draw/main.c:254:17: note: here
+  254 |                 case SDL_MOUSEBUTTONDOWN: // selection forme avec souris
+      |                 ^~~~
