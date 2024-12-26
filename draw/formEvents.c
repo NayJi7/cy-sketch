@@ -73,7 +73,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
             SDL_Point points[5];
             SDL_Point selectionPoints[5];
-            int offset = 5; // Espace autour pour le contour
+            int offset = 25; // Espace encore plus large autour pour le contour
 
             // Calcul des points du rectangle
             points[0].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
@@ -90,14 +90,14 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
             points[4] = points[0]; // Fermer le rectangle
 
-            // Calcul des points pour le contour jaune
+            // Calcul des points pour le contour jaune en prolongeant les vecteurs
             for (int i = 0; i < 4; i++) {
                 double dx = points[i].x - cx;
                 double dy = points[i].y - cy;
+                double length = sqrt(dx * dx + dy * dy);
 
-                // Ajuster les points du contour
-                selectionPoints[i].x = points[i].x + (dx > 0 ? offset : -offset);
-                selectionPoints[i].y = points[i].y + (dy > 0 ? offset : -offset);
+                selectionPoints[i].x = cx + (dx / length) * (length + offset);
+                selectionPoints[i].y = cy + (dy / length) * (length + offset);
             }
             selectionPoints[4] = selectionPoints[0]; // Fermer le contour
 
@@ -117,7 +117,6 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                 SDL_RenderDrawLines(renderer, selectionPoints, 5);
             }
             break;
-
         case SHAPE_ELLIPSE:
             Uint8 rE = (shape->color >> 24) & 0xFF; // Rouge
             Uint8 gE = (shape->color >> 16) & 0xFF; // Vert
@@ -602,4 +601,3 @@ int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
     // Si la distance est inférieure à la tolérance, le point est proche de la ligne
     return (distance <= tolerance);
 }
-
