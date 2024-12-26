@@ -61,17 +61,18 @@ int main(){
     SDL_RenderClear(renderer);
 
     //rectangles ------
-    //if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF00FF00, "filled") == -1) return 0;
+    if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
     //circles ------
-    //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
+    
+    if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "empty") == -1) return 0;
     //ellipses ------
-    //if(drawShape(renderer, mainTexture, "instant", "ellipse", 400, 270, 70, 50, 0xFF00FF00, "fille") == -1) return 0;
+    if(drawShape(renderer, mainTexture, "instant", "ellipse", 400, 270, 70, 50, 0xFF0000FF, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "ellipse", 300, 370, 70, 50, 0xFF00FF00, "empty") == -1) return 0;
     //lines ------
     //if(drawShape(renderer, mainTexture, "instant", "line", 200, 200, 300, 200, 2, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "line", 100, 100, 400, 300, 20, 0xFF00FF00, "empty") == -1) return 0;
+    if(drawShape(renderer, mainTexture, "instant", "line", 100, 100, 400, 300, 20, 0xFFFF0000, "empty") == -1) return 0;
 
     //roundedrectangles ------
     //NE MARCHE PAS POUR SELECTIONNER
@@ -91,7 +92,7 @@ int main(){
     SDL_RenderPresent(renderer);
 
     SDL_ShowCursor(SDL_DISABLE);
-
+ 
     int running = 1;
     while (running) {
         while (SDL_PollEvent(&event)) {
