@@ -112,9 +112,20 @@ int findShapeAtCursor(int x, int y) {
 void handleCursorSelection(int cursorX, int cursorY) {
     int index = findShapeAtCursor(cursorX, cursorY);
     if (index != -1) {
-        shapes[index].selected = !shapes[index].selected; // Alterner la sélection
+        // Désélectionner toutes les autres formes
+        for (int i = 0; i < shapeCount; i++) {
+            shapes[i].selected = false;
+        }
+        // Sélectionner la forme trouvée
+        shapes[index].selected = true;
+    } else {
+        // Si aucune forme n'est trouvée, désélectionner toutes les formes
+        for (int i = 0; i < shapeCount; i++) {
+            shapes[i].selected = false;
+        }
     }
 }
+
 
 void handleShapeDeletion(int cursorX, int cursorY) {
     int index = findShapeAtCursor(cursorX, cursorY);
