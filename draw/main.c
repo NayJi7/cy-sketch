@@ -84,6 +84,9 @@ int main(){
 
     //NE MARCHE PAS POUR SELECTIONNER
         //roundedrectangles ------
+        // selectionne avec cavier mais contour pas top 
+        // selectionne avec souris mais change la forme donc pas cool 
+        // on peut deplacer mais quand on zoom et grocis wtf
         if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 20, 0xFF00FF00, "empty") == -1) return 0;
         if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
 
@@ -92,10 +95,11 @@ int main(){
         if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
         if(drawShape(renderer, mainTexture, "animated", "arc", 400, 200, 100, 0, 180, 0xFF00FF00, "empty") == -1) return 0;
     
-    //REGLER LE DEZOOM
+    //REGLER LE DEZOOM => c'est good si ca te va => j'ai gardé le rapport du rectangle de base 
+        // on fait une limite de taille ? 
         //rectangles ------
-        if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
-        if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
 //____________________________________________________________________     
 
 
@@ -104,7 +108,7 @@ int main(){
     SDL_RenderPresent(renderer);
 
     SDL_ShowCursor(SDL_DISABLE);
- 
+
     int running = 1;
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -205,17 +209,17 @@ int main(){
                                     }
                                 }
                                 else if (shapes[i].type == SHAPE_ROUNDED_RECTANGLE) {
-                                    if (isPointInRoundedRectangle(cursor.x, cursor.y, 
-                                    shapes[i].data.rounded_rectangle.x1,
-                                    shapes[i].data.rounded_rectangle.y1,
-                                    shapes[i].data.rounded_rectangle.x2,
-                                    shapes[i].data.rounded_rectangle.y2,
-                                    shapes[i].data.rounded_rectangle.radius)) {
+                                    if (isPointInRoundedRectangle(cursor.x, cursor.y,
+                                      shapes[i].data.rounded_rectangle.x1,
+                                      shapes[i].data.rounded_rectangle.y1,
+                                      shapes[i].data.rounded_rectangle.x2,
+                                      shapes[i].data.rounded_rectangle.y2,
+                                      shapes[i].data.rounded_rectangle.radius)) {
                                         shapes[i].selected = true;
                                     } else {
                                         shapes[i].selected = false;
                                     }
-                                }
+                                                            }
                                 else if(shapes[i].type == SHAPE_POLYGON) {
                                     if(isPointInPolygon(cursor.x, cursor.y, shapes[i].data.polygon.cx, shapes[i].data.polygon.cy, shapes[i].data.polygon.radius, shapes[i].data.polygon.sides)) {
                                         shapes[i].selected = true;
