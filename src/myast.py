@@ -13,7 +13,8 @@ def print_error(e):
         print(f"\033[31m{e}\033[0m")
         if "Unknown identifier" in e:
             suggestion = suggest_keyword(e.split("'")[1])
-            print(f"\033[34mSuggestion : Did you mean '{suggestion}' ?\033[0m")
+            if suggestion:
+                print(f"\033[34mSuggestion : Did you mean '{suggestion}' ?\033[0m")
     sys.exit(1)
 # @}
 
@@ -22,7 +23,8 @@ def print_error_interractive(e):
         print(f"\033[31m{e}\033[0m")
         if "Unknown identifier" in e:
             suggestion = suggest_keyword(e.split("'")[1])
-            print(f"\033[34mSuggestion : Did you mean '{suggestion}' ?\033[0m")
+            if suggestion:
+                print(f"\033[34mSuggestion : Did you mean '{suggestion}' ?\033[0m")
 
 # @{
 # @brief Converts a condition to its C representation.
@@ -58,7 +60,7 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
     elif isinstance(value, str) and '"' in value:  # Literal String
         return f"char[{len(value.strip('"'))}]", value.strip('"')
     elif isinstance(value, str):  # Variable name
-        # Search the AST for the variable declaration, assignment, or modification
+        # Search the AST for the variable assignment, or modification
         for i, node in enumerate(ast):
             if current_position is not None and i >= current_position:
                 # If the current position is reached and variable is not found, return an error
@@ -81,19 +83,13 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
                                 elif "char" in param:
                                     return param.split()[0] + param.split()[1][param.split()[1].index('['):], None
                     # searching in the body of the function
-                    sub_ast = copy.deepcopy(node[3][1]) if len(node) > 2 else []  # Block
-                    func_astlist = list(ast[0])
-                    func_astlist.pop(3)
-                    func_ast_params = tuple(func_astlist)
-                    sub_ast.append(func_ast_params)
+                    sub_ast = copy.deepcopy(node[0])
                     try:
                         # Recursively search in the sub-AST
                         return resolve_value_and_find_variable(sub_ast, value, current_position)
                     except Exception:
                         continue  # If not found, continue searching other nodes
 
-                    print("test")
-                    
                 elif node[0] == 'func' and len(node) == 3: # passed a modified node of func without bloc
                     params = node[2]  # Parameters of the function
                     list_types = ["int", "float", "char"]
@@ -131,7 +127,9 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
                             continue
         # If the variable is not found in the AST
         raise ValueError(f"ValueError : Variable '{value}' is not initialized.")
+    
     elif isinstance(value, tuple):  # Operation Node
+        # A AMELIORER
         if value[0] == "op":
             # Resolve operation result type and expression
             left_type, left_c = resolve_value_and_find_variable(ast, value[2], current_position)
@@ -207,9 +205,18 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
 
     if DEBUG:
         print(f"[DEBUG] Translating node : {node}")
+
+    if isinstance(node, int):
+        return node
+    
+    elif isinstance(node, float):
+        return node
+    
+    elif isinstance(node, str):
+        return node
     
     # Case: Drawing instruction (e.g., draw_circle)
-    if isinstance(node, tuple) and node[0] == 'draw':
+    elif isinstance(node, tuple) and node[0] == 'draw':
         forme = node[1]
         parametres = node[2]
         ok = True
@@ -267,7 +274,9 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                     raise ValueError(f"ValueError : '{x}' variable not initialized")
                 elif t[0] != ("int" or "float"):
                     raise TypeError(f"TypeError : '{x}' is {t[0]}, expected int or float")
-                    ok = False
+            else:
+                t = resolve_value_and_find_variable(ast, x, current_position)
+                raise TypeError(f"TypeError : '{x}' is {t[0]}, expected int or float")
 
         if type(y) != int or float:
             if type(y) == str and '"' not in y:
@@ -277,6 +286,9 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                     raise ValueError(f"ValueError : '{y}' variable not initialized")
                 elif t[0] != ("int" or "float"):
                     raise TypeError(f"TypeError : '{y}' is {t[0]}, expected int or float")
+            else:
+                t = resolve_value_and_find_variable(ast, y, current_position)
+                raise TypeError(f"TypeError : '{y}' is {t[0]}, expected int or float")
             
         c_code += f"move_to({translate_node_to_c(ast, prototypes,x,0,0,0)}, {translate_node_to_c(ast, prototypes,y,0,0,0)})"
 
@@ -289,7 +301,6 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
     # Case: Rotation instruction (e.g., rotate)
     elif isinstance(node, tuple) and node[0] == 'rotate':
         angle = node[1]
-        ok = True
 
         if tabulation > 0: 
             c_code += "\t" * tabulation
@@ -300,10 +311,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
 
                 if t == None:
                     raise ValueError(f"ValueError : '{angle}' variable not initialized")
-                    ok = False
                 elif t[0] != "int":
                     raise TypeError(f"TypeError : '{angle}' is {t[0]}, expected int")
-                    ok = False
 
         if ok:
             c_code += f"rotate({translate_node_to_c(ast, prototypes, angle, 0,0,0)})"
@@ -339,15 +348,6 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
 
         if newline > 0: 
             c_code += "\n" * newline
-
-    elif isinstance(node, int):
-        return node
-    
-    elif isinstance(node, float):
-        return node
-    
-    elif isinstance(node, str):
-        return node
     
     elif isinstance(node, tuple) and node[0] == 'func':
         name = node[1]
@@ -413,16 +413,16 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         for i, arg in enumerate(params):
             arg_type, arg_val = resolve_value_and_find_variable(ast, arg, current_position)
             
-            if "char" in arg_type:
+            if "char" in arg_type and "char" in prot_args[i]:
                 if int(arg_type.split("[")[1].split("]")[0]) > int(prot_args[i].split("[")[1].split("]")[0]):
                     if i == 0:
-                        raise IndexError(f"IndexError : {arg_val} is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}st argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}st argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
                     elif i == 1:
-                        raise IndexError(f"IndexError : {arg_val} is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}nd argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}nd argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
                     elif i == 2:
-                        raise IndexError(f"IndexError : {arg_val} is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}rd argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}rd argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
                     else :
-                        raise IndexError(f"IndexError : {arg_val} is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}th argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}th argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
             elif arg_type not in prot_args[i]:
                 if i == 0:
                     raise TypeError(f"TypeError : '{name}' function's {i+1}st argument is not {arg_type}. Expected : {prot_args[i].split()[0]}")
@@ -541,8 +541,10 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             c_code += f"{type(value).__name__} {var_name} = {value}"
         elif isinstance(value, str):  # Identifier
             var_type, var_value = resolve_value_and_find_variable(ast, value, current_position)
-            if var_type:
+            if "char" in var_type:
                 c_code += f"{var_type.split('[')[0]} {var_name}{'['+var_type.split('[')[1]} = {value}"
+            elif var_type:
+                c_code += f"{var_type} {var_name} = {value}"
             else:
                 raise ValueError(f"ValueError: Variable '{value}' not found")
         # Case: Operation artihmetic
@@ -635,8 +637,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
     
     # Default case (unsupported node)
     else:
-        c_code += f"// Node non pris en charge : {node}\n"
-        return c_code
+        raise Exception(f"CriticalError : Unsupported node -> {node}\n")
 
     if DEBUG:
         print(f"[DEBUG] Translated successfully: {c_code}\n")

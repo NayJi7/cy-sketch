@@ -1,9 +1,38 @@
+import re
 import ply.lex as lex
 from difflib import get_close_matches
 
 def suggest_keyword(word):
     suggestions = get_close_matches(word, keywords.keys(), n=1, cutoff=0.6)
     return suggestions[0] if suggestions else None
+
+def get_variables(t):
+    variables = []
+
+    text = t.lexer.lexdata
+    lines = text.split('\n')
+    lines = [x for x in lines if x != ""] # supprimes toutes les lignes vides
+    for line in lines :
+        line = line.strip('\n')
+        line = line.strip('\t')
+
+        resultat = re.search(r'var (\w+)\s*=', line)
+        if resultat:
+            variables.append(resultat.group(1))
+
+        resultat = re.search(r'int\s+(\w+)[\s,)]', line)
+        if resultat:
+            variables.append(resultat.group(1))
+
+        resultat = re.search(r'float\s+(\w+)[\s,)]', line)
+        if resultat:
+            variables.append(resultat.group(1))
+
+        resultat = re.search(r'char\s+(\w+)', line)
+        if resultat:
+            variables.append(resultat.group(1))
+
+    return variables
 
 # === 1. Definition of Tokens ===
 
@@ -70,34 +99,48 @@ t_NOT = r'not'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACE = r'\{'
-t_RBRACE = r'\}'
 t_LBRACKET = r'\['
 t_RBRACKET = r'\]'
 t_COMMA = r','
-t_SEMICOLON = r';'
 t_COLON = r':'
 # @}
+
+def t_RBRACE(t):
+    r'\}'
+    if t.lexer.current_state == "for" : t.lexer.current_state = None
+    return t
+
+def t_SEMICOLON(t):
+    r';'
+    if t.lexer.current_state == "var" : t.lexer.current_state = "for"
+    return t
 
 # @brief Matches identifiers and checks if they correspond to reserved keywords
 # @param t Token object containing the matched value
 # @return Token object with the correct type
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
+
+    variables = get_variables(t)
+
     if t.value in keywords:
-        t.lexer.current_state = t.value
+        if t.value in ["var", "char", "float", "int", "func", "for","while"]:
+            t.lexer.current_state = t.value
         t.type = keywords[t.value]
-    elif t.lexer.current_state in ["var", "char", "float", "int", "func", "if", "for", "while"]:
+    elif t.lexer.current_state in ["var", "char", "float", "int", "func", "for", "while"]:
         # Skip suggestion checks in these contexts
         t.type = 'IDENTIFIER'
     elif t.value in ['True', 'False']:  # Handle boolean literals
         t.type = 'BOOLEAN'
         t.value = (t.value == 'True')
+    elif t.value in variables:
+        t.type = 'IDENTIFIER'
     else:
         # Check for similarity with keywords
         suggestion = suggest_keyword(t.value)
         if suggestion:
-            raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}. Did you mean '{suggestion}'?")
-        t.type = 'IDENTIFIER'  # Default to identifier if no suggestion
+            raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
+        raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
     return t
 
 # @brief Matches numbers, both integers and floats

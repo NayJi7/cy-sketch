@@ -245,7 +245,7 @@ def p_error(p):
             if suggestions:
                 print(f"\033[34mDid you mean: {', '.join(suggestions)}?\033[0m")
             else:
-                print("\033[34mSuggestion: Check if '{p.value}' is declared or is a valid keyword.\033[0m")
+                print(f"\033[34mSuggestion: Check if '{p.value}' is declared or is a valid keyword.\033[0m")
         elif p.type in ("NUMBER", "STRING", "BOOLEAN"):
             print("\033[34mSuggestion: Check the format of the value or verify its context in the statement.\033[0m")
         elif p.type in ("PLUS", "MINUS", "TIMES", "DIVIDE"):
