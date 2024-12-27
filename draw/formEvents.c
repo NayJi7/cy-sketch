@@ -414,16 +414,32 @@ void deleteShape(int index) {
 void zoomShape(Shape *shape, float zoomFactor) {
     switch (shape->type) {
         case SHAPE_RECTANGLE:
-            shape->data.rectangle.width += (int)(zoomFactor * 10);
-            shape->data.rectangle.height += (int)(zoomFactor * 10);
 
-            // Assurez-vous que la largeur et la hauteur restent valides
-            if (shape->data.rectangle.width < 30) shape->data.rectangle.width = 30;
-            if (shape->data.rectangle.height < 30) {
-                // Ajuster proportionnellement si la hauteur devient trop petite
-                shape->data.rectangle.height = shape->data.rectangle.width * 2; // Exemple : conserver un rapport 1:2
-            }
-            break;
+        // Calculer le rapport d'aspect initial du rectangle
+        float aspectRatio = (float)shape->data.rectangle.width / shape->data.rectangle.height;
+
+        // Appliquer le zoom
+        shape->data.rectangle.width += (int)(zoomFactor * 10);
+        shape->data.rectangle.height = (int)(shape->data.rectangle.width / aspectRatio);
+
+        // Définir une taille minimale pour la largeur
+        const int minWidth = 10;
+        // on peut rajouter max aussi stv 
+
+        // Vérifier et ajuster la taille si elle tombe en dessous de la largeur minimale
+        if (shape->data.rectangle.width < minWidth) {
+            shape->data.rectangle.width = minWidth;
+            shape->data.rectangle.height = (int)(minWidth / aspectRatio); // Ajuster en fonction du rapport
+        }
+
+        // Optionnel : Limiter aussi une hauteur minimale
+        const int minHeight = 10;
+        if (shape->data.rectangle.height < minHeight) {
+            shape->data.rectangle.height = minHeight;
+            shape->data.rectangle.width = (int)(minHeight * aspectRatio); // Ajuster en fonction du rapport
+        }
+        break;
+
 
         case SHAPE_CIRCLE:
             shape->data.circle.radius += (int)(zoomFactor * 5);
@@ -474,20 +490,47 @@ void zoomShape(Shape *shape, float zoomFactor) {
             }
             break;
 
-        case SHAPE_ROUNDED_RECTANGLE:
-            shape->data.rounded_rectangle.x2 += (int)(zoomFactor * 10);
-            shape->data.rounded_rectangle.y2 += (int)(zoomFactor * 10);
-            shape->data.rounded_rectangle.radius += (int)(zoomFactor * 2);
+        case SHAPE_ROUNDED_RECTANGLE: {
+            // Calculer la largeur, la hauteur et le centre actuels
+            int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
+            int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
+            int centerX = shape->data.rounded_rectangle.x1 + width / 2;
+            int centerY = shape->data.rounded_rectangle.y1 + height / 2;
 
-            // Assurez-vous que les dimensions restent valides
-            if ((shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1) < 30)
-                shape->data.rounded_rectangle.x2 = shape->data.rounded_rectangle.x1 + 30;
+            // Calculer le rapport d'aspect initial (largeur / hauteur)
+            static float aspectRatio = -1.0f;
+            if (aspectRatio < 0) {
+                aspectRatio = (float)width / height; // Calculer le rapport une fois au premier appel
+            }
 
-            if ((shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1) < 30)
-                shape->data.rounded_rectangle.y2 = shape->data.rounded_rectangle.y1 + 30;
+            // Appliquer le zoom à la largeur
+            int newWidth = width + (int)(zoomFactor * 10);
 
-            if (shape->data.rounded_rectangle.radius < 8) shape->data.rounded_rectangle.radius = 8;
+            // Ajuster la hauteur pour respecter le rapport d'aspect
+            int newHeight = (int)(newWidth / aspectRatio);
+
+            // Imposer des dimensions minimales
+            const int minWidth = 30;
+            if (newWidth < minWidth) {
+                newWidth = minWidth;
+                newHeight = (int)(newWidth / aspectRatio); // Ajuster la hauteur pour respecter le rapport
+            }
+
+            // Recalculer les coordonnées pour conserver le centre
+            shape->data.rounded_rectangle.x1 = centerX - newWidth / 2;
+            shape->data.rounded_rectangle.y1 = centerY - newHeight / 2;
+            shape->data.rounded_rectangle.x2 = centerX + newWidth / 2;
+            shape->data.rounded_rectangle.y2 = centerY + newHeight / 2;
+
+            // Ajuster le rayon des coins proportionnellement à la hauteur
+            shape->data.rounded_rectangle.radius = (int)(newHeight * 0.2); // Exemple : 20% de la hauteur
+            if (shape->data.rounded_rectangle.radius < 8) {
+                shape->data.rounded_rectangle.radius = 8; // Limite minimale pour le rayon
+            }
+
             break;
+        }
+
 
         case SHAPE_POLYGON:
             shape->data.polygon.radius += (int)(zoomFactor * 5);
@@ -698,8 +741,22 @@ int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH)
     return (x >= rectX && x <= rectX + rectW && y >= rectY && y <= rectY + rectH);
 }
 // Vérifie si un point (px, py) est à l'intérieur d'un rectangle arrondi
-
 int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 radius) {
+    // Corriger les coordonnées si elles ne sont pas dans l'ordre correct
+    if (x1 > x2) {
+        Sint16 temp = x1;
+        x1 = x2;
+        x2 = temp;
+    }
+
+    if (y1 > y2) {
+        Sint16 temp = y1;
+        y1 = y2;
+        y2 = temp;
+    }
+
+    printf("Corrected Rectangle: (%d, %d, %d, %d), Radius: %d\n", x1, y1, x2, y2, radius);
+
     // Vérification si le point est dans la partie rectangulaire centrale (sans les coins arrondis)
     if (px >= x1 + radius && px <= x2 - radius && py >= y1 && py <= y2) {
         return 1; // Le point est dans la zone rectangulaire centrale
@@ -709,18 +766,10 @@ int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 x1, Sint16 y1, Sint16
         return 1; // Le point est dans les zones rectangulaires gauche/droite
     }
 
-
     // Vérification des coins arrondis (par rapport à leurs centres)
-    // Coin supérieur gauche
     if (isPointInCircle(px, py, x1 + radius, y1 + radius, radius)) return 1;
-
-    // Coin supérieur droit
     if (isPointInCircle(px, py, x2 - radius, y1 + radius, radius)) return 1;
-
-    // Coin inférieur gauche
     if (isPointInCircle(px, py, x1 + radius, y2 - radius, radius)) return 1;
-
-    // Coin inférieur droit
     if (isPointInCircle(px, py, x2 - radius, y2 - radius, radius)) return 1;
 
     return 0; // Le point n'est pas dans le RoundedRectangle
