@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit)
 from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor, QFont, QIcon,QPainter,QTextFormat
 from PyQt5.QtCore import Qt, QProcess,QRect, QSize
-from PyQt5.QtWinExtras import QtWin  # Pour Windows uniquement
 import os
 import platform
 import subprocess
 import sys
-
+if platform.system() == "Windows":
+    from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
 
 # Ces 3 classes sont utiles pour : avoir les n
 
@@ -74,7 +74,6 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                     self.setFormat(start, length, text_format)  # Applique le format à la portion correspondante
                     position = start + length  # Avance pour chercher la prochaine correspondance
                 else:  # Si aucune correspondance n'est trouvée, arrête la boucle
-                    
                     break
 
     def findMatch(self, regex, text, start):
@@ -86,6 +85,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         return None  # Si aucune correspondance, retourne None
 
 class CodeEditor(QPlainTextEdit):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.lineNumberArea = LineNumberArea(self)
@@ -159,12 +159,17 @@ class CodeEditor(QPlainTextEdit):
 
         self.setExtraSelections(extra_selections)
 
+
+
 class MyDrawppIDE(QMainWindow):
     '''Classe principale de l'ide qui est hérité de la super classe QMainWindow'''
     def __init__(self):
         super().__init__()
+
         self.process = QProcess(self) #le signal de récup de processus
+        
         self.setWindowIcon(QIcon("Dpp_circle.ico"))
+
         self.init_ui()
 
 
@@ -175,15 +180,10 @@ class MyDrawppIDE(QMainWindow):
         self.setStyleSheet("background-color: #1E1E1E; color: white;")
         self.setWindowIcon(QIcon("Dpp_circle.ico"))  # Remplacez par le chemin de votre icône
 
-
-        # Zone de texte principale - zone d'édition de code
-        self.text_area = QTextEdit(self)
-        self.text_area.setStyleSheet("background-color: #1E1E1E; color: #D4D4D4; font-family: Consolas; font-size: 18px;")
-        self.text_area.setTabStopDistance(4 * self.text_area.fontMetrics().horizontalAdvance(' '))
-
         # Zone de texte principale - zone d'édition de code
         self.text_area = CodeEditor(self)
         self.text_area.setStyleSheet("background-color: #1E1E1E; color: #D4D4D4; font-family: Consolas; font-size: 18px;")
+        self.text_area.setTabStopDistance(4 * self.text_area.fontMetrics().horizontalAdvance(' '))
 
         # Highlighter syntaxique
         self.highlighter = SyntaxHighlighter(self.text_area.document())
@@ -201,6 +201,7 @@ class MyDrawppIDE(QMainWindow):
        # Boutons de la barre d'outils
         open_icon = QIcon.fromTheme("document-open")
         save_icon = QIcon.fromTheme("document-save")
+        new_icon = QIcon.fromTheme("new-window")
 
         open_action = QAction(open_icon, "Open", self)
         open_action.setFont(QFont("Consolas", 12))  # Changer la taille du texte ici
@@ -211,6 +212,12 @@ class MyDrawppIDE(QMainWindow):
         save_action.setFont(QFont("Consolas", 12))  # Changer la taille du texte ici
         save_action.triggered.connect(self.save_as_file)
         self.toolbar.addAction(save_action)
+
+        new_window_button_action = QAction(new_icon, "New", self)
+        new_window_button_action.triggered.connect(self.show_new_window)
+        self.toolbar.addAction(new_window_button_action)
+
+        # bouton dans l'ide directement
 
         # Bouton Run 
         self.run_button = QPushButton("Run", self)
@@ -223,10 +230,11 @@ class MyDrawppIDE(QMainWindow):
         layout.addWidget(self.text_area)
         layout.addWidget(self.run_button)
         layout.addWidget(self.terminal)
+    
 
         container = QWidget()
         container.setLayout(layout)
-        self.setCentralWidget(container)
+        self.setCentralWidget(container) # pour placer un widget tout simplement
 
         #explications : 
         #QProcess c'est une classe de PyQt5 qui permet d'executer des programmes externes et des commandes système dans un processus séparé
@@ -266,7 +274,7 @@ class MyDrawppIDE(QMainWindow):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Draw++ Files (*.dpp);;All Files (*)", options=options)
         if file_path:
             with open(file_path, "r") as file:
-                self.text_area.setText(file.read())
+                self.text_area.setPlainText(file.read())
 
     def save_as_file(self):
         options = QFileDialog.Options()
@@ -302,7 +310,10 @@ class MyDrawppIDE(QMainWindow):
         else:
             self.process.start("python3", [interpreter_script, file_path])
         
-        
+    def show_new_window(self):
+        self.w = AnotherWindow()
+        self.w.show()
+
 
 
     # gestion de l'affichage dans le terminal
@@ -348,22 +359,32 @@ class MyDrawppIDE(QMainWindow):
         self.terminal.ensureCursorVisible()  # S'assure que le texte reste visible
 
 
+#création de la nouvelle fenêtre : 
+class AnotherWindow(MyDrawppIDE):
+    def __init__(self):
+        super().__init__() #on hérite de la classe mainWindow
+        self.setWindowTitle("Fenetre 2")
+        
+
 #partie obligatoire pour run l'appli
 if __name__ == "__main__":
+    #instance principale de l'application
     app = QApplication(sys.argv)
 
 
-    #partie chiante juste pour forcer l'icone dans la barre des taches windows
-    #          ---------NE PAS HESITER A SUPPRIMER SI PROBLEME---------------
-    # Définir l'icône de l'application
-    icon = QIcon("Dpp_circle.ico")
-    app.setWindowIcon(icon)
-    # Appliquer l'icône explicitement pour la barre des tâches sous Windows
-    if hasattr(QtWin, 'setCurrentProcessExplicitAppUserModelID'):
-        myappid = 'mon.application.ide.version1.0'  # ID unique pour votre application
-        QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
+    if platform.system() == "Windows":
+        #partie chiante juste pour forcer l'icone dans la barre des taches windows
+        #          ---------NE PAS HESITER A SUPPRIMER SI PROBLEME---------------
+        # Définir l'icône de l'application
+        icon = QIcon("Dpp_circle.ico")
+        app.setWindowIcon(icon)
+        # Appliquer l'icône explicitement pour la barre des tâches sous Windows
+        if hasattr(QtWin, 'setCurrentProcessExplicitAppUserModelID'):
+            myappid = 'mon.application.ide.version1.0'  # ID unique pour votre application
+            QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
 
-
+    #la main window, qui est un widget en fait QMainwindow, qui est un objet special
+        # qui peut contenir des menus etc..
     window = MyDrawppIDE()
     window.show()
     sys.exit(app.exec_())
