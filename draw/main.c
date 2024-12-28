@@ -88,18 +88,18 @@ int main(){
         // selectionne avec souris mais change la forme donc pas cool 
         // on peut deplacer mais quand on zoom et grocis wtf
         if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 20, 0xFF00FF00, "empty") == -1) return 0;
-        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
 
     //LA FORME DISPARAIT PAR UNE AUTRE A SON OPPOSER + PAS DE ROTATION
         //arcs ------
-        if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
         if(drawShape(renderer, mainTexture, "animated", "arc", 400, 200, 100, 0, 180, 0xFF00FF00, "empty") == -1) return 0;
     
     //REGLER LE DEZOOM => c'est good si ca te va => j'ai gardé le rapport du rectangle de base 
         // on fait une limite de taille ? 
         //rectangles ------
         //if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
+        if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
 //____________________________________________________________________     
 
 
