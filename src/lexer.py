@@ -6,8 +6,8 @@ def suggest_keyword(word):
     suggestions = get_close_matches(word, keywords.keys(), n=1, cutoff=0.6)
     return suggestions[0] if suggestions else None
 
-def get_variables(t):
-    variables = []
+def get_known_identifiers(t):
+    known_identifiers = []
 
     text = t.lexer.lexdata
     lines = text.split('\n')
@@ -18,21 +18,25 @@ def get_variables(t):
 
         resultat = re.search(r'var (\w+)\s*=', line)
         if resultat:
-            variables.append(resultat.group(1))
+            known_identifiers.append(resultat.group(1))
+
+        resultat = re.search(r'func\s+(\w+)\s*\(', line)
+        if resultat:
+            known_identifiers.append(resultat.group(1))
 
         resultat = re.search(r'int\s+(\w+)[\s,)]', line)
         if resultat:
-            variables.append(resultat.group(1))
+            known_identifiers.append(resultat.group(1))
 
         resultat = re.search(r'float\s+(\w+)[\s,)]', line)
         if resultat:
-            variables.append(resultat.group(1))
+            known_identifiers.append(resultat.group(1))
 
         resultat = re.search(r'char\s+(\w+)', line)
         if resultat:
-            variables.append(resultat.group(1))
+            known_identifiers.append(resultat.group(1))
 
-    return variables
+    return known_identifiers
 
 # === 1. Definition of Tokens ===
 
@@ -107,12 +111,10 @@ t_COLON = r':'
 
 def t_RBRACE(t):
     r'\}'
-    if t.lexer.current_state == "for" : t.lexer.current_state = None
     return t
 
 def t_SEMICOLON(t):
     r';'
-    if t.lexer.current_state == "var" : t.lexer.current_state = "for"
     return t
 
 # @brief Matches identifiers and checks if they correspond to reserved keywords
@@ -121,19 +123,14 @@ def t_SEMICOLON(t):
 def t_IDENTIFIER(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
 
-    variables = get_variables(t)
+    known_identifiers = get_known_identifiers(t)
 
     if t.value in keywords:
-        if t.value in ["var", "char", "float", "int", "func", "for","while"]:
-            t.lexer.current_state = t.value
         t.type = keywords[t.value]
-    elif t.lexer.current_state in ["var", "char", "float", "int", "func", "for", "while"]:
-        # Skip suggestion checks in these contexts
-        t.type = 'IDENTIFIER'
     elif t.value in ['True', 'False']:  # Handle boolean literals
         t.type = 'BOOLEAN'
         t.value = (t.value == 'True')
-    elif t.value in variables:
+    elif t.value in known_identifiers:
         t.type = 'IDENTIFIER'
     else:
         # Check for similarity with keywords

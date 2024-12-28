@@ -116,7 +116,7 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
                     except Exception:
                         continue  # If not found, continue searching other nodes
                 elif node[0] == "for":
-                    sub_ast = node[4] if len(node) > 2 else []  # Block
+                    sub_ast = node[4][1] if len(node) > 2 else []  # Block
                     try:
                         # Recursively search in the sub-AST
                         return resolve_value_and_find_variable(sub_ast, value, None)
