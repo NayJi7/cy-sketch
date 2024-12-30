@@ -221,7 +221,6 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
 
         case SHAPE_ROUNDED_RECTANGLE:
-          
 
             SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
 
@@ -245,32 +244,32 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                                     shape->color);
             }
             if (shape->selected) {
-    // Déterminer une marge cohérente pour le contour jaune
-    int margin = -10; // Ajuste cette valeur selon tes besoins
+                // Déterminer une marge cohérente pour le contour jaune
+                int margin = -10; // Ajuste cette valeur selon tes besoins
 
-    // Calculer les nouvelles dimensions du rectangle
-    int new_x1 = shape->data.rounded_rectangle.x1 - margin;
-    int new_y1 = shape->data.rounded_rectangle.y1 - margin;
-    int new_x2 = shape->data.rounded_rectangle.x2 + margin;
-    int new_y2 = shape->data.rounded_rectangle.y2 + margin;
+                // Calculer les nouvelles dimensions du rectangle
+                int new_x1 = shape->data.rounded_rectangle.x1 - margin;
+                int new_y1 = shape->data.rounded_rectangle.y1 - margin;
+                int new_x2 = shape->data.rounded_rectangle.x2 + margin;
+                int new_y2 = shape->data.rounded_rectangle.y2 + margin;
 
-    // Calculer un rayon ajusté
-    int new_radius = shape->data.rounded_rectangle.radius + margin;
+                // Calculer un rayon ajusté
+                int new_radius = shape->data.rounded_rectangle.radius + margin;
 
-    // Appliquer la couleur jaune
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Jaune
+                // Appliquer la couleur jaune
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Jaune
 
-    // Dessiner le contour jaune
-    roundedRectangleColor(renderer,
-                          new_x1, new_y1,
-                          new_x2, new_y2,
-                          new_radius,
-                          0xFFFFFF00); // Couleur jaune
-} 
+                // Dessiner le contour jaune
+                roundedRectangleColor(renderer,
+                                    new_x1, new_y1,
+                                    new_x2, new_y2,
+                                    new_radius,
+                                    0xFFFFFF00); // Couleur jaune
+            } 
             
             break;
         
-        /*case SHAPE_POLYGON:
+        case SHAPE_POLYGON:
             Uint8 rP = (shape->color >> 24) & 0xFF; // Rouge
             Uint8 gP = (shape->color >> 16) & 0xFF; // Vert
             Uint8 bP = (shape->color >> 8) & 0xFF;  // Bleu
@@ -282,7 +281,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             if (sides < 3) return; // Ne pas dessiner si moins de 3 côtés
 
             double angleStep = 2 * M_PI / sides; // Angle entre chaque sommet
-            SDL_Point pointsP[sides + 1]; // Points pour le contour fermé
+            SDL_Point pointsP[13]; // Points pour le contour fermé
 
             // Calcul des sommets
             for (int i = 0; i < sides; i++) {
@@ -310,7 +309,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Couleur jaune
                 SDL_RenderDrawLines(renderer, pointsP, sides + 1);
             }
-            break;*/
+            break;
         
         case SHAPE_ARC:
             Uint8 rA = (shape->color >> 24) & 0xFF; // Rouge
@@ -326,27 +325,35 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             if (startAngle < 0) startAngle += 360;
             if (endAngle < 0) endAngle += 360;
 
-            // Ajuster si l'arc est inversé
-            if (endAngle < startAngle) {
-                int temp = startAngle;
-                startAngle = endAngle;
-                endAngle = temp;
-            }
+            // Appliquer la rotation à l'arc
+            int centerX = shape->data.arc.x;
+            int centerY = shape->data.arc.y;
+            double rotationRad = shape->rotation * M_PI / 180.0; // Convertir la rotation en radians
+
+            // Déplacer le centre de rotation si nécessaire (ajuster avec d'autres transformations si besoin)
+            int rotatedX = (int)(cos(rotationRad) * (centerX - centerX) - sin(rotationRad) * (centerY - centerY)) + centerX;
+            int rotatedY = (int)(sin(rotationRad) * (centerX - centerX) + cos(rotationRad) * (centerY - centerY)) + centerY;
+
+            // Ajuster les angles de départ et de fin selon la rotation
+            startAngle = (startAngle + (int)shape->rotation) % 360;
+            endAngle = (endAngle + (int)shape->rotation) % 360;
+
             // Dessiner l'arc
             if (strcmp(shape->typeForm, "empty") == 0) {
-                arcColor(renderer, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius,
+                arcColor(renderer, rotatedX, rotatedY, shape->data.arc.radius,
                         startAngle, endAngle, shape->color);
             } else if (strcmp(shape->typeForm, "filled") == 0) {
-                filledPieColor(renderer, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius,
+                filledPieColor(renderer, rotatedX, rotatedY, shape->data.arc.radius,
                             startAngle, endAngle, shape->color);
             }
 
             // Dessiner un contour jaune si sélectionné
             if (shape->selected) {
-                arcColor(renderer, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius + 5,
+                arcColor(renderer, rotatedX, rotatedY, shape->data.arc.radius + 5,
                         startAngle, endAngle, 0xFFFFFF00);
             }
             break;
+
    
     }
 }
@@ -500,34 +507,32 @@ void zoomShape(Shape *shape, float zoomFactor) {
             break;
 
         case SHAPE_ROUNDED_RECTANGLE: {
-    // Calculer la largeur, la hauteur et le centre actuels
-    int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
-    int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
-    int centerX = shape->data.rounded_rectangle.x1 + width / 2;
-    int centerY = shape->data.rounded_rectangle.y1 + height / 2;
+            // Calculer la largeur, la hauteur et le centre actuels
+            int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
+            int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
+            int centerX = shape->data.rounded_rectangle.x1 + width / 2;
+            int centerY = shape->data.rounded_rectangle.y1 + height / 2;
 
-    // Définir le pourcentage de zoom (5% par défaut)
-    float zoomPercentage = 0.05f * zoomFactor; // Positif ou négatif selon zoom
+            // Définir le pourcentage de zoom (5% par défaut)
+            float zoomPercentage = 0.05f * zoomFactor; // Positif ou négatif selon zoom
 
-    // Calculer les nouvelles dimensions
-    int newWidth = width + (int)(width * zoomPercentage);
-    int newHeight = height + (int)(height * zoomPercentage);
+            // Calculer les nouvelles dimensions
+            int newWidth = width + (int)(width * zoomPercentage);
+            int newHeight = height + (int)(height * zoomPercentage);
 
-    // Recalculer les coordonnées pour conserver le centre
-    shape->data.rounded_rectangle.x1 = centerX - newWidth / 2;
-    shape->data.rounded_rectangle.y1 = centerY - newHeight / 2;
-    shape->data.rounded_rectangle.x2 = centerX + newWidth / 2;
-    shape->data.rounded_rectangle.y2 = centerY + newHeight / 2;
+            // Recalculer les coordonnées pour conserver le centre
+            shape->data.rounded_rectangle.x1 = centerX - newWidth / 2;
+            shape->data.rounded_rectangle.y1 = centerY - newHeight / 2;
+            shape->data.rounded_rectangle.x2 = centerX + newWidth / 2;
+            shape->data.rounded_rectangle.y2 = centerY + newHeight / 2;
 
-    // Ajuster le rayon des coins proportionnellement à la hauteur
-    shape->data.rounded_rectangle.radius = (int)(newHeight * 0.2); // Exemple : 20% de la hauteur
-    if (shape->data.rounded_rectangle.radius < 5) {
-        shape->data.rounded_rectangle.radius = 5; // Rayon minimal pour éviter des erreurs
-    }
-
-    break;
-}
-
+            // Ajuster le rayon des coins proportionnellement à la hauteur
+            shape->data.rounded_rectangle.radius = (int)(newHeight * 0.2); // Exemple : 20% de la hauteur
+            if (shape->data.rounded_rectangle.radius < 5) {
+                shape->data.rounded_rectangle.radius = 5; // Rayon minimal pour éviter des erreurs
+            }
+        }
+            break;
 
 
         case SHAPE_POLYGON:

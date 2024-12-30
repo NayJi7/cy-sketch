@@ -10,7 +10,7 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
 
 int drawEllipse(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int rx, int ry, Uint32 color, char *type);
 
-int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color);
+int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type);
 
 int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, Uint32 color, char *type);
 

@@ -92,12 +92,37 @@ int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int 
  * @param end_angle The ending angle of the arc in degrees.
  * @param color The color of the arc in Uint32 format (0xRRGGBBAA).
  */
-int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color) {
+int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type) {
 
     if (handleEvents(renderer, texture) == -1) return -1;
 
-    if (arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0) {
-        printf("Error in arcColor: %s\n", SDL_GetError());
+    if (strcmp(type, "filled") == 0) {
+    // Convertir les angles en radians
+        double startRad = start_angle * M_PI / 180.0;
+        double endRad = end_angle * M_PI / 180.0;
+            // Décomposer la couleur
+        Uint8 r = (color >> 24) & 0xFF;
+        Uint8 g = (color >> 16) & 0xFF;
+        Uint8 b = (color >> 8) & 0xFF;
+        Uint8 a = color & 0xFF;
+
+        // Définir la couleur pour le dessin
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+
+        // Décomposer l'arc en points concentriques pour le remplir
+        for (int r = 0; r <= radius; ++r) { // Itérer sur chaque rayon jusqu'à `radius`
+            for (double angle = startRad; angle <= endRad; angle += 0.01) { // Itérer sur chaque angle
+                int px = x + (int)(r * cos(angle));
+                int py = y + (int)(r * sin(angle));
+                // Dessiner une ligne du centre au bord de l'arc
+                SDL_RenderDrawLine(renderer, x, y, px, py);
+            }
+        }
+    } else if (strcmp(type, "empty") == 0) {
+        // Dessiner un arc classique
+        if (arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0) {
+            printf("Error in arcColor: %s\n", SDL_GetError());
+        }
     }
 
     renderTexture(renderer, texture, 750);
@@ -608,28 +633,32 @@ int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, 
         
         SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
-        // Convertir les angles de degrés en radians
-        double start_rad = start_angle * M_PI / 180.0;
-        double end_rad = end_angle * M_PI / 180.0;
+        // Convertir les angles en radians
+        double startRad = start_angle * M_PI / 180.0;
+        double endRad = end_angle * M_PI / 180.0;
 
-        // Tracer l'arc
-        for (double theta = start_rad; theta <= end_rad; theta += 0.01) {
-            int dx = (int)(radius * cos(theta));
-            int dy = (int)(radius * sin(theta));
-            
-            if (handleEvents(renderer, texture) == -1) return -1;
+        if (strcmp(type, "empty") == 0) {
+            // Dessin progressif pour un arc vide
+            for (double theta = startRad; theta <= endRad; theta += 0.01) {
+                int px = (int)(radius * cos(theta));
+                int py = (int)(radius * sin(theta));
 
-            if (strcmp(type, "empty") == 0) {
-                SDL_RenderDrawPoint(renderer, x + dx, y - dy);
-            } else if (strcmp(type, "filled") == 0) {
-                for (int r = radius - 2; r <= radius; ++r) { 
-                    int fx = (int)(r * cos(theta));
-                    int fy = (int)(r * sin(theta));
-                    SDL_RenderDrawPoint(renderer, x + fx, y - fy);
-                }
+                SDL_RenderDrawPoint(renderer, x + px, y - py); // Dessiner le point
+                renderTexture(renderer, texture, 5);          // Mettre à jour la texture
+                if (handleEvents(renderer, texture) == -1) return -1; // Gérer les événements
             }
-            
-            renderTexture(renderer, texture, 7);
+        } else if (strcmp(type, "filled") == 0) {
+            // Dessin progressif pour un arc rempli
+            for (int currentRadius = 0; currentRadius <= radius; ++currentRadius) { // Progresser en augmentant le rayon
+                for (double angle = startRad; angle <= endRad; angle += 0.01) { // Itérer sur chaque angle
+                    int px = x + (int)(currentRadius * cos(angle));
+                    int py = y + (int)(currentRadius * sin(angle));
+
+                    SDL_RenderDrawLine(renderer, x, y, px, py); // Dessiner le point correspondant
+                }
+                renderTexture(renderer, texture, 5);          // Mettre à jour la texture
+                if (handleEvents(renderer, texture) == -1) return -1; // Gérer les événements       
+            }
         }
         // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
@@ -872,15 +901,31 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         int x = va_arg(args, int);
         int y = va_arg(args, int);
         int radius = va_arg(args, int);
+        // Rayon minimum pour éviter des bugs d'affichage
+        if (radius < 5) radius = 5;
+
+        // Gestion des angles
         int start_angle = va_arg(args, int);
+        if (start_angle < 0) start_angle = 0; // Minimum 0
+        if (start_angle > 360) start_angle = 360; // Maximum 360
+
         int end_angle = va_arg(args, int);
+        if (end_angle < 0) end_angle = 0; // Minimum 0
+        if (end_angle > 360) end_angle = 360; // Maximum 360
+
+        // Option : vérifier si start_angle > end_angle
+        if (start_angle > end_angle) {
+            int temp = start_angle; // Inverser si nécessaire
+            start_angle = end_angle;
+            end_angle = temp;
+        }
         Uint32 color = va_arg(args, Uint32);
         char *type = va_arg(args, char*);
 
         if (isAnimated) {
             if(drawAnimatedArc(renderer, texture, x, y, radius, start_angle, end_angle, color, type) == -1) return -1;
         } else {
-            if(drawArc(renderer, texture, x, y, radius, start_angle, end_angle, color) == -1) return -1;
+            if(drawArc(renderer, texture, x, y, radius, start_angle, end_angle, color, type) == -1) return -1;
         }
 
         // Enregistrer la forme

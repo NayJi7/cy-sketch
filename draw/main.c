@@ -62,44 +62,42 @@ int main(){
 
 
     //circles ------
-    //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "empty") == -1) return 0;
 
     //ellipses ------
-    //if(drawShape(renderer, mainTexture, "instant", "ellipse", 400, 270, 70, 50, 0xFF0000FF, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "ellipse", 400, 270, 70, 50, 0xFF0000FF, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "ellipse", 300, 370, 70, 50, 0xFF00FF00, "empty") == -1) return 0;
 
     //lines ------
-    //if(drawShape(renderer, mainTexture, "instant", "line", 200, 200, 300, 200, 2, 0xFF00FF00, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "line", 200, 200, 300, 200, 2, 0xFF00FF00, "filled") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "line", 100, 100, 400, 300, 20, 0xFFFF0000, "empty") == -1) return 0;
 
-    //polygones
+    //polygones -----
     //if(drawShape(renderer, mainTexture, "animated", "polygon", 530, 130, 100, 3, 0xFF808080, "empty") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "polygon", 330, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
     
+    //rectangles ------
+    //if(drawShape(renderer, mainTexture, "animated", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
+
+    //arcs ------
+    //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 90, 270, 0xFF00FF00, "empty") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "instant", "arc", 400, 200, 100, 90, 180, 0xFF00FF00, "empty") == -1) return 0;
     
 //PROBLEMES __________________________________________________________
     //REGLER LES COULEURS POUR LES ANIMATED FORMES
 
+    //regler les deselections avec souris
 
     //NE MARCHE PAS POUR SELECTIONNER
         //roundedrectangles ------
         // selectionne avec cavier mais contour pas top 
         // selectionne avec souris mais change la forme donc pas cool 
         // on peut deplacer mais quand on zoom et grocis wtf
-        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 20, 0xFF00FF00, "empty") == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 10, 0xFF00FF00, "empty") == -1) return 0;
         //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
 
-    //LA FORME DISPARAIT PAR UNE AUTRE A SON OPPOSER + PAS DE ROTATION
-        //arcs ------
-        //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 0, 180, 0xFF00FF00, "filled") == -1) return 0;
-        if(drawShape(renderer, mainTexture, "animated", "arc", 400, 200, 100, 0, 180, 0xFF00FF00, "empty") == -1) return 0;
-    
-    //REGLER LE DEZOOM => c'est good si ca te va => j'ai gardé le rapport du rectangle de base 
-        // on fait une limite de taille ? 
-        //rectangles ------
-        //if(drawShape(renderer, mainTexture, "instant", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
-        if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
 //____________________________________________________________________     
 
 
