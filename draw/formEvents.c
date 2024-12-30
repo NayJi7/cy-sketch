@@ -243,7 +243,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                                     shape->data.rounded_rectangle.radius,
                                     shape->color);
             }
-            if (shape->selected) {
+if (shape->selected) {
                 // Déterminer une marge cohérente pour le contour jaune
                 int margin = -10; // Ajuste cette valeur selon tes besoins
 
@@ -265,8 +265,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                                     new_x2, new_y2,
                                     new_radius,
                                     0xFFFFFF00); // Couleur jaune
-            } 
-            
+            }   
             break;
         
         case SHAPE_POLYGON:
@@ -595,13 +594,17 @@ void moveShapesWithMouse(Shape *shapes, int shapeCount, SDL_Event *event, Cursor
                     break;
 
                 case SHAPE_ROUNDED_RECTANGLE:
-                    shapes[i].data.rounded_rectangle.x1 = event->motion.x - 50;
-                    shapes[i].data.rounded_rectangle.y1 = event->motion.y - 50;
-                    shapes[i].data.rounded_rectangle.x2 = event->motion.x + 50;
-                    shapes[i].data.rounded_rectangle.y2 = event->motion.y + 50;
+                    int dx = event->motion.xrel;
+                    int dy = event->motion.yrel;
 
-                    cursor->x = (shapes[i].data.rounded_rectangle.x1 + shapes[i].data.rounded_rectangle.x2) / 2;
-                    cursor->y = (shapes[i].data.rounded_rectangle.y1 + shapes[i].data.rounded_rectangle.y2) / 2;
+                    // Déplacer les coordonnées
+                    shapes[i].data.rounded_rectangle.x1 += dx;
+                    shapes[i].data.rounded_rectangle.y1 += dy;
+                    shapes[i].data.rounded_rectangle.x2 += dx;
+                    shapes[i].data.rounded_rectangle.y2 += dy;
+
+                    // Assurez-vous que le rayon reste inchangé
+                    shapes[i].data.rounded_rectangle.radius = shapes[i].data.rounded_rectangle.radius;
                     break;
                 
                 case SHAPE_POLYGON:
