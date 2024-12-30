@@ -345,6 +345,7 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
 
 // Fonction pour dessiner un cercle de manière progressive 
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, Uint32 color, char *type) { 
+    printf("Avant le dessin du cercle : r=%d, g=%d, b=%d, a=%d\n", (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid animatedCircle type: %s\n", type);
@@ -615,7 +616,7 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
 
 
 int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type) {
-
+    
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid animatedArc type: %s\n", type);
     }
