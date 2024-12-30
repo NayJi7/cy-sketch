@@ -6,3 +6,4 @@ doc/latex/
 .parser_generated/
 .to_run.dpp
 .to_compil.c
+dump/
