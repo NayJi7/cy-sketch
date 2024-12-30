@@ -82,21 +82,24 @@ int main(){
     //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
 
     //arcs ------
-    //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 90, 270, 0xFF00FF00, "empty") == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 90, 270, 0xFFFF0000, "empty") == -1) return 0;
     //if(drawShape(renderer, mainTexture, "instant", "arc", 400, 200, 100, 90, 180, 0xFF00FF00, "empty") == -1) return 0;
     
 //PROBLEMES __________________________________________________________
     //REGLER LES COULEURS POUR LES ANIMATED FORMES
 
-    //regler les deselections avec souris
+    //regler les deselections avec souris => c ok
 
     //NE MARCHE PAS POUR SELECTIONNER
         //roundedrectangles ------
-        // selectionne avec cavier mais contour pas top 
-        // selectionne avec souris mais change la forme donc pas cool 
+        // selectionne avec cavier mais contour pas top => 
+        // selectionne avec souris mais change la forme donc pas cool  => c ok
         // on peut deplacer mais quand on zoom et grocis wtf
-        //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 10, 0xFF00FF00, "empty") == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
+        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 10, 0xFF00FF00, "empty") == -1) return 0;
+        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
+SDL_SetRenderTarget(renderer, NULL); // Assurez-vous que le rendu pointe sur l'écran
+
+roundedRectangleColor(renderer, 100, 100, 300, 200, 20, 0xFFFFFF00);
 
 //____________________________________________________________________     
 
