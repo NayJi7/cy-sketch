@@ -2,4 +2,4 @@
 #include <stdlib.h>
 #include <math.h>
 
-draw_line(5, 5);
+int caca = 9;

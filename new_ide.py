@@ -1,12 +1,17 @@
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QTabWidget,QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit)
 from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor, QFont, QIcon,QPainter,QTextFormat
-from PyQt5.QtCore import Qt, QProcess,QRect, QSize
+from PyQt5.QtCore import Qt, QProcess,QRect, QSize,QRegExp
 import os
 import platform
 import subprocess
+import re
 import sys
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
+
+global ongletCount
+ongletCount = 0
+
 
 # Ces 3 classes sont utiles pour : avoir les n
 
@@ -23,66 +28,42 @@ class LineNumberArea(QWidget):
         """Dessine les numéros de ligne."""
         self.editor.line_number_area_paint_event(event)
 
+
+
 class SyntaxHighlighter(QSyntaxHighlighter):
-    ''' Cette classe s'occupe de la coloration syntaxique'''
-
-    ''' Elle hérite la classe QSyntaxHighlighter qui est une classe native de PyQt5, une classe faite pour mettre en couleur
-                        des textes dans des zones de texte'''
     def __init__(self, document):
-        super().__init__(document) #j'hérite de la superclass QSyntaxHighlighter
-        self.rules = [] #ensemble des règles de coloration
+        super().__init__(document)
+        self.rules = []
 
-        # Coloration des mots-clés dpp (hors fonctions)
-        keyword_format = QTextCharFormat()
-        keyword_format.setForeground(QColor("#007ACC"))  # Bleu moderne
-        keyword_format.setFontWeight(QFont.Bold)
-        keywords = ["if", "else", "for", "while", "return", "def", "class", "var"]
-        self.add_rules(keywords, keyword_format)
-        #coloration des fonctions dpp
-        keyword_format2 = QTextCharFormat()
-        keyword_format2.setForeground(QColor("#ff5733"))
-        keyword_format2.setFontWeight(QFont.Bold)
-        functions_word1 = ["rotate", "cursor","draw line","draw circle"]
-        self.add_rules(functions_word1,keyword_format2)
-        #coloration des modules d'importation
-        keyword_format3 = QTextCharFormat()
-        keyword_format3.setForeground(QColor("#e873f3"))
-        keyword_format3.setFontWeight(QFont.Bold)
-        functions_word2 = ["import", "from"]
-        self.add_rules(functions_word2,keyword_format3)
-        # Coloration des parenthèses
-        parenthesis_format = QTextCharFormat()
-        parenthesis_format.setForeground(QColor("#FFD700"))  # Jaune doré
-        parentheses = [r"\(", r"\)", r"\{", r"\}", r"\[", r"\]"]
-        self.add_rules(parentheses, parenthesis_format)
+        # Définir les formats
+        self.keyword_format = QTextCharFormat()
+        self.keyword_format.setForeground(QColor("#ff5733"))  # Violet
+        self.keyword_format.setFontWeight(QFont.Bold)
 
+        # Ajouter des règles
+        self.add_rules(["import", "from", "def", "class", "self"], self.keyword_format)
 
     def add_rules(self, patterns, text_format):
-        '''méthode pour ajouter une règle de coloration'''
+        """Ajoute des règles de surlignage."""
         for pattern in patterns:
-            regex = f"\\b{pattern}\\b"
+            # Utilisation des expressions régulières avec \b pour les mots entiers
+            regex = QRegExp(rf"\b{pattern}\b")
             self.rules.append((regex, text_format))
 
     def highlightBlock(self, text):
-        '''Applique les règles de coloration sur une ligne de texte.'''
-        for regex, text_format in self.rules:  # Parcourt chaque règle (regex, format)
-            position = 0  # Initialise la position de départ
-            while True:
-                match = self.findMatch(regex, text, position)  # Recherche une correspondance dans le texte
-                if match:  # Si une correspondance est trouvée
-                    start, length = match  # Récupère la position de départ et la longueur
-                    self.setFormat(start, length, text_format)  # Applique le format à la portion correspondante
-                    position = start + length  # Avance pour chercher la prochaine correspondance
-                else:  # Si aucune correspondance n'est trouvée, arrête la boucle
-                    break
+        """Applique les règles de surlignage au bloc de texte donné."""
 
-    def findMatch(self, regex, text, start):
-        '''Recherche une correspondance pour un motif regex dans le texte à partir d'une position donnée.'''
-        import re  # Importe le module des expressions régulières
-        match = re.search(regex, text[start:])  # Cherche le motif regex dans le texte à partir de la position donnée
-        if match:  # Si une correspondance est trouvée
-            return start + match.start(), match.end() - match.start()  # Retourne la position de départ et la longueur
-        return None  # Si aucune correspondance, retourne None
+        print("HighlightBlock called")
+
+
+        for regex, text_format in self.rules:
+            index = regex.indexIn(text)
+            while index >= 0:  # Tant qu'il y a des correspondances
+                length = regex.matchedLength()
+                self.setFormat(index, length, text_format)
+                index = regex.indexIn(text, index + length)
+
+
 
 class CodeEditor(QPlainTextEdit):
 
@@ -159,132 +140,150 @@ class CodeEditor(QPlainTextEdit):
 
         self.setExtraSelections(extra_selections)
 
-
-
 class MyDrawppIDE(QMainWindow):
-    '''Classe principale de l'ide qui est hérité de la super classe QMainWindow'''
+    '''Classe principale de l'IDE'''
     def __init__(self):
         super().__init__()
-
-        self.process = QProcess(self) #le signal de récup de processus
-        
+        self.process = QProcess(self)
         self.setWindowIcon(QIcon("Dpp_circle.ico"))
-
         self.init_ui()
 
-
     def init_ui(self):
-        #informations de base sur la fenetre
-        self.setWindowTitle("Visouale stoudio coude")
+        # Configuration de la fenêtre principale
+        global ongletCount
+        self.setWindowTitle(f'Onglet actif : Onglet {ongletCount}')
         self.setGeometry(100, 100, 1000, 700)
         self.setStyleSheet("background-color: #1E1E1E; color: white;")
-        self.setWindowIcon(QIcon("Dpp_circle.ico"))  # Remplacez par le chemin de votre icône
+        
 
-        # Zone de texte principale - zone d'édition de code
-        self.text_area = CodeEditor(self)
-        self.text_area.setStyleSheet("background-color: #1E1E1E; color: #D4D4D4; font-family: Consolas; font-size: 18px;")
-        self.text_area.setTabStopDistance(4 * self.text_area.fontMetrics().horizontalAdvance(' '))
+        # Widget principal avec onglets
+        self.tab_widget = QTabWidget(self)
+        self.setCentralWidget(self.tab_widget)
 
-        # Highlighter syntaxique
-        self.highlighter = SyntaxHighlighter(self.text_area.document())
-
-        # Terminal intégré
-        self.terminal = QPlainTextEdit(self)
-        self.terminal.setReadOnly(True) # propriété du terminal : ne peut etre que lu et pas écris , pour l'instant
-        self.terminal.setStyleSheet("background-color: #000000; color: white; font-family: Consolas; font-size: 14px;")
-
-        # Barre d'outils
+        # Boutons pour la barre d'outils
         self.toolbar = QToolBar("Main Toolbar", self)
         self.toolbar.setStyleSheet("background-color: #333333; border: none;")
         self.addToolBar(self.toolbar)
 
-       # Boutons de la barre d'outils
         open_icon = QIcon.fromTheme("document-open")
         save_icon = QIcon.fromTheme("document-save")
-        new_icon = QIcon.fromTheme("new-window")
+        new_tab_icon = QIcon.fromTheme("new-tab")
+        new_window_icon = QIcon.fromTheme("new-window")
 
         open_action = QAction(open_icon, "Open", self)
-        open_action.setFont(QFont("Consolas", 12))  # Changer la taille du texte ici
         open_action.triggered.connect(self.open_file)
         self.toolbar.addAction(open_action)
 
         save_action = QAction(save_icon, "Save", self)
-        save_action.setFont(QFont("Consolas", 12))  # Changer la taille du texte ici
         save_action.triggered.connect(self.save_as_file)
         self.toolbar.addAction(save_action)
 
-        new_window_button_action = QAction(new_icon, "New", self)
-        new_window_button_action.triggered.connect(self.show_new_window)
-        self.toolbar.addAction(new_window_button_action)
+        new_tab_action = QAction(new_tab_icon, "New Tab", self)
+        new_tab_action.triggered.connect(self.open_new_tab)
+        self.toolbar.addAction(new_tab_action)
 
-        # bouton dans l'ide directement
-
-        # Bouton Run 
-        self.run_button = QPushButton("Run", self)
-        self.run_button.setIcon(QIcon("green-play-button-png.ico"))  # Ajout de l'icône
-        self.run_button.setStyleSheet("background-color: #007ACC; color: white; border: none; padding: 5px 10px; font-size: 14px;")
-        self.run_button.clicked.connect(self.run_code)
-
-        # Layout principal
-        layout = QVBoxLayout()
-        layout.addWidget(self.text_area)
-        layout.addWidget(self.run_button)
-        layout.addWidget(self.terminal)
-    
-
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container) # pour placer un widget tout simplement
-
-        #explications : 
-        #QProcess c'est une classe de PyQt5 qui permet d'executer des programmes externes et des commandes système dans un processus séparé
-        # et quand un programme/commande est fait avec QProcess, alors on peut en sortir un stdout et un stderr
-        # pour les capturer on doit utiliser 2 signaux qui sont natifs a QProcess qui sont : 
-                # readyReadStandardOutput -> quand il y a un truc qui ressort de la commande effectuée
-                # readyReadStandardError -> quand il y a une erreur (non voulu donc pas les nôtres) qui ressort de la commande effectuée
+        new_window_action = QAction(new_window_icon, "New Window", self)
+        new_window_action.triggered.connect(self.show_new_window)
+        self.toolbar.addAction(new_window_action)
 
 
-        # Connecte le QProcess aux méthodes pour afficher les sorties
-        self.process.readyReadStandardOutput.connect(self.display_output) # on connecte la sortie a ma méthode display_output qui se charge de récup et afficher
-        #self.process.readyReadStandardError.connect(self.display_error) # same avec ma méthode display_error: pour l'instant pas besoin
-
-        # Barre de menu
-        menubar = self.menuBar()
-        menubar.setStyleSheet("background-color: #333333; color: white;")
-
-        file_menu = menubar.addMenu("File")
-
-        run_icon = QIcon("green-play-button-png.ico")  # Charger ton icône personnalisée
+        run_icon = QIcon("green-play-button-png.ico")
         run_action = QAction(run_icon, "Run", self)
         run_action.triggered.connect(self.run_code)
         self.toolbar.addAction(run_action)
 
-        open_action_menu = QAction("Open File", self)
-        open_action_menu.triggered.connect(self.open_file)
-        file_menu.addAction(open_action_menu)
+        # Connecter le changement d'onglet pour mettre à jour le titre
+        self.tab_widget.currentChanged.connect(self.update_window_title)
+        # Ajoute un premier onglet par défaut
+        self.open_new_tab()
 
-        save_as_action_menu = QAction("Save As", self)
-        save_as_action_menu.triggered.connect(self.save_as_file)
-        file_menu.addAction(save_as_action_menu)
+    def open_new_tab(self):
+        """Créer un nouvel onglet avec un éditeur et un terminal."""
+        print("Création d'un nouvel onglet")
 
-    ''' METHODES DE L'OBJET SELF : principalement les fonctions pour les triggering des boutons'''
+        global ongletCount
+        ongletCount+=1
+
+        # Crée un nouvel onglet et son layout
+        new_tab = QWidget()
+        layout = QVBoxLayout()
+
+        # Création de l'éditeur
+        editor = CodeEditor(self)
+        editor.setStyleSheet("background-color: #1E1E1E; color: #D4D4D4; font-family: Consolas; font-size: 18px;")
+        editor.setTabStopDistance(4 * editor.fontMetrics().horizontalAdvance(' '))
+
+        # Ajouter le surlignage syntaxique
+        highlighter = SyntaxHighlighter(editor.document())
+
+        # Création du terminal
+        terminal = QPlainTextEdit(self)
+        terminal.setReadOnly(True)
+        terminal.setStyleSheet("background-color: #000000; color: white; font-family: Consolas; font-size: 14px;")
+
+        # Ajouter les widgets au layout
+        layout.addWidget(editor)
+        layout.addWidget(terminal)
+
+        new_tab.setLayout(layout)
+
+        # Stocker les références dans un dictionnaire, car sinon on a que un terminal qui fonctionne
+
+            # partie chat gpt, à comprendre
+        if not hasattr(self, 'tabs_data'):
+            self.tabs_data = {}
+        self.tabs_data[new_tab] = {'editor': editor, 'terminal': terminal, 'highlighter': highlighter}
+
+        # Ajouter l'onglet 
+        tabName = f'Onglet {ongletCount}'
+        self.tab_widget.addTab(new_tab, tabName)
+        self.tab_widget.setCurrentWidget(new_tab)
+
+    def update_window_title(self, index):
+        """Met à jour le titre de la fenêtre selon l'onglet actif."""
+        if index == -1:
+            self.setWindowTitle("Visouale Stoudio Coude")  # Aucun onglet actif
+        else:
+            current_tab_title = self.tab_widget.tabText(index)
+            self.setWindowTitle(f"Visouale Stoudio Coude - {current_tab_title}")
+
 
     def open_file(self):
+        """Ouvre un fichier dans l'onglet actif."""
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Draw++ Files (*.dpp);;All Files (*)", options=options)
         if file_path:
             with open(file_path, "r") as file:
-                self.text_area.setPlainText(file.read())
+                current_tab = self.tab_widget.currentWidget()
+                editor = current_tab.layout().itemAt(0).widget()
+                editor.setPlainText(file.read())
+                self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(file_path))
 
     def save_as_file(self):
+        """Sauvegarde le contenu de l'éditeur actif."""
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Draw++ Files (*.dpp);;All Files (*)", options=options)
         if file_path:
+            current_tab = self.tab_widget.currentWidget()
+            editor = current_tab.layout().itemAt(0).widget()
             with open(file_path, "w") as file:
-                file.write(self.text_area.toPlainText())
-
+                file.write(editor.toPlainText())
+            self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(file_path))
 
     def run_code(self):
+        """Exécute le code de l'éditeur actif et affiche la sortie dans le terminal actif."""
+        current_tab = self.tab_widget.currentWidget()
+        if not current_tab:
+            return  # Aucun onglet actif
+
+        # Récupérer l'éditeur et le terminal associés à l'onglet actif
+        tab_data = self.tabs_data.get(current_tab)
+        if not tab_data:
+            return
+
+        editor = tab_data['editor']
+        terminal = tab_data['terminal']
+
         # Préparation du fichier temporaire
         dir_path = ".to_run"
         if not os.path.exists(dir_path):
@@ -292,99 +291,79 @@ class MyDrawppIDE(QMainWindow):
 
         file_path = os.path.join(dir_path, "to_execute.dpp")
         with open(file_path, "w") as file:
-            file.write(self.text_area.toPlainText())
+            file.write(editor.toPlainText())
 
         interpreter_script = "interpreter.py"
 
-        # Commande à exécuter
-        if platform.system() == "Windows": # Windows -> testé et fonctionnel
+        # Nettoyer le terminal avant d'exécuter
+        terminal.clear()
+
+        # Créer un nouveau processus pour cet onglet
+        process = QProcess(self)
+        tab_data['process'] = process  # Stocker le processus dans le dictionnaire
+
+        # Connecter les sorties au terminal actif
+        process.readyReadStandardOutput.connect(lambda: self.display_output(process, terminal))
+        process.readyReadStandardError.connect(lambda: self.display_error(process, terminal))
+
+        # Configurer la commande pour l'exécution
+        if platform.system() == "Windows":
             command = ["python", interpreter_script, file_path]
         else:
             command = ["python3", interpreter_script, file_path]
-        self.terminal.clear()  # Nettoie le terminal avant d'exécuter
-        #self.terminal.appendPlainText(f"Running command: {' '.join(command)}\n")
 
-        # Démarre le processus
-        if platform.system() == "Windows": # Windows -> testé et fonctionnel
-            self.process.start("python", [interpreter_script, file_path])
-        else:
-            self.process.start("python3", [interpreter_script, file_path])
-        
+        # Démarrer le processus
+        process.start(command[0], command[1:])
+
+
+
+    def display_output(self, process, terminal):
+        """Affiche les sorties dans le terminal spécifié avec des couleurs simples pour certaines séquences."""
+        output = process.readAllStandardOutput().data().decode('utf-8', errors='ignore')
+
+        for line in output.splitlines():  # Découpe en lignes
+            if "31m" in line:  # Si "31m" est détecté -> Rouge
+                line = line.replace("[31m", "").replace("[0m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#cf4016"))
+            elif "34m" in line:  # Si "34m" est détecté -> Bleu
+                line = line.replace("[34m", "").replace("[0m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#555df5"))
+            else:  # Texte sans séquence ANSI, affiché normalement
+                terminal.appendPlainText(line)
+
+    def append_colored_text(self, terminal, text, color=QColor("white")):
+        """Ajoute une ligne de texte colorée dans le terminal spécifié."""
+        cursor = terminal.textCursor()
+        cursor.movePosition(QTextCursor.End)  # Place le curseur à la fin
+        text_format = QTextCharFormat()
+        text_format.setForeground(color)  # Définit la couleur
+        cursor.insertText(text, text_format)  # Insère le texte coloré
+        terminal.setTextCursor(cursor)
+        terminal.ensureCursorVisible()  # S'assure que le texte reste visible
+
     def show_new_window(self):
         self.w = AnotherWindow()
         self.w.show()
 
 
-
-    # gestion de l'affichage dans le terminal
-
-
-    def display_output(self):
-        if platform.system() == "Windows":
-            #.data et .decode -> converti en chaine de caracteres visible sinon on comprend rien
-            output = self.process.readAllStandardOutput().data().decode('utf-8', errors='ignore')
-        else:
-            output = self.process.readAllStandardOutput().data().decode()
-        
-
-        for line in output.splitlines():  # Découpe en lignes
-            if "31m" in line:  # Si "31m" est détecté -> Rouge
-                line = line.replace("[31m","")
-                line = line.replace("[0m","")
-                self.append_colored_text(line + "\n", QColor("#cf4016")) #
-            elif "34m" in line:  # Si "34m" est détecté -> Bleu
-                line = line.replace("[34m","")
-                line = line.replace("[0m","")
-                self.append_colored_text(line + "\n", QColor("#555df5"))
-            else:
-                self.terminal.appendPlainText(line)  # Affiche normalement
-    # def display_error(self):
-    #     error_output = self.process.readAllStandardError().data().decode()
-    #     for line in error_output.splitlines():  # Découpe en lignes
-    #         if "31m" in line:  # Si "31m" est détecté -> Rouge
-    #             self.append_colored_text(line + "\n", QColor("red"))
-    #         elif "34m" in line:  # Si "34m" est détecté -> Bleu
-    #             self.append_colored_text(line + "\n", QColor("blue"))
-    #         else:
-    #             self.terminal.appendPlainText(line)  # Affiche normalement
-
-    def append_colored_text(self, text, color=QColor("color")):
-        """Ajoute une ligne de texte colorée dans le terminal."""
-        cursor = self.terminal.textCursor()
-        cursor.movePosition(QTextCursor.End)  # Place le curseur à la fin
-        format = QTextCharFormat()
-        format.setForeground(color)  # Définit la couleur (rouge par défaut)
-        cursor.insertText(text, format)  # Insère le texte coloré
-        self.terminal.setTextCursor(cursor)
-        self.terminal.ensureCursorVisible()  # S'assure que le texte reste visible
-
-
-#création de la nouvelle fenêtre : 
 class AnotherWindow(MyDrawppIDE):
     def __init__(self):
-        super().__init__() #on hérite de la classe mainWindow
-        self.setWindowTitle("Fenetre 2")
-        
+        super().__init__()
 
-#partie obligatoire pour run l'appli
+
+
+
+
 if __name__ == "__main__":
-    #instance principale de l'application
     app = QApplication(sys.argv)
 
-
     if platform.system() == "Windows":
-        #partie chiante juste pour forcer l'icone dans la barre des taches windows
-        #          ---------NE PAS HESITER A SUPPRIMER SI PROBLEME---------------
-        # Définir l'icône de l'application
         icon = QIcon("Dpp_circle.ico")
         app.setWindowIcon(icon)
-        # Appliquer l'icône explicitement pour la barre des tâches sous Windows
         if hasattr(QtWin, 'setCurrentProcessExplicitAppUserModelID'):
-            myappid = 'mon.application.ide.version1.0'  # ID unique pour votre application
+            myappid = 'mon.application.ide.version1.0'
             QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
 
-    #la main window, qui est un widget en fait QMainwindow, qui est un objet special
-        # qui peut contenir des menus etc..
     window = MyDrawppIDE()
     window.show()
     sys.exit(app.exec_())
