@@ -212,11 +212,29 @@ def p_bloc(p):
 # @}
 
 # @{
-# @brief Handles conditional instructions with or without an else clause.
+# @brief Handles conditional instructions with elif and optional else clause.
 def p_conditionnelle(p):
-    '''conditionnelle : IF LPAREN expression_logique RPAREN bloc ELSE bloc
+    '''conditionnelle : IF LPAREN expression_logique RPAREN bloc elif_clauses ELSE bloc
+                      | IF LPAREN expression_logique RPAREN bloc elif_clauses
+                      | IF LPAREN expression_logique RPAREN bloc ELSE bloc
                       | IF LPAREN expression_logique RPAREN bloc'''
-    p[0] = ('if', p[3], p[5], p[7]) if len(p) == 8 else ('if', p[3], p[5])
+    if len(p) == 9:  # If with elif and else
+        p[0] = ('if', p[3], p[5], p[6], p[8])
+    elif len(p) == 7:  # If with elif
+        p[0] = ('if', p[3], p[5], p[6])
+    elif len(p) == 8:  # If with else
+        p[0] = ('if', p[3], p[5], p[7])
+    else:  # Simple if
+        p[0] = ('if', p[3], p[5])
+
+# @brief Handles elif clauses.
+def p_elif_clauses(p):
+    '''elif_clauses : ELIF LPAREN expression_logique RPAREN bloc elif_clauses
+                    | ELIF LPAREN expression_logique RPAREN bloc'''
+    if len(p) == 7:  # Multiple elifs
+        p[0] = [('elif', p[3], p[5])] + p[6]
+    else:  # Single elif
+        p[0] = [('elif', p[3], p[5])]
 # @}
 
 # @{

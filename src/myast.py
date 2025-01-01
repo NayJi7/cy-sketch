@@ -35,7 +35,9 @@ def print_error_interractive(e):
 def condition_to_c(ast, current_position, condition):
     if type(condition) == (int or float):
         return condition
-    
+    elif type(condition) == bool:
+        return 'TRUE' if condition else 'FALSE'
+
     op = condition[0]
     if condition[0] == "or":
         op = "||"
@@ -55,9 +57,7 @@ def condition_to_c(ast, current_position, condition):
     elif type(condition) == str and '"' in condition:
         raise TypeError(f"TypeError : Cannot compare char {condition}")
 
-    if type(condition) == bool:
-        return 'TRUE' if condition else 'FALSE'
-    elif type(condition[1]) == bool:
+    if type(condition[1]) == bool:
         if type(condition[2]) == bool:
             if condition[1] and condition[2]:
                 return f"TRUE {op} TRUE"
@@ -884,32 +884,46 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
     elif isinstance(node, tuple) and node[0] == 'if':
         condition = node[1]
         bloc_true = node[2][1]  # List of instructions in the true block
-        bloc_false = node[3][1] if len(node) == 4 else None  # False block if available
+        elif_clauses = node[3] if isinstance(node[3], list) else []  # List of elif clauses if available
+        if len(elif_clauses) > 0:
+            bloc_false = node[4][1] if len(node) == 5 else None  # False block elif case
+        else:
+            bloc_false = node[3][1] if len(node) == 4 else None  # False block if else case
 
         if tabulation > 0: 
             c_code += "\t" * tabulation
 
+        # Translate the main "if" block
         c_code += f"if ({condition_to_c(ast, current_position, condition)}) {{"
-        
         for instr in bloc_true:
             c_code += f"\n{translate_node_to_c(ast, prototypes, instr, 1, tabulation+1, True)}"
-        
         if tabulation > 0: 
             c_code += "\t" * tabulation
-        c_code += f"}}"
+        c_code += f"}}\n"
 
+        # Translate "elif" blocks (as "else if")
+        for elif_clause in elif_clauses:
+            elif_condition = elif_clause[1]
+            elif_bloc = elif_clause[2][1]
+            if tabulation > 0: 
+                c_code += "\t" * tabulation
+            c_code += f"else if ({condition_to_c(ast, current_position, elif_condition)}) {{"
+            for instr in elif_bloc:
+                c_code += f"\n{translate_node_to_c(ast, prototypes, instr, 1, tabulation+1, True)}"
+            if tabulation > 0: 
+                c_code += "\t" * tabulation
+            c_code += f"}}\n"
+
+        # Translate the "else" block if it exists
         if bloc_false:
             if tabulation > 0: 
                 c_code += "\t" * tabulation
-
             c_code += f"else {{"
-            
             for instr in bloc_false:
                 c_code += f"\n{translate_node_to_c(ast, prototypes, instr, 1, tabulation+1, True)}"
-            
             if tabulation > 0: 
                 c_code += "\t" * tabulation
-            c_code += f"}}"
+            c_code += f"}}\n"
 
         if newline > 0: 
             c_code += "\n" * (newline+1)

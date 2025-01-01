@@ -62,6 +62,7 @@ colors = {
 # @brief Reserved keywords and their corresponding token names
 keywords = {
     'if': 'IF',
+    'elif': 'ELIF',
     'else': 'ELSE',
     'for': 'FOR',
     'while': 'WHILE',
