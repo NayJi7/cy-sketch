@@ -884,10 +884,12 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
     elif isinstance(node, tuple) and node[0] == 'if':
         condition = node[1]
         bloc_true = node[2][1]  # List of instructions in the true block
-        elif_clauses = node[3] if isinstance(node[3], list) else []  # List of elif clauses if available
-        if len(elif_clauses) > 0:
-            bloc_false = node[4][1] if len(node) == 5 else None  # False block elif case
+        if len(node) > 3 : 
+            elif_clauses = node[3] if isinstance(node[3], list) else []  # List of elif clauses if available
+            if len(elif_clauses) > 0:
+                bloc_false = node[4][1] if len(node) == 5 else None  # False block elif case
         else:
+            elif_clauses = []
             bloc_false = node[3][1] if len(node) == 4 else None  # False block if else case
 
         if tabulation > 0: 
