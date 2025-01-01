@@ -40,6 +40,24 @@ def get_known_identifiers(t):
 
 # === 1. Definition of Tokens ===
 
+colors = {
+    "red": "red",
+    "green": "green",
+    "blue": "blue",
+    "white": "white",
+    "black": "black",
+    "yellow": "yellow",
+    "cyan": "cyan",
+    "magenta": "magenta",
+    "gray": "gray",
+    "light_gray": "light_gray",
+    "dark_gray": "dark_gray",
+    "orange": "orange",
+    "purple": "purple",
+    "brown": "brown",
+    "pink": "pink"
+}
+
 # @{
 # @brief Reserved keywords and their corresponding token names
 keywords = {
@@ -54,17 +72,26 @@ keywords = {
     'return': 'RET',
     'draw': 'DRAW',
     'cursor': 'CURSOR',
-    'move': 'MOVE',
+    'window': 'WINDOW',
     'color': 'COLOR',
-    'animate': 'ANIMATE',
-    'rotate': 'ROTATE',
+    'size': 'SIZE',
+    'set': 'SET',
+    'animated': 'ANIMATED',
+    'instant': 'INSTANT',
+    'empty': 'EMPTY',
+    'filled': 'FILLED',
     'var': 'VARIABLE',
+    'ellipse': 'ELLIPSE',
+    'polygon': 'POLYGON',
     'line': 'LINE',
     'circle': 'CIRCLE',
+    'triangle': 'TRIANGLE',
     'square': 'SQUARE',
+    'rectangle': 'RECTANGLE',
     'arc': 'ARC',
-    'point': 'POINT',
-}
+    'or': 'OR',
+    'and': 'AND', 
+} | colors # add the colors to the keylist
 # @}
 
 # @{
@@ -72,9 +99,9 @@ keywords = {
 tokens = [
     'IDENTIFIER', 'NUMBER', 'STRING', 'BOOLEAN',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EQUALS',
-    'LT', 'GT', 'LE', 'GE', 'EQ', 'NEQ', 'AND', 'OR', 'NOT',
-    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'LBRACKET', 'RBRACKET',
-    'COMMA', 'SEMICOLON', 'COLON',
+    'LT', 'GT', 'LE', 'GE', 'EQ', 'NEQ', 'AND',
+    'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'LBRACKET', 
+    'RBRACKET','COMMA', 'SEMICOLON', 'COLON',
 ] + list(keywords.values())
 # @}
 
@@ -93,9 +120,6 @@ t_LE = r'<='
 t_GE = r'>='
 t_EQ = r'=='
 t_NEQ = r'!='
-t_AND = r'and'
-t_OR = r'or'
-t_NOT = r'not'
 # @}
 
 # @{
@@ -127,9 +151,9 @@ def t_IDENTIFIER(t):
 
     if t.value in keywords:
         t.type = keywords[t.value]
-    elif t.value in ['True', 'False']:  # Handle boolean literals
+    elif t.value in ['true', 'false']:  # Handle boolean literals
         t.type = 'BOOLEAN'
-        t.value = (t.value == 'True')
+        t.value = (t.value == 'true')
     elif t.value in known_identifiers:
         t.type = 'IDENTIFIER'
     else:
@@ -159,8 +183,8 @@ def t_STRING(t):
 # @param t Token object containing the matched value
 # @return Token object with boolean value
 def t_BOOLEAN(t):
-    r'True|False'
-    t.value = (t.value == 'True')
+    r'true|false'
+    t.value = (t.value == 'true')
     return t
 
 # @brief Ignores spaces and tabs

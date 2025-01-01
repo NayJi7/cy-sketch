@@ -3,9 +3,9 @@ import sys
 import argparse
 import atexit
 import readline
-from lexer import init_lexer
-from parser import init_parser
-from myast import *
+from src.lexer import init_lexer
+from src.parser import init_parser
+from src.myast import *
 
 DEBUG = False  # Debug mode is off by default
 
@@ -14,7 +14,7 @@ DEBUG = False  # Debug mode is off by default
 # @{
 # @brief Executes a source file written in the Draw++ language.
 # @param file_path The path to the Draw++ source file.
-def run_file(file_path):
+def run_file(file_path, filename):
     """Executes a Draw++ source file."""
 
     lexer = init_lexer()
@@ -66,7 +66,7 @@ def run_file(file_path):
 
     if ast:
         # Execute the AST
-        execute_ast(ast, DEBUG)
+        execute_ast(ast, DEBUG, filename)
 # @}
 
 # === 5. Interactive Mode ===
@@ -160,11 +160,13 @@ def main():
     # DEBUG
     sys.argv.append("-d")
     sys.argv.append(".to_run.dpp")
+    sys.argv.append("-n test")
 
     """Main entry point for the Draw++ interpreter."""
     argparser = argparse.ArgumentParser(description="Draw++ Language Interpreter")
     argparser.add_argument("file", nargs="?", help="Source file to execute (optional)")
     argparser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
+    argparser.add_argument("-n", "--name", default="test", help="Output filename without extension (default: test)")
     args = argparser.parse_args()
 
     # Set the debug mode flag globally
@@ -174,9 +176,11 @@ def main():
     if DEBUG:
         print("[DEBUG] Debug mode activated.\n")
 
+    filename = args.name.lstrip()  # Get the filename from the arguments (lstrip gets rid of the spaces at the begining)
+
     if args.file:  # If a file is specified
         file_path = args.file
-        run_file(file_path)
+        run_file(file_path, filename)
     else:  # Interactive mode
         run_interactive()
 # @}

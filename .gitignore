@@ -7,3 +7,4 @@ doc/latex/
 .to_run.dpp
 .to_compil.c
 dump/
+todo.h

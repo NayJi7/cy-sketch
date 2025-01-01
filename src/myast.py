@@ -1,7 +1,7 @@
 import os
 import sys
 import copy
-from lexer import suggest_keyword
+from src.lexer import suggest_keyword, colors
 
 # === 1. Error Handling ===
 
@@ -15,6 +15,8 @@ def print_error(e):
             suggestion = suggest_keyword(e.split("'")[1])
             if suggestion:
                 print(f"\033[34mSuggestion : Did you mean '{suggestion}' ?\033[0m")
+            else:
+                print(f"\033[34mSuggestion : Check if you intitalized correctly all your variables and functions.\033[0m")
     sys.exit(1)
 # @}
 
@@ -30,15 +32,56 @@ def print_error_interractive(e):
 # @brief Converts a condition to its C representation.
 # @param condition The condition to convert (boolean or tuple).
 # @return A string representing the condition in C syntax.
-def condition_to_c(condition):
+def condition_to_c(ast, current_position, condition):
+    if type(condition) == (int or float):
+        return condition
+    
+    op = condition[0]
+    if condition[0] == "or":
+        op = "||"
+    elif condition[0] == "and":
+        op = "&&"
+    
+    elif type(condition) == str and '"' not in condition:
+        operators = ["||", "&&", "==", "!=", "<", ">", "<=", ">="]
+        if condition in operators:
+            return condition
+
+        t = resolve_value_and_find_variable(ast, condition, current_position)
+        if "char" in t[0]:
+            raise TypeError(f"TypeError : Cannot compare '{t[1]}' variable as it is {t[0]}.")
+        return condition
+    
+    elif type(condition) == str and '"' in condition:
+        raise TypeError(f"TypeError : Cannot compare char {condition}")
+
     if type(condition) == bool:
         return 'TRUE' if condition else 'FALSE'
-    elif condition[1] == (True or False):
-        return f"TRUE {condition[0]} {condition[2]}" if condition[1] else f"FALSE {condition[0]} {condition[2]}"
-    elif condition[2] == (True or False):
-        return f"{condition[1]} {condition[0]} TRUE" if condition[2] else f"{condition[1]} {condition[0]} FALSE"
+    elif type(condition[1]) == bool:
+        if type(condition[2]) == bool:
+            if condition[1] and condition[2]:
+                return f"TRUE {op} TRUE"
+            elif condition[1] and not condition[2]:
+                return f"TRUE {op} FALSE"
+            elif not condition[1] and condition[2]:
+                return f"FALSE {op} TRUE"
+            else:
+                return f"FALSE {op} FALSE"    
+        return f"TRUE {op} {condition_to_c(ast, current_position, condition[2])}" if condition[1] else f"FALSE {op} {condition_to_c(ast, current_position, condition[2])}"
+    
+    elif type(condition[2]) == bool:
+        if type(condition[1]) == bool:
+            if condition[1] and condition[2]:
+                return f"TRUE {op} TRUE"
+            elif condition[1] and not condition[2]:
+                return f"TRUE {op} FALSE"
+            elif not condition[1] and condition[2]:
+                return f"FALSE {op} TRUE"
+            else:
+                return f"FALSE {op} FALSE"
+        return f"{condition_to_c(ast, current_position, condition[1])} {op} TRUE" if condition[2] else f"{condition_to_c(ast, current_position, condition[1])} {op} FALSE"
     else:
-        return f"{condition[1]} {condition[0]} {condition[2]}"
+        return f"{condition_to_c(ast, current_position, condition[1])} {op} {condition_to_c(ast, current_position, condition[2])}"
 # @}
 
 # === 2. AST Node Resolution ===
@@ -58,9 +101,13 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
     if isinstance(value, (int, float)):  # Literal Numbers
         return type(value).__name__, value
     elif isinstance(value, str) and '"' in value:  # Literal String
-        return f"char[{len(value.strip('"'))}]", value.strip('"')
+        return f"char[{len(value.strip('"'))}]", value
     elif isinstance(value, str):  # Variable name
         # Search the AST for the variable assignment, or modification
+        colors = ['red', 'green', 'blue', 'white', 'black', 'yellow', 'cyan', 'magenta', 'gray', 'light_gray', 'dark_gray', 'orange', 'purple', 'brown', 'pink']
+        tmp = ["animated", "instant", "filled", "empty"] + colors
+        if value in tmp :
+            return None, value
         for i, node in enumerate(ast):
             if current_position is not None and i >= current_position:
                 # If the current position is reached and variable is not found, return an error
@@ -200,7 +247,7 @@ def make_prototype(ast, node, prototypes):
 # @param current_position The current position in the AST (default: None).
 # @return A string containing the translated C code.
 def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, current_position=None):
-    """Traduire une node en code C."""
+    """draw forme(animated|instant, filled|empty, params)"""
     c_code = ""
 
     if DEBUG:
@@ -213,140 +260,394 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         return node
     
     elif isinstance(node, str):
-        return node
+        tmp = ["animated", "instant", "filled", "empty"]
+        if node in tmp:
+            return f'"{node}"'
+        else:
+            return node
     
     # Case: Drawing instruction (e.g., draw_circle)
     elif isinstance(node, tuple) and node[0] == 'draw':
         forme = node[1]
         parametres = node[2]
-        ok = True
 
         if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        if forme == "line":
-            expected_args = 2
-        elif forme == "circle":
-            expected_args = 2
+        if forme == "circle":
+            expected_args = 6
+        elif forme == "ellipse":
+            expected_args = 7
+        elif forme == "line":
+            expected_args = 8
+        elif forme == "polygon":
+            expected_args = 7
+        elif forme == "rectangle":
+            expected_args = 7
         elif forme == "arc":
-            expected_args = 3
+            expected_args = 8
+        elif forme == "triangle":
+            forme = "polygon"
+            parametres.insert(5,3)
+            expected_args = 7
         elif forme == "square":
-            expected_args = 4
-        elif forme == "point":
-            expected_args = 1
-
-        for test in parametres:
-            if type(test) == str and '"' not in test:
-                t = resolve_value_and_find_variable(ast, test, current_position)
-
-                if t == None:
-                    raise ValueError(f"ValueError : '{test}' variable not initialized")
+            forme = "rectangle"
+            parametres.insert(5,parametres[5])
+            expected_args = 7
 
         if expected_args == len(parametres):
-            c_code += f"draw_{forme}("
+            c_code += f'if(drawShape(renderer, mainTexture, "{forme}", '
             for i, param in enumerate(parametres):
                 c_code += f"{translate_node_to_c(ast, prototypes, param, 0, 0, 0)}"
                 if i<len(parametres) - 1:
                     c_code += ', '
-            c_code += ')'
+            c_code += ') == -1) return 0'
         elif expected_args != len(parametres):
-            raise IndexError(f"IndexError : draw_{forme} function requires {expected_args} arguments, but you gave {len(parametres)}")          
+            raise IndexError(f"IndexError : draw {forme} function requires {expected_args} arguments, but you gave {len(parametres)}")
+
+        if forme == "circle":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+
+        elif forme == "ellipse":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius x
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius y
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+
+        elif forme == "line":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x1
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y1
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #x2
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #y2
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+
+            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #width
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+
+        elif forme == "polygon":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+        elif forme == "rectangle":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #w
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #h
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+        elif forme == "arc":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #r
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #startangle
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #endangle
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+
+        elif forme == "triangle":
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+        elif forme == "square":
+
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #c
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")         
 
         if semicolon:
             c_code += ";"
 
         if newline > 0:
-            c_code += "\n" * newline
-    
-    # Case: Movement instruction (e.g., move_to)
-    elif isinstance(node, tuple) and node[0] == 'move':
-        x = node[1]
-        y = node[2]
-
-        if tabulation > 0: 
-            c_code += "\t" * tabulation
-
-        if type(x) != int or float:
-            if type(x) == str and '"' not in x:
-                t = resolve_value_and_find_variable(ast, x, current_position)
-
-                if t == None:
-                    raise ValueError(f"ValueError : '{x}' variable not initialized")
-                elif t[0] != ("int" or "float"):
-                    raise TypeError(f"TypeError : '{x}' is {t[0]}, expected int or float")
-            else:
-                t = resolve_value_and_find_variable(ast, x, current_position)
-                raise TypeError(f"TypeError : '{x}' is {t[0]}, expected int or float")
-
-        if type(y) != int or float:
-            if type(y) == str and '"' not in y:
-                t = resolve_value_and_find_variable(ast, y, current_position)
-
-                if t == None:
-                    raise ValueError(f"ValueError : '{y}' variable not initialized")
-                elif t[0] != ("int" or "float"):
-                    raise TypeError(f"TypeError : '{y}' is {t[0]}, expected int or float")
-            else:
-                t = resolve_value_and_find_variable(ast, y, current_position)
-                raise TypeError(f"TypeError : '{y}' is {t[0]}, expected int or float")
-            
-        c_code += f"move_to({translate_node_to_c(ast, prototypes,x,0,0,0)}, {translate_node_to_c(ast, prototypes,y,0,0,0)})"
-
-        if semicolon:
-            c_code += ";"
-
-        if newline > 0: 
-            c_code += "\n" * newline
-    
-    # Case: Rotation instruction (e.g., rotate)
-    elif isinstance(node, tuple) and node[0] == 'rotate':
-        angle = node[1]
-
-        if tabulation > 0: 
-            c_code += "\t" * tabulation
-
-        if type(angle) != int:
-            if type(angle) == str and '"' not in angle:
-                t = resolve_value_and_find_variable(ast, angle, current_position)
-
-                if t == None:
-                    raise ValueError(f"ValueError : '{angle}' variable not initialized")
-                elif t[0] != "int":
-                    raise TypeError(f"TypeError : '{angle}' is {t[0]}, expected int")
-
-        if ok:
-            c_code += f"rotate({translate_node_to_c(ast, prototypes, angle, 0,0,0)})"
-
-        if semicolon:
-            c_code += ";"
-
-        if newline > 0: 
-            c_code += "\n" * newline
-
-    # Handle color assignment (e.g., set_color)
-    elif isinstance(node, tuple) and node[0] == 'color':
-        color = node[1]
-
-        if tabulation > 0: 
-            c_code += "\t" * tabulation
-
-        if type(color) == str and '"' not in color:
-            t = resolve_value_and_find_variable(ast, color, current_position)
-
-            if t == None:
-                raise ValueError(f"ValueError : '{color}' variable not initialized")
-            elif "char" not in t[0]:
-                raise TypeError(f"TypeError : '{color}' is {t[0]}, expected char*")
-        
-        if type(color) != str: # security ++, normally it is detected in the parser
-            raise TypeError(f"TypeError : '{color}' is {type(color)}, expected char*")
-
-        c_code += f"set_color({color})"
-
-        if semicolon:
-            c_code += ";"
-
-        if newline > 0: 
             c_code += "\n" * newline
     
     elif isinstance(node, tuple) and node[0] == 'func':
@@ -567,7 +868,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"while ({condition_to_c(condition)}) {{"
+        c_code += f"while ({condition_to_c(ast, current_position, condition)}) {{"
         
         for instr in bloc:
             c_code += f"\n{translate_node_to_c(ast, prototypes, instr, 1, tabulation+1, True)}"
@@ -588,7 +889,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"if ({condition_to_c(condition)}) {{"
+        c_code += f"if ({condition_to_c(ast, current_position, condition)}) {{"
         
         for instr in bloc_true:
             c_code += f"\n{translate_node_to_c(ast, prototypes, instr, 1, tabulation+1, True)}"
@@ -623,7 +924,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if tabulation > 0: 
             c_code += "\t" * tabulation
 
-        c_code += f"for ({translate_node_to_c(ast, prototypes, init, 0, 0, 0)}; {condition_to_c(condition)}; {translate_node_to_c(ast, prototypes, increment, 0, 0, 0)}) {{\n"
+        c_code += f"for ({translate_node_to_c(ast, prototypes, init, 0, 0, 0)}; {condition_to_c(ast, current_position, condition)}; {translate_node_to_c(ast, prototypes, increment, 0, 0, 0)}) {{\n"
         
         for instr in bloc:
             c_code += f"{translate_node_to_c(ast, prototypes, instr, 1, tabulation+1, True)}"
@@ -634,6 +935,75 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
 
         if newline > 0: 
             c_code += "\n" * (newline+1)
+
+    elif isinstance(node, tuple) and node[0] == "setcolor": # Gets the setcolors in the ast
+        elem = node[1]
+        color = node[2]
+
+        if elem == "cursor":
+            if color in colors:
+                if color == "red":          c_code += '#define cursorcolorR 255\n#define cursorcolorG 0\n#define cursorcolorB 0\n'
+                elif color == "green":      c_code += '#define cursorcolorR 0\n#define cursorcolorG 255\n#define cursorcolorB 0\n'
+                elif color == "blue":       c_code += '#define cursorcolorR 0\n#define cursorcolorG 0\n#define cursorcolorB 255\n'
+                elif color == "white":      c_code += '#define cursorcolorR 255\n#define cursorcolorG 255\n#define cursorcolorB 255\n'
+                elif color == "black":      c_code += '#define cursorcolorR 0\n#define cursorcolorG 0\n#define cursorcolorB 0\n'
+                elif color == "yellow":     c_code += '#define cursorcolorR 255\n#define cursorcolorG 255\n#define cursorcolorB 0\n'
+                elif color == "cyan":       c_code += '#define cursorcolorR 0\n#define cursorcolorG 255\n#define cursorcolorB 255\n'
+                elif color == "magenta":    c_code += '#define cursorcolorR 255\n#define cursorcolorG 0\n#define cursorcolorB 255\n'
+                elif color == "gray":       c_code += '#define cursorcolorR 128\n#define cursorcolorG 128\n#define cursorcolorB 128\n'
+                elif color == "light_gray": c_code += '#define cursorcolorR 211\n#define cursorcolorG 211\n#define cursorcolorB 211\n'
+                elif color == "dark_gray":  c_code += '#define cursorcolorR 169\n#define cursorcolorG 169\n#define cursorcolorB 169\n'
+                elif color == "orange":     c_code += '#define cursorcolorR 255\n#define cursorcolorG 165\n#define cursorcolorB 0\n'
+                elif color == "purple":     c_code += '#define cursorcolorR 128\n#define cursorcolorG 0\n#define cursorcolorB 128\n'
+                elif color == "brown":      c_code += '#define cursorcolorR 165\n#define cursorcolorG 42\n#define cursorcolorB 42\n'
+                elif color == "pink":       c_code += '#define cursorcolorR 255\n#define cursorcolorG 192\n#define cursorcolorB 203\n'
+                c_code += '#define cursorcolorA 255\n'
+            else:
+                raise TypeError(f'TypeError : "{color}" is not a supported color')
+        elif elem == "window":
+            if color in colors:
+                if color == "red":          c_code += '#define bgcolorR 255\n#define bgcolorG 0\n#define bgcolorB 0\n'
+                elif color == "green":      c_code += '#define bgcolorR 0\n#define bgcolorG 255\n#define bgcolorB 0\n'
+                elif color == "blue":       c_code += '#define bgcolorR 0\n#define bgcolorG 0\n#define bgcolorB 255\n'
+                elif color == "white":      c_code += '#define bgcolorR 255\n#define bgcolorG 255\n#define bgcolorB 255\n'
+                elif color == "black":      c_code += '#define bgcolorR 0\n#define bgcolorG 0\n#define bgcolorB 0\n'
+                elif color == "yellow":     c_code += '#define bgcolorR 255\n#define bgcolorG 255\n#define bgcolorB 0\n'
+                elif color == "cyan":       c_code += '#define bgcolorR 0\n#define bgcolorG 255\n#define bgcolorB 255\n'
+                elif color == "magenta":    c_code += '#define bgcolorR 255\n#define bgcolorG 0\n#define bgcolorB 255\n'
+                elif color == "gray":       c_code += '#define bgcolorR 128\n#define bgcolorG 128\n#define bgcolorB 128\n'
+                elif color == "light_gray": c_code += '#define bgcolorR 211\n#define bgcolorG 211\n#define bgcolorB 211\n'
+                elif color == "dark_gray":  c_code += '#define bgcolorR 169\n#define bgcolorG 169\n#define bgcolorB 169\n'
+                elif color == "orange":     c_code += '#define bgcolorR 255\n#define bgcolorG 165\n#define bgcolorB 0\n'
+                elif color == "purple":     c_code += '#define bgcolorR 128\n#define bgcolorG 0\n#define bgcolorB 128\n'
+                elif color == "brown":      c_code += '#define bgcolorR 165\n#define bgcolorG 42\n#define bgcolorB 42\n'
+                elif color == "pink":       c_code += '#define bgcolorR 255\n#define bgcolorG 192\n#define bgcolorB 203\n'
+            else:
+                raise TypeError(f'TypeError : "{color}" is not a supported color')
+        else:
+            raise NameError(f"NameError : you can only change the color of the cursor or the background")
+        
+    elif isinstance(node, tuple) and node[0] == 'setsize':
+        elem = node[1]
+        width = node[2]
+        height = node[3] if len(node) == 4 else None
+
+        if elem == "cursor":
+            if height:
+                raise TypeError(f"TypeError : set cursor size function takes only one argument")
+
+            if type(width) == float:
+                raise TypeError(f"TypeError : the window's width cannot be float. Expected int")
+
+            c_code += f'#define cursorSize {width}\n'
+
+        elif elem == "window":
+            if type(width) == float:
+                raise TypeError(f"TypeError : the window's width cannot be float. Expected int")
+            if type(height) == float:
+                raise TypeError(f"TypeError : the window's height cannot be float. Expected int")
+
+            c_code += f'#define windowW {width}\n'
+            c_code += f'#define windowH {height}\n'
     
     # Default case (unsupported node)
     else:
@@ -651,10 +1021,11 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
 # @brief Translates the entire AST into a C program.
 # @param ast The abstract syntax tree containing program instructions.
 # @return A string containing the translated C program.
-def translate_ast_to_c(ast):
+def translate_ast_to_c(ast, filename):
     """Traduire l'AST en code C."""
     c_code = ""
     prototypes = []
+    topop = []
 
     c_code += "/////////////////////////////////////////////////////////////////////////////////////////////////////\n"
     c_code += "// This is a generated file. It is useless to edit it as it will be regenerated at each compilation//\n"
@@ -668,10 +1039,42 @@ def translate_ast_to_c(ast):
     c_code += "#include <stdio.h>\n"
     c_code += "#include <stdlib.h>\n"
     c_code += "#include <string.h>\n"
-    c_code += "#include <math.h>\n\n"
+    c_code += "#include <math.h>\n"
+    c_code += '#include "./dump/files.h/main.h"\n\n'
 
     c_code += "#define TRUE 1\n"
     c_code += "#define FALSE 0\n\n"
+
+    try:
+        for i, node in enumerate(ast):
+            if isinstance(node, tuple) and node[0] in ['setcolor', 'setsize']:
+                topop.append(i) # Save the node's position
+                c_code += translate_node_to_c(ast, prototypes, node,0,0,False)
+    except Exception as e:
+        print_error(f"Error during the traduction of the defines' AST : {e}")
+        return None  # Signal an error occurred
+    
+    if "#define bgcolorR" not in c_code:
+        c_code += '#define bgcolorR 0\n'
+    if "#define bgcolorG" not in c_code:        
+        c_code += '#define bgcolorG 0\n'
+    if "#define bgcolorB" not in c_code:
+        c_code += '#define bgcolorB 0\n'
+    if "#define cursorcolorR" not in c_code:
+        c_code += '#define cursorcolorR 255\n'
+    if "#define cursorcolorG" not in c_code:
+        c_code += '#define cursorcolorG 255\n'
+    if "#define cursorcolorB" not in c_code:
+        c_code += '#define cursorcolorB 255\n'
+    if "#define cursorcolorA" not in c_code:
+        c_code += '#define cursorcolorA 255\n'
+    if "#define cursorSize" not in c_code:
+        c_code += '#define cursorSize 5\n'
+    if "#define windowW" not in c_code:
+        c_code += '#define windowW 800\n'
+    if "#define windowH" not in c_code:
+        c_code += '#define windowH 600\n'
+    c_code += f'#define windowTitle "{filename}"\n\n'
 
     if DEBUG:
         print("\n[DEBUG] Translating AST to C code...")
@@ -693,7 +1096,6 @@ def translate_ast_to_c(ast):
     c_code += "// Function's declarations //\n"
     c_code += "/////////////////////////////\n\n"
 
-    topop = []
     try:
         for i, node in enumerate(ast):
             if isinstance(node, tuple) and node[0] == "func": # Gets the functions in the ast
@@ -713,12 +1115,47 @@ def translate_ast_to_c(ast):
 
     c_code += f"int main() {{\n\n"
 
+    c_code += f'    SDL_Window *window = NULL;\n'
+    c_code += f'    SDL_Renderer *renderer = NULL;\n'
+    c_code += f'    SDL_Event event;\n'
+    c_code += f'    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {{\n'
+    c_code += f'        printf("Erreur SDL : %s\\n", SDL_GetError());\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
+    c_code += f'    if (SDL_CreateWindowAndRenderer(windowW, windowH, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0) {{\n'
+    c_code += f'        printf("Erreur SDL_CreateWindowAndRenderer : %s\\n", SDL_GetError());\n'
+    c_code += f'        SDL_Quit();\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
+    c_code += f'    SDL_SetWindowTitle(window, windowTitle);\n'
+    c_code += f'    SDL_Color cursorColor = {{cursorcolorR, cursorcolorG, cursorcolorB, cursorcolorA}};\n'
+    c_code += f'    Cursor cursor = createCursor(windowW/2, windowH/2, cursorColor, cursorSize, true);\n'
+    c_code += f'    SDL_Texture* mainTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);\n'
+    c_code += f'    SDL_SetRenderTarget(renderer, mainTexture);\n'
+    c_code += f'    SDL_SetRenderDrawColor(renderer, bgcolorR, bgcolorG, bgcolorB, 255);\n'
+    c_code += f'    SDL_RenderClear(renderer);\n\n\n'
+
+    c_code += "    /////////////////////////////\n"
+    c_code += "    // User Instructions Start //\n"
+    c_code += "    /////////////////////////////\n\n"
+
     try:
         for i, node in enumerate(ast):
             c_code += translate_node_to_c(ast, prototypes, node, 1, 1, 1, current_position=i)
     except Exception as e:
         print_error(f"Error during the traduction of the main AST : {e}")
         return None  # Signal an error occurred
+    
+    c_code += f'\n'
+    c_code += "    ///////////////////////////\n"
+    c_code += "    // User Instructions End //\n"
+    c_code += "    ///////////////////////////\n\n"
+    
+    c_code += f'    mainLoop(renderer, event, cursor);\n\n'
+    c_code += f'    SDL_DestroyTexture(mainTexture);\n'
+    c_code += f'    SDL_DestroyRenderer(renderer);\n'
+    c_code += f'    SDL_DestroyWindow(window);\n'
+    c_code += f'    SDL_Quit();\n'
 
     c_code += f"\n\treturn 0;\n"
     c_code += f"}}\n"
@@ -729,7 +1166,6 @@ def translate_ast_to_c(ast):
         for i,line in enumerate(lines, start=1):
             print(f"[DEBUG] {i}\t{line}")
 
-
     return c_code
 # @}
 
@@ -739,7 +1175,7 @@ def translate_ast_to_c(ast):
 # @brief Executes the AST by translating it to C and writing it to a file.
 # @param ast The abstract syntax tree containing program instructions.
 # @param debug A flag to enable or disable debug output.
-def execute_ast(ast, debug):
+def execute_ast(ast, debug, filename):
     """Exécute l'AST généré par le parser."""
     if not ast:
         print("Aucune instruction à exécuter.")
@@ -749,7 +1185,7 @@ def execute_ast(ast, debug):
     DEBUG = debug
     
     # Traduction de l'AST en code C
-    c_code = translate_ast_to_c(ast)
+    c_code = translate_ast_to_c(ast, filename)
 
     # Determine the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))

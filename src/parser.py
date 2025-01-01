@@ -1,7 +1,7 @@
 import os
 import sys
 import ply.yacc as yacc
-from lexer import tokens, find_column, suggest_keyword
+from src.lexer import tokens, find_column, suggest_keyword
 
 # === 1. Parser Rules ===
 
@@ -18,9 +18,7 @@ def p_programme(p):
 # @brief Defines different types of instructions in the program.
 def p_instruction(p):
     '''instruction : dessin
-                   | deplacement
-                   | rotation
-                   | couleur
+                   | set
                    | assignation
                    | modification
                    | conditionnelle
@@ -45,9 +43,12 @@ def p_dessin(p):
 def p_forme(p):
     '''forme : LINE
              | CIRCLE
+             | ELLIPSE
+             | POLYGON
              | SQUARE
-             | ARC
-             | POINT'''
+             | TRIANGLE
+             | RECTANGLE
+             | ARC'''
     p[0] = p[1]
 # @}
 
@@ -66,9 +67,36 @@ def p_arg(p):
            | IDENTIFIER
            | STRING
            | BOOLEAN
+           | color
+           | specialparam
            | expression_arithmetic'''
     p[0] = p[1]
 # @}
+
+def p_specialparam(p):
+    '''specialparam : ANIMATED
+                    | INSTANT
+                    | FILLED
+                    | EMPTY'''
+    p[0] = p[1]
+
+def p_color(p):
+    '''color : red
+             | green
+             | blue
+             | white
+             | black
+             | yellow
+             | cyan
+             | magenta
+             | gray
+             | light_gray
+             | dark_gray
+             | orange
+             | purple
+             | brown
+             | pink'''
+    p[0] = p[1]
 
 def p_type(p):
     '''type : INT
@@ -125,26 +153,25 @@ def p_expression_arithmetic_atomic(p):
     p[0] = p[1] if len(p) == 2 else p[2]
 # @}
 
-# @{
-# @brief Handles movement instructions.
-def p_deplacement(p):
-    '''deplacement : MOVE LPAREN arg COMMA arg RPAREN'''
-    p[0] = ('move', p[3], p[5])
-# @}
+# @brief Handles set color instructions.
+def p_set_color(p):
+    '''set : SET elem COLOR LPAREN color RPAREN'''
+    p[0] = ('setcolor', p[2], p[5])
 
-# @{
-# @brief Handles rotation instructions.
-def p_rotation(p):
-    '''rotation : ROTATE LPAREN arg RPAREN'''
-    p[0] = ('rotate', p[3])
-# @}
+# @brief Handles set size instructions for window.
+def p_set_size_two(p):
+    '''set : SET elem SIZE LPAREN NUMBER COMMA NUMBER RPAREN'''
+    p[0] = ('setsize', p[2], p[5], p[7])
 
-# @{
-# @brief Handles color change instructions.
-def p_couleur(p):
-    '''couleur : COLOR LPAREN arg RPAREN'''
-    p[0] = ('color', p[3])
-# @}
+# @brief Handles set size instructions for cursor.
+def p_set_size_one(p):
+    '''set : SET elem SIZE LPAREN NUMBER RPAREN'''
+    p[0] = ('setsize', p[2], p[5])
+
+def p_elem(p):
+    '''elem : WINDOW
+            | CURSOR'''
+    p[0] = p[1]
 
 # @{
 # @brief Handles variable assignments.
@@ -193,13 +220,20 @@ def p_conditionnelle(p):
 # @}
 
 # @{
-# @brief Handles logical expressions with comparison operators or boolean values.
+# @brief Handles logical expressions with comparison operators, boolean values, and logical operators.
 def p_expression_logique(p):
     '''expression_logique : valeur operateur_comparaison valeur
                           | valeur operateur_comparaison BOOLEAN
                           | BOOLEAN operateur_comparaison valeur
-                          | BOOLEAN'''
-    p[0] = (p[2], p[1], p[3]) if len(p) == 4 else p[1]
+                          | BOOLEAN
+                          | expression_logique AND expression_logique
+                          | expression_logique OR expression_logique'''
+    if len(p) == 4 and p[2] in ('AND', 'OR'):
+        p[0] = (p[2], p[1], p[3])  # Logical operators
+    elif len(p) == 4:
+        p[0] = (p[2], p[1], p[3])  # Comparison operators
+    else:
+        p[0] = p[1]                # Single boolean or value
 # @}
 
 # @{
@@ -211,6 +245,14 @@ def p_operateur_comparaison(p):
                              | GT
                              | LE
                              | GE'''
+    p[0] = p[1]
+# @}
+
+# @{
+# @brief Defines supported logical operators.
+def p_operateur_logique(p):
+    '''operateur_logique : AND
+                         | OR'''
     p[0] = p[1]
 # @}
 
