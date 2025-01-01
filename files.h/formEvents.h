@@ -38,7 +38,9 @@ typedef struct {
 extern Shape shapes[MAX_SHAPES];
 extern int shapeCount;
 
+void setRenderColor(SDL_Renderer* renderer, Uint32 color);
 
+Uint32 adjustBrightness(Uint32 color, float factor);
 
 void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time);
 void renderShape(SDL_Renderer *renderer, Shape *shape);

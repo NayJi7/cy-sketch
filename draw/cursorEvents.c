@@ -116,19 +116,16 @@ int findShapeAtCursor(int x, int y) {
                 if (isPointInEllipse(x, y, shape->data.ellipse.x, shape->data.ellipse.y, shape->data.ellipse.rx, shape->data.ellipse.ry)) return i;
                 break;
             case SHAPE_ARC:
-                if(isPointInArc(x, y, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius, shape->data.arc.start_angle, shape->data.arc.end_angle))return i;
+                if(isPointInArc(x, y, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius, shape->data.arc.start_angle, shape->data.arc.end_angle)) return i;
                 break;
             case SHAPE_ROUNDED_RECTANGLE:
-                if(isPointInRoundedRectangle(x, y, shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1, 
-                                                shape->data.rounded_rectangle.x2, 
-                                                shape->data.rounded_rectangle.y2, 
-                                                shape->data.rounded_rectangle.radius))return i;
+                if(isPointInRoundedRectangle(x, y, shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1, shape->data.rounded_rectangle.x2, shape->data.rounded_rectangle.y2, shape->data.rounded_rectangle.radius)) return i;
                 break;
             case SHAPE_POLYGON:
-                if(isPointInPolygon(x, y, shape->data.polygon.cx, shape->data.polygon.cy, shape->data.polygon.radius, shape->data.polygon.sides))return i;
+                if(isPointInPolygon(x, y, shape->data.polygon.cx, shape->data.polygon.cy, shape->data.polygon.radius, shape->data.polygon.sides)) return i;
                 break;
             case SHAPE_LINE:
-                if(isPointInLine(x, y, shape->data.line.x1, shape->data.line.y1, shape->data.line.x2, shape->data.line.y2, shape->data.line.thickness))return i;        
+                if(isPointInLine(x, y, shape->data.line.x1, shape->data.line.y1, shape->data.line.x2, shape->data.line.y2, shape->data.line.thickness)) return i;        
                 break;
         }
     }
@@ -142,23 +139,24 @@ int findShapeAtCursor(int x, int y) {
  * 
  * @param cursorX X-coordinate of the cursor.
  * @param cursorY Y-coordinate of the cursor.
+*/
+
+
+/**
+ * @brief Handles the selection or deselection of shapes based on cursor position.
+ * 
+ * When the cursor is positioned over a shape and the mouse is clicked:
+ * - If the shape is not selected, it will be selected.
+ * - If the shape is already selected, it will be deselected.
+ * 
+ * @param cursorX The x-coordinate of the cursor.
+ * @param cursorY The y-coordinate of the cursor.
  */
-
-
 void handleCursorSelection(int cursorX, int cursorY) {
     int index = findShapeAtCursor(cursorX, cursorY);
     if (index != -1) {
-        // Désélectionner toutes les autres formes
-        for (int i = 0; i < shapeCount; i++) {
-            shapes[i].selected = false;
-        }
-        // Sélectionner la forme trouvée
-        shapes[index].selected = true;
-    } else {
-        // Si aucune forme n'est trouvée, désélectionner toutes les formes
-        for (int i = 0; i < shapeCount; i++) {
-            shapes[i].selected = false;
-        }
+        // Toggle selection status of the shape
+        shapes[index].selected = !shapes[index].selected;
     }
 }
 

@@ -26,8 +26,8 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
     }
     else
     {
-        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
-        
+        setRenderColor(renderer, color);
+
         if (handleEvents(renderer, texture) == -1) return -1;
 
         // Dessin
@@ -342,7 +342,6 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
  * @return -1 if an event interrupts the drawing, 0 otherwise.
  */
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, Uint32 color, char *type) { 
-    printf("Avant le dessin du cercle : r=%d, g=%d, b=%d, a=%d\n", (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid animatedCircle type: %s\n", type);
@@ -352,7 +351,7 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int 
         // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
-        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+        setRenderColor(renderer, color);
 
         for (int dy = -radius; dy <= radius; ++dy) 
         {

@@ -8,6 +8,35 @@ Shape shapes[MAX_SHAPES];
 int shapeCount = 0;
 
 
+void setRenderColor(SDL_Renderer* renderer, Uint32 color) {
+    static Uint32 currentColor = 0xFFFFFFFF; // Couleur par défaut (blanc)
+    if (currentColor != color) {
+        currentColor = color;
+        Uint8 r = (color >> 24) & 0xFF;
+        Uint8 g = (color >> 16) & 0xFF;
+        Uint8 b = (color >> 8) & 0xFF;
+        Uint8 a = color & 0xFF;
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    }
+}
+
+
+Uint32 adjustBrightness(Uint32 color, float factor) {
+    Uint8 r = (color >> 24) & 0xFF;
+    Uint8 g = (color >> 16) & 0xFF;
+    Uint8 b = (color >> 8) & 0xFF;
+    Uint8 a = color & 0xFF;
+
+    // Ajuster les composantes RGB avec le facteur
+    r = (Uint8)fminf(255, fmaxf(0, r * factor));
+    g = (Uint8)fminf(255, fmaxf(0, g * factor));
+    b = (Uint8)fminf(255, fmaxf(0, b * factor));
+
+    // Combiner les composants ajustés en une seule couleur
+    return (r << 24) | (g << 16) | (b << 8) | a;
+}
+
+
 /**
  * @brief Renders the content of a texture onto the screen and handles optional delays.
  * 
@@ -37,14 +66,8 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
     }
     
     switch (shape->type) {  
-        case SHAPE_CIRCLE:
-            Uint8 rC = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gC = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bC = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aC = shape->color & 0xFF;         // Alpha
-
-            // Appliquer la couleur par défaut pour le remplissage
-            SDL_SetRenderDrawColor(renderer, rC, gC, bC, aC);
+        case SHAPE_CIRCLE: {
+            setRenderColor(renderer, shape->color);
 
             if (strcmp(shape->typeForm, "filled") == 0) {
                 filledCircleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, shape->color);
@@ -53,7 +76,8 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             }
 
             if (shape->selected) {
-                circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, blue);
+                Uint32 highlightColor = adjustBrightness(shape->color, 0.8); // Rendre la couleur 20% plus sombre
+                circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, highlightColor);
             }
 
             // Dessiner une "aiguille" ou un indicateur pour montrer la rotation
@@ -61,18 +85,14 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             int endX = shape->data.circle.x + cos(angle1) * shape->data.circle.radius;
             int endY = shape->data.circle.y + sin(angle1) * shape->data.circle.radius;
 
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Rouge pour l'aiguille
+            setRenderColor(renderer, red); // Rouge pour l'aiguille
             SDL_RenderDrawLine(renderer, shape->data.circle.x, shape->data.circle.y, endX, endY);
             break;
+        }
     
-        case SHAPE_RECTANGLE:
+        case SHAPE_RECTANGLE: {
 
-            Uint8 rR = (shape->color >> 24) & 0xFF;
-            Uint8 gR = (shape->color >> 16) & 0xFF;
-            Uint8 bR = (shape->color >> 8) & 0xFF;
-            Uint8 aR = shape->color & 0xFF;
-
-            SDL_SetRenderDrawColor(renderer, rR, gR, bR, aR);
+            setRenderColor(renderer, shape->color);
 
             int cx = shape->data.rectangle.x + shape->data.rectangle.width / 2;
             int cy = shape->data.rectangle.y + shape->data.rectangle.height / 2;
@@ -120,17 +140,23 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
             // Dessiner le contour jaune si sélectionné
             if (shape->selected) {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 139, 255);
-                SDL_RenderDrawLines(renderer, selectionPoints, 5);
+                if (strcmp(shape->typeForm, "filled") == 0) {
+                    filledPolygonColor(renderer, 
+                                    (Sint16[]){pointsR[0].x, pointsR[1].x, pointsR[2].x, pointsR[3].x}, 
+                                    (Sint16[]){pointsR[0].y, pointsR[1].y, pointsR[2].y, pointsR[3].y}, 
+                                    4, yellow);
+                } else if (strcmp(shape->typeForm, "empty") == 0) {
+                    polygonColor(renderer, 
+                                    (Sint16[]){pointsR[0].x, pointsR[1].x, pointsR[2].x, pointsR[3].x}, 
+                                    (Sint16[]){pointsR[0].y, pointsR[1].y, pointsR[2].y, pointsR[3].y}, 
+                                    4, yellow);
+                }
             }
             break;
-        case SHAPE_ELLIPSE:
-            Uint8 rE = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gE = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bE = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aE = shape->color & 0xFF;         // Alpha
+        }
 
-            SDL_SetRenderDrawColor(renderer, rE, gE, bE, aE);
+        case SHAPE_ELLIPSE: {
+            setRenderColor(renderer, shape->color);
 
             int cxE = shape->data.ellipse.x;
             int cyE = shape->data.ellipse.y;
@@ -165,7 +191,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                 SDL_RenderDrawLine(renderer, ellipsePoints[pointCount - 1].x, ellipsePoints[pointCount - 1].y, ellipsePoints[0].x, ellipsePoints[0].y);
             }
 
-            // Contour jaune si sélectionné
+            
             if (shape->selected) {
                 SDL_Point selectionPoints[36];
                 for (int i = 0; i < pointCount; i++) {
@@ -176,19 +202,15 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                     selectionPoints[i].y = sin(angleE) * dx + cos(angleE) * dy + cyE;
                 }
 
-                SDL_SetRenderDrawColor(renderer, 0, 0, 139, 255); // Jaune
+                setRenderColor(renderer, black);
                 SDL_RenderDrawLines(renderer, selectionPoints, pointCount);
                 SDL_RenderDrawLine(renderer, selectionPoints[pointCount - 1].x, selectionPoints[pointCount - 1].y, selectionPoints[0].x, selectionPoints[0].y);
             }
             break;
+        }
 
-        case SHAPE_LINE:
-            Uint8 rL = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gL = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bL = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aL = shape->color & 0xFF;         // Alpha
-
-            SDL_SetRenderDrawColor(renderer, rL, gL, bL, aL);
+        case SHAPE_LINE: {
+            setRenderColor(renderer, shape->color);
 
             int x1 = shape->data.line.x1;
             int y1 = shape->data.line.y1;
@@ -215,6 +237,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                 y2 = rotatedY2;
             }
 
+
             // Dessiner la ligne
             thickLineColor(renderer, x1, y1, x2, y2, thickness, shape->color);
 
@@ -224,15 +247,55 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                 SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
             }
             break;
+        }
 
+        case SHAPE_ROUNDED_RECTANGLE: {
+            setRenderColor(renderer, shape->color);
 
+            int cx = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
+            int cy = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
+            double angle = shape->rotation * M_PI / 180.0;
 
-        case SHAPE_ROUNDED_RECTANGLE:
+            SDL_Point pointsR[13];
+            SDL_Point selectionPoints[13];
+            int offset = 0; // Espace pour le contour
 
-            SDL_SetRenderDrawColor(renderer, 0, 0, 139, 255);
+            int radius = shape->data.rounded_rectangle.radius;
 
+            // Calcul des points du rectangle arrondi
+            for (int i = 0; i < 4; i++) {
+                double dx, dy;
+                if (i == 0) { // Coin supérieur gauche
+                    dx = cos(angle) * (shape->data.rounded_rectangle.x1 - cx) - sin(angle) * (shape->data.rounded_rectangle.y1 - cy);
+                    dy = sin(angle) * (shape->data.rounded_rectangle.x1 - cx) + cos(angle) * (shape->data.rounded_rectangle.y1 - cy);
+                } else if (i == 1) { // Coin supérieur droit
+                    dx = cos(angle) * (shape->data.rounded_rectangle.x2 - cx) - sin(angle) * (shape->data.rounded_rectangle.y1 - cy);
+                    dy = sin(angle) * (shape->data.rounded_rectangle.x2 - cx) + cos(angle) * (shape->data.rounded_rectangle.y1 - cy);
+                } else if (i == 2) { // Coin inférieur droit
+                    dx = cos(angle) * (shape->data.rounded_rectangle.x2 - cx) - sin(angle) * (shape->data.rounded_rectangle.y2 - cy);
+                    dy = sin(angle) * (shape->data.rounded_rectangle.x2 - cx) + cos(angle) * (shape->data.rounded_rectangle.y2 - cy);
+                } else { // Coin inférieur gauche
+                    dx = cos(angle) * (shape->data.rounded_rectangle.x1 - cx) - sin(angle) * (shape->data.rounded_rectangle.y2 - cy);
+                    dy = sin(angle) * (shape->data.rounded_rectangle.x1 - cx) + cos(angle) * (shape->data.rounded_rectangle.y2 - cy);
+                }
+                pointsR[i].x = cx + dx;
+                pointsR[i].y = cy + dy;
+            }
+            pointsR[4] = pointsR[0]; // Fermer le rectangle arrondi
+
+            // Calcul des points pour le contour jaune
+            for (int i = 0; i < 4; i++) {
+                double dx = pointsR[i].x - cx;
+                double dy = pointsR[i].y - cy;
+                double length = sqrt(dx * dx + dy * dy);
+
+                selectionPoints[i].x = cx + (dx / length) * (length + offset);
+                selectionPoints[i].y = cy + (dy / length) * (length + offset);
+            }
+            selectionPoints[4] = selectionPoints[0]; // Fermer le contour
+
+            // Dessiner le rectangle arrondi
             if (strcmp(shape->typeForm, "filled") == 0) {
-                // Dessiner un rectangle arrondi rempli
                 roundedBoxColor(renderer,
                                 shape->data.rounded_rectangle.x1,
                                 shape->data.rounded_rectangle.y1,
@@ -241,7 +304,6 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                                 shape->data.rounded_rectangle.radius,
                                 shape->color);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                // Dessiner le contour d'un rectangle arrondi
                 roundedRectangleColor(renderer,
                                     shape->data.rounded_rectangle.x1,
                                     shape->data.rounded_rectangle.y1,
@@ -250,38 +312,35 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                                     shape->data.rounded_rectangle.radius,
                                     shape->color);
             }
-if (shape->selected) {
-                // Déterminer une marge cohérente pour le contour jaune
-                int margin = -10; // Ajuste cette valeur selon tes besoins
 
-                // Calculer les nouvelles dimensions du rectangle
-                int new_x1 = shape->data.rounded_rectangle.x1 - margin;
-                int new_y1 = shape->data.rounded_rectangle.y1 - margin;
-                int new_x2 = shape->data.rounded_rectangle.x2 + margin;
-                int new_y2 = shape->data.rounded_rectangle.y2 + margin;
-
-                // Calculer un rayon ajusté
-                int new_radius = shape->data.rounded_rectangle.radius + margin;
-
-                // Appliquer la couleur jaune
-                SDL_SetRenderDrawColor(renderer, 0, 0, 139, 255); // Jaune
-
-                // Dessiner le contour jaune
-                roundedRectangleColor(renderer,
-                                    new_x1, new_y1,
-                                    new_x2, new_y2,
-                                    new_radius,
-                                    black); // Couleur jaune
-            }   
+            // Dessiner le contour si sélectionné
+            if (shape->selected) {
+                if(strcmp(shape->typeForm, "filled") == 0){
+                    SDL_SetRenderDrawColor(renderer, 240, 0, 130, 255);
+                    roundedBoxColor(renderer,
+                                    shape->data.rounded_rectangle.x1,
+                                    shape->data.rounded_rectangle.y1,
+                                    shape->data.rounded_rectangle.x2,
+                                    shape->data.rounded_rectangle.y2,
+                                    radius,
+                                    yellow); // Couleur blanche
+                }
+                else if(strcmp(shape->typeForm, "empty") == 0){
+                    SDL_SetRenderDrawColor(renderer, 240, 0, 130, 255);
+                    roundedRectangleColor(renderer,
+                                    shape->data.rounded_rectangle.x1 + offset,
+                                    shape->data.rounded_rectangle.y1 + offset,
+                                    shape->data.rounded_rectangle.x2 - offset,
+                                    shape->data.rounded_rectangle.y2 - offset,
+                                    radius + offset,
+                                    yellow); 
+                }
+            }
             break;
-        
-        case SHAPE_POLYGON:
-            Uint8 rP = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gP = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bP = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aP = shape->color & 0xFF;         // Alpha
+        }
 
-            SDL_SetRenderDrawColor(renderer, rP, gP, bP, aP);
+        case SHAPE_POLYGON: {
+            setRenderColor(renderer, shape->color);
 
             int sides = shape->data.polygon.sides;
             if (sides < 3) return; // Ne pas dessiner si moins de 3 côtés
@@ -312,18 +371,24 @@ if (shape->selected) {
 
             // Ajouter un contour jaune si sélectionné
             if (shape->selected) {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 139, 255); // Couleur jaune
-                SDL_RenderDrawLines(renderer, pointsP, sides + 1);
+                Sint16 xCoords[sides];
+                Sint16 yCoords[sides];
+                for (int i = 0; i < sides; i++) {
+                    xCoords[i] = pointsP[i].x;
+                    yCoords[i] = pointsP[i].y;
+                }
+
+                if (strcmp(shape->typeForm, "filled") == 0) {
+                    filledPolygonColor(renderer, xCoords, yCoords, sides, yellow);
+                } else if (strcmp(shape->typeForm, "empty") == 0) {
+                    polygonColor(renderer, xCoords, yCoords, sides, yellow);
+                }
             }
             break;
+        }
         
-        case SHAPE_ARC:
-            Uint8 rA = (shape->color >> 24) & 0xFF; // Rouge
-            Uint8 gA = (shape->color >> 16) & 0xFF; // Vert
-            Uint8 bA = (shape->color >> 8) & 0xFF;  // Bleu
-            Uint8 aA = shape->color & 0xFF;         // Alpha
-
-            SDL_SetRenderDrawColor(renderer, rA, gA, bA, aA);
+        case SHAPE_ARC: {
+            setRenderColor(renderer, shape->color);
 
             // Vérifier les angles pour éviter l'inversion
             int startAngle = shape->data.arc.start_angle % 360;
@@ -355,11 +420,16 @@ if (shape->selected) {
 
             // Dessiner un contour jaune si sélectionné
             if (shape->selected) {
-                arcColor(renderer, rotatedX, rotatedY, shape->data.arc.radius + 5,
-                        startAngle, endAngle, blue);
+                if (strcmp(shape->typeForm, "empty") == 0) {
+                arcColor(renderer, rotatedX, rotatedY, shape->data.arc.radius,
+                        startAngle, endAngle, yellow);
+                } else if (strcmp(shape->typeForm, "filled") == 0) {
+                    filledPieColor(renderer, rotatedX, rotatedY, shape->data.arc.radius,
+                                startAngle, endAngle, yellow);
+                }
             }
             break;
-
+        }
    
     }
 }
@@ -398,42 +468,43 @@ void deleteShape(int index) {
  */
 void zoomShape(Shape *shape, float zoomFactor) {
     switch (shape->type) {
-        case SHAPE_RECTANGLE:
+        case SHAPE_RECTANGLE: {
 
-        // Calculer le rapport d'aspect initial du rectangle
-        float aspectRatio = (float)shape->data.rectangle.width / shape->data.rectangle.height;
+            // Calculer le rapport d'aspect initial du rectangle
+            float aspectRatio = (float)shape->data.rectangle.width / shape->data.rectangle.height;
 
-        // Appliquer le zoom
-        shape->data.rectangle.width += (int)(zoomFactor * 10);
-        shape->data.rectangle.height = (int)(shape->data.rectangle.width / aspectRatio);
+            // Appliquer le zoom
+            shape->data.rectangle.width += (int)(zoomFactor * 10);
+            shape->data.rectangle.height = (int)(shape->data.rectangle.width / aspectRatio);
 
-        // Définir une taille minimale pour la largeur
-        const int minWidth = 10;
-        // on peut rajouter max aussi stv 
+            // Définir une taille minimale pour la largeur
+            const int minWidth = 10;
+            // on peut rajouter max aussi stv 
 
-        // Vérifier et ajuster la taille si elle tombe en dessous de la largeur minimale
-        if (shape->data.rectangle.width < minWidth) {
-            shape->data.rectangle.width = minWidth;
-            shape->data.rectangle.height = (int)(minWidth / aspectRatio); // Ajuster en fonction du rapport
+            // Vérifier et ajuster la taille si elle tombe en dessous de la largeur minimale
+            if (shape->data.rectangle.width < minWidth) {
+                shape->data.rectangle.width = minWidth;
+                shape->data.rectangle.height = (int)(minWidth / aspectRatio); // Ajuster en fonction du rapport
+            }
+
+            // Optionnel : Limiter aussi une hauteur minimale
+            const int minHeight = 10;
+            if (shape->data.rectangle.height < minHeight) {
+                shape->data.rectangle.height = minHeight;
+                shape->data.rectangle.width = (int)(minHeight * aspectRatio); // Ajuster en fonction du rapport
+            }
+            break;
         }
 
-        // Optionnel : Limiter aussi une hauteur minimale
-        const int minHeight = 10;
-        if (shape->data.rectangle.height < minHeight) {
-            shape->data.rectangle.height = minHeight;
-            shape->data.rectangle.width = (int)(minHeight * aspectRatio); // Ajuster en fonction du rapport
-        }
-        break;
-
-
-        case SHAPE_CIRCLE:
+        case SHAPE_CIRCLE: {
             shape->data.circle.radius += (int)(zoomFactor * 5);
 
             // Rayon minimum pour éviter des bugs
             if (shape->data.circle.radius < 20) shape->data.circle.radius = 20;
             break;
+        }
 
-        case SHAPE_ELLIPSE:
+        case SHAPE_ELLIPSE: {
             shape->data.ellipse.rx += (int)(zoomFactor * 5);
             shape->data.ellipse.ry += (int)(zoomFactor * 5);
 
@@ -447,8 +518,9 @@ void zoomShape(Shape *shape, float zoomFactor) {
                 shape->data.ellipse.rx = 20 * 2; // Exemple : conserver un rapport 2:1
             }
             break;
+        }
 
-        case SHAPE_LINE:
+        case SHAPE_LINE: {
             // Calcul du centre de la ligne
             int cx = (shape->data.line.x1 + shape->data.line.x2) / 2;
             int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
@@ -474,6 +546,7 @@ void zoomShape(Shape *shape, float zoomFactor) {
                 shape->data.line.y2 = cy + (int)((shape->data.line.y2 - cy) * scale);
             }
             break;
+        }
 
         case SHAPE_ROUNDED_RECTANGLE: {
             // Calculer la largeur, la hauteur et le centre actuels
@@ -500,18 +573,19 @@ void zoomShape(Shape *shape, float zoomFactor) {
             if (shape->data.rounded_rectangle.radius < 5) {
                 shape->data.rounded_rectangle.radius = 5; // Rayon minimal pour éviter des erreurs
             }
-        }
+        
             break;
+        }
 
-
-        case SHAPE_POLYGON:
+        case SHAPE_POLYGON: {
             shape->data.polygon.radius += (int)(zoomFactor * 5);
 
             // Empêcher un rayon trop petit
             if (shape->data.polygon.radius < 35) shape->data.polygon.radius = 35;
             break;
+        }
 
-        case SHAPE_ARC:
+        case SHAPE_ARC: {
             shape->data.arc.radius += (int)(zoomFactor * 5);
 
             // Empêcher un rayon trop petit
@@ -519,6 +593,7 @@ void zoomShape(Shape *shape, float zoomFactor) {
                 shape->data.arc.radius = 30;
             }
             break;
+        }
     }
 }
 
@@ -798,9 +873,8 @@ int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH)
  * 
  * @return 1 if the point is inside the rounded rectangle, 0 otherwise.
  */
-int isPointInRoundedRectangle(Sint16 x, Sint16 y, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 radius) {
-    // Corriger les coordonnées si elles ne sont pas dans l'ordre correct
-    if (x1 > x2) {
+int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 radius) {
+     if (x1 > x2) {
         Sint16 temp = x1;
         x1 = x2;
         x2 = temp;
@@ -811,23 +885,20 @@ int isPointInRoundedRectangle(Sint16 x, Sint16 y, Sint16 x1, Sint16 y1, Sint16 x
         y1 = y2;
         y2 = temp;
     }
-
-    printf("Corrected Rectangle: (%d, %d, %d, %d), Radius: %d\n", x1, y1, x2, y2, radius);
-
-    // Vérification si le point est dans la partie rectangulaire centrale (sans les coins arrondis)
-    if (x >= x1 + radius && x <= x2 - radius && y >= y1 && y <= y2) {
+    
+    if (px >= x1 + radius && px <= x2 - radius && py >= y1 && py <= y2) {
         return 1; // Le point est dans la zone rectangulaire centrale
     }
 
-    if (x >= x1 && x <= x2 && y >= y1 + radius && y <= y2 - radius) {
+    if (px >= x1 && px <= x2 && py >= y1 + radius && py <= y2 - radius) {
         return 1; // Le point est dans les zones rectangulaires gauche/droite
     }
 
     // Vérification des coins arrondis (par rapport à leurs centres)
-    if (isPointInCircle(x, y, x1 + radius, y1 + radius, radius)) return 1;
-    if (isPointInCircle(x, y, x2 - radius, y1 + radius, radius)) return 1;
-    if (isPointInCircle(x, y, x1 + radius, y2 - radius, radius)) return 1;
-    if (isPointInCircle(x, y, x2 - radius, y2 - radius, radius)) return 1;
+    if (isPointInCircle(px, py, x1 + radius, y1 + radius, radius)) return 1;
+    if (isPointInCircle(px, py, x2 - radius, y1 + radius, radius)) return 1;
+    if (isPointInCircle(px, py, x1 + radius, y2 - radius, radius)) return 1;
+    if (isPointInCircle(px, py, x2 - radius, y2 - radius, radius)) return 1;
 
     return 0; // Le point n'est pas dans le RoundedRectangle
 }
