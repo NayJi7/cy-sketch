@@ -13,7 +13,7 @@
 #include "formEvents.h"
 
 
-int setWindowColor(SDL_Renderer *renderer, SDL_Color color);
+void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor);
 
 
 #endif

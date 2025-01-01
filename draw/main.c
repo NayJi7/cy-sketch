@@ -1,113 +1,7 @@
 #include "../files.h/main.h"
 
-/**
- * @brief Sets the background color of the SDL window.
- * 
- * @param renderer The SDL renderer used to set the color.
- * @param color The SDL_Color struct representing the color (RGBA) to be set.
- * 
- * @return int Returns 0 on success, -1 on failure.
- */
-int setWindowColor(SDL_Renderer *renderer, SDL_Color color)
-{
-    if(SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a) < 0)
-    {
-        return -1;
-    }
-    if(SDL_RenderClear(renderer) < 0)
-    {
-        return -1;
-    }
-    return 0;
-}
 
-
-/**
- * @brief Main function that initializes SDL, creates a window and renderer, and draws shapes.
- * 
- * @return int Returns 0 on successful execution.
- */
-int main(){
-
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
-    SDL_Event event;
-
-    // Initialiser SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-        printf("Erreur SDL : %s\n", SDL_GetError());
-        return -1;
-    }
-
-
-    // Créer la fenêtre et le renderer
-    if (SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0) {
-        printf("Erreur SDL_CreateWindowAndRenderer : %s\n", SDL_GetError());
-        SDL_Quit();
-        return -1;
-    }
-    SDL_SetWindowTitle(window, "Animated Shapes");
-
-    // Couleur de fond
-    SDL_Color cursorColor = {255, 255, 255, 255};
-    Cursor cursor = createCursor(400, 300, cursorColor, 5, true);
-
-    // Créer une texture principale pour dessiner
-    SDL_Texture* mainTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
-
-    // Remplir la texture de fond noir
-    SDL_SetRenderTarget(renderer, mainTexture);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-
-
-    //circles ------
-    //if(drawShape(renderer, mainTexture, "animated", "circle", 200, 170, 60, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "circle", 200, 170, 60, 0xFF00FF00, "empty") == -1) return 0;
-
-    //ellipses ------
-    //if(drawShape(renderer, mainTexture, "animated", "ellipse", 400, 270, 70, 50, 0xFF0000FF, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "ellipse", 300, 370, 70, 50, 0xFF00FF00, "empty") == -1) return 0;
-
-    //lines ------
-    //if(drawShape(renderer, mainTexture, "animated", "line", 200, 200, 300, 200, 2, 0xFF00FF00, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "line", 100, 100, 400, 300, 20, 0xFFFF0000, "empty") == -1) return 0;
-
-    //polygones -----
-    //if(drawShape(renderer, mainTexture, "animated", "polygon", 530, 130, 100, 3, 0xFF808080, "empty") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "polygon", 330, 130, 100, 12, 0xFF808080, "filled") == -1) return 0;
-    
-    //rectangles ------
-    //if(drawShape(renderer, mainTexture, "animated", "rectangle", 100, 100, 200, 50, 0xFF0000FF, "filled") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "rectangle", 200, 200, 200, 50, 0xFF00FF00, "empty") == -1) return 0;
-
-    //arcs ------
-    //if(drawShape(renderer, mainTexture, "animated", "arc", 200, 400, 100, 90, 270, 0xFFFF0000, "empty") == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "instant", "arc", 400, 200, 100, 90, 180, 0xFF00FF00, "empty") == -1) return 0;
-    
-//PROBLEMES __________________________________________________________
-    //REGLER LES COULEURS POUR LES ANIMATED FORMES
-
-    //regler les deselections avec souris => c ok
-
-    //NE MARCHE PAS POUR SELECTIONNER
-        //roundedrectangles ------
-        // selectionne avec cavier mais contour pas top => 
-        // selectionne avec souris mais change la forme donc pas cool  => c ok
-        // on peut deplacer mais quand on zoom et grocis wtf
-        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 300, 100, 200, 150, 10, 0xFF00FF00, "empty") == -1) return 0;
-        if(drawShape(renderer, mainTexture, "instant", "roundedRectangle", 400, 200, 200, 150, 20, 0xFF00FF00, "filled") == -1) return 0;
-SDL_SetRenderTarget(renderer, NULL); // Assurez-vous que le rendu pointe sur l'écran
-
-roundedRectangleColor(renderer, 100, 100, 300, 200, 20, 0xFFFFFF00);
-
-//____________________________________________________________________     
-
-
-    SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderCopy(renderer, mainTexture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-
+void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor){
     SDL_ShowCursor(SDL_DISABLE);
 
     int running = 1;
@@ -271,7 +165,7 @@ roundedRectangleColor(renderer, 100, 100, 300, 200, 20, 0xFFFFFF00);
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 235, 235, 235, 255);
         SDL_RenderClear(renderer);
 
         for (int i = 0; i < shapeCount; i++) {
@@ -282,8 +176,98 @@ roundedRectangleColor(renderer, 100, 100, 300, 200, 20, 0xFFFFFF00);
 
         SDL_RenderPresent(renderer);
     }
-    SDL_ShowCursor(SDL_ENABLE);
 
+    SDL_ShowCursor(SDL_ENABLE);
+}
+
+
+/**
+ * @brief Main function that initializes SDL, creates a window and renderer, and draws shapes.
+ * 
+ * @return int Returns 0 on successful execution.
+ */
+int main(){
+
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
+    SDL_Event event;
+
+    // Initialiser SDL
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
+        printf("Erreur SDL : %s\n", SDL_GetError());
+        return -1;
+    }
+
+
+    // Créer la fenêtre et le renderer
+    if (SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0) {
+        printf("Erreur SDL_CreateWindowAndRenderer : %s\n", SDL_GetError());
+        SDL_Quit();
+        return -1;
+    }
+    SDL_SetWindowTitle(window, "Animated Shapes");
+
+    // Couleur de fond
+    SDL_Color cursorColor = {0, 0, 0, 0};
+    Cursor cursor = createCursor(400, 300, cursorColor, 5, true);
+
+    // Créer une texture principale pour dessiner
+    SDL_Texture* mainTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
+
+    // Remplir la texture de fond noir
+    SDL_SetRenderTarget(renderer, mainTexture);
+    SDL_SetRenderDrawColor(renderer, 235, 235, 235, 250);
+    SDL_RenderClear(renderer);
+
+
+    //circles ------
+    //if(drawShape(renderer, mainTexture, "circle", "animated", "filled", brown, 200, 170, 60) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "circle", "instant", "empty", orange, 400, 170, 60) == -1) return 0;
+
+    //ellipses ------
+    //if(drawShape(renderer, mainTexture, "ellipse", "animated", "filled", red, 400, 270, 70, 50) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "ellipse", "instant", "empty", gray, 300, 370, 70, 50) == -1) return 0;
+
+    //lines ------
+    //if(drawShape(renderer, mainTexture, "line", "animated", "filled", black, 200, 200, 300, 200, 2) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "line", "instant", "filled", magenta, 100, 100, 400, 300, 20) == -1) return 0;
+
+    //polygones -----
+    //if(drawShape(renderer, mainTexture, "polygon", "animated", "filled", dark_gray, 530, 130, 100, 3) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "polygon", "instant", "empty", gray, 330, 130, 100, 12) == -1) return 0;
+    
+    //rectangles ------
+    //if(drawShape(renderer, mainTexture, "rectangle", "animated", "filled", red, 100, 100, 200, 50) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "rectangle", "instant", "empty", blue, 200, 200, 200, 50) == -1) return 0;
+
+    //arcs ------
+    //if(drawShape(renderer, mainTexture, "arc", "animated", "filled", yellow, 200, 400, 100, 90, 270) == -1) return 0;
+
+
+//PROBLEMES __________________________________________________________
+    //REGLER LES COULEURS POUR LES ANIMATED FORMES
+
+    //changer la logique de l'arc pour s'inspirer de l'ellipse rx, ry
+    
+    //regler les deselections avec souris 
+
+    //regler les contours du cercle, du polygon et de l'arc (ils doivent etre à l'exterieur)
+
+    //cette fonction nous fait disparaitre le curseur et la line
+        //arc
+        //if(drawShape(renderer, mainTexture, "arc", "instant", "empty", red, 400, 200, 100, 90, 180) == -1) return 0;
+
+    //REVOIR CETTE FONCTION
+        //roundedrectangles ------
+        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "empty", red, 300, 100, 200, 150, 10) == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "empty", red, 300, 100, 200, 150, 10) == -1) return 0;
+//____________________________________________________________________     
+
+    SDL_SetRenderTarget(renderer, NULL);
+    SDL_RenderCopy(renderer, mainTexture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+
+    mainLoop(renderer, event, cursor); 
 
     SDL_DestroyTexture(mainTexture);
     SDL_DestroyRenderer(renderer);

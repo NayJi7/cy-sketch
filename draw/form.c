@@ -1,14 +1,23 @@
 #include "../files.h/form.h"
 
+
+/**
+ * @brief Common parameters for functions.
+ * 
+ * @param renderer Pointer to the SDL renderer used for rendering.
+ * @param texture Target texture for the drawing.
+ * @param color Color in RGBA format (Uint32).
+ * @param type Type of the shape: "filled" or "empty".
+ */
+
+
+
 /**
  * @brief Draws a circle on the SDL renderer.
  * 
- * @param renderer The SDL renderer where the circle will be drawn.
  * @param x The x-coordinate of the circle's center.
  * @param y The y-coordinate of the circle's center.
  * @param radius The radius of the circle.
- * @param color The color of the circle in Uint32 format (0xRRGGBBAA).
- * @param type Specifies the type of circle ("empty" for outline, "filled" for solid).
  */
 int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, Uint32 color, char *type) {
 
@@ -45,13 +54,10 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
 /**
  * @brief Draws an ellipse on the SDL renderer.
  * 
- * @param renderer The SDL renderer where the ellipse will be drawn.
  * @param x The x-coordinate of the ellipse's center.
  * @param y The y-coordinate of the ellipse's center.
  * @param rx The horizontal radius of the ellipse.
  * @param ry The vertical radius of the ellipse.
- * @param color The color of the ellipse in Uint32 format (0xRRGGBBAA).
- * @param type Specifies the type of ellipse ("empty" for outline, "filled" for solid).
  */
 int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int rx, int ry, Uint32 color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
@@ -84,13 +90,11 @@ int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int 
 /**
  * @brief Draws an arc on the SDL renderer.
  * 
- * @param renderer The SDL renderer where the arc will be drawn.
  * @param x The x-coordinate of the arc's center.
  * @param y The y-coordinate of the arc's center.
  * @param radius The radius of the arc.
  * @param start_angle The starting angle of the arc in degrees.
  * @param end_angle The ending angle of the arc in degrees.
- * @param color The color of the arc in Uint32 format (0xRRGGBBAA).
  */
 int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type) {
 
@@ -135,13 +139,10 @@ int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radi
 /**
  * @brief Draws a rectangle on the SDL renderer.
  * 
- * @param renderer The SDL renderer where the rectangle will be drawn.
  * @param x The x-coordinate of the top-left corner.
  * @param y The y-coordinate of the top-left corner.
  * @param w The width of the rectangle.
  * @param h The height of the rectangle.
- * @param color The color of the rectangle in Uint32 format (0xRRGGBBAA).
- * @param type Specifies the type of rectangle ("empty" for outline, "filled" for solid).
  */
 int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, Uint32 color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
@@ -180,14 +181,11 @@ int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, in
 /**
  * @brief Draws a rounded rectangle on the SDL renderer.
  * 
- * @param renderer The SDL renderer where the rounded rectangle will be drawn.
  * @param x1 The x-coordinate of the top-left corner.
  * @param y1 The y-coordinate of the top-left corner.
  * @param x2 The x-coordinate of the bottom-right corner.
  * @param y2 The y-coordinate of the bottom-right corner.
  * @param rad The radius of the corners.
- * @param color The color of the rounded rectangle in Uint32 format (0xRRGGBBAA).
- * @param type Specifies the type of rounded rectangle ("empty" for outline, "filled" for solid).
  */
 int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, Uint32 color, char *type) {
 
@@ -222,12 +220,9 @@ int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1
 /**
  * @brief Draws a polygon on the SDL renderer.
  * 
- * @param renderer The SDL renderer where the polygon will be drawn.
  * @param vx Array of x-coordinates for the vertices of the polygon.
  * @param vy Array of y-coordinates for the vertices of the polygon.
  * @param n The number of vertices in the polygon.
- * @param color The color of the polygon in Uint32 format (0xRRGGBBAA).
- * @param type Specifies the type of polygon ("empty" for outline, "filled" for solid).
  */
 void drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint16 *vy, int n, Uint32 color, char *type)
 {
@@ -262,13 +257,10 @@ void drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint1
 /**
  * @brief Draws a custom polygon with a specified number of sides, centered at (cx, cy).
  * 
- * @param renderer The SDL renderer where the custom polygon will be drawn.
  * @param cx The x-coordinate of the polygon's center.
  * @param cy The y-coordinate of the polygon's center.
  * @param radius The radius from the center to the vertices.
  * @param sides The number of sides of the polygon (must be between 3 and 12).
- * @param color The color of the polygon in Uint32 format (0xRRGGBBAA).
- * @param type Specifies the type of polygon ("empty" for outline, "filled" for solid).
  */
 int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, int sides, Uint32 color, char *type) 
 {
@@ -301,16 +293,14 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
 /**
  * @brief Draws a line on the SDL renderer with optional thickness.
  * 
- * @param renderer The SDL renderer where the line will be drawn.
  * @param x1 The x-coordinate of the starting point of the line.
  * @param y1 The y-coordinate of the starting point of the line.
  * @param x2 The x-coordinate of the ending point of the line.
- * @param y2 The y-coordinate of the ending point of the line.
- * @param color The color of the line in Uint32 format (0xRRGGBBAA).
- * @param thickness The thickness of the line (ignored if type is "empty").
- * @param type Specifies the type of line ("empty" for thin line, "filled" for thick line).
+ * @param y2 The y-coordinate of the ending point of the line. 
+ * @param width The thickness of the line (ignored if type is "empty").
  */
-int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color, Uint8 width, char *type) {
+int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint32 color, char *type) {
+
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid instantLine type: %s\n", type);
@@ -343,7 +333,14 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
 
 
 
-// Fonction pour dessiner un cercle de manière progressive 
+/**
+ * @brief Draws an animated circle progressively.
+ * 
+ * @param x X-coordinate of the circle's center.
+ * @param y Y-coordinate of the circle's center.
+ * @param radius Radius of the circle.
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, Uint32 color, char *type) { 
     printf("Avant le dessin du cercle : r=%d, g=%d, b=%d, a=%d\n", (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
 
@@ -387,8 +384,15 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int 
 
 }
 
-
-// Fonction pour dessiner un rectangle de manière progressive
+/**
+ * @brief Draws an animated rectangle progressively.
+ * 
+ * @param x X-coordinate of the rectangle's top-left corner.
+ * @param y Y-coordinate of the rectangle's top-left corner.
+ * @param w Width of the rectangle.
+ * @param h Height of the rectangle.
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
 int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int w, int h, Uint32 color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
@@ -460,7 +464,16 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
     
 }
 
-
+/**
+ * @brief Draws an animated rounded rectangle progressively.
+ * 
+ * @param x X-coordinate of the top-left corner.
+ * @param y Y-coordinate of the top-left corner.
+ * @param w Width of the rounded rectangle.
+ * @param h Height of the rounded rectangle.
+ * @param radius Radius of the rounded corners.
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
 int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int w, int h, int radius, Uint32 color, char *type) {
     if (radius * 2 > w || radius * 2 > h) {
         printf("Invalid radius: too large for the rectangle dimensions.\n");
@@ -545,7 +558,15 @@ int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, i
 }
 
 
-// Fonction pour dessiner une ellipse de manière progressive
+/**
+ * @brief Draws an animated ellipse progressively.
+ * 
+ * @param x X-coordinate of the ellipse's center.
+ * @param y Y-coordinate of the ellipse's center.
+ * @param rx Radius along the x-axis.
+ * @param ry Radius along the y-axis.
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
 int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int rx, int ry, Uint32 color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
@@ -614,7 +635,16 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
     }
 }
 
-
+/**
+ * @brief Draws an animated arc progressively.
+ * 
+ * @param x X-coordinate of the arc's center.
+ * @param y Y-coordinate of the arc's center.
+ * @param radius Radius of the arc.
+ * @param start_angle Starting angle in degrees.
+ * @param end_angle Ending angle in degrees.
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
 int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, Uint32 color, char *type) {
     
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
@@ -667,7 +697,15 @@ int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, 
 }
 
 
-// Fonction pour dessiner un polygon de manière progressive
+/**
+ * @brief Draws an animated custom polygon progressively.
+ * 
+ * @param cx X-coordinate of the polygon's center.
+ * @param cy Y-coordinate of the polygon's center.
+ * @param radius Radius of the polygon.
+ * @param sides Number of sides of the polygon (minimum 3).
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
 int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int cx, int cy, int radius, int sides, Uint32 color, char *type) 
 {
     
@@ -774,8 +812,17 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
 }
 
 
-// Fonction pour dessiner une ligne de manière progressive
-int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, Uint32 color, int thickness, char *type) {
+/**
+ * @brief Draws an animated line progressively.
+ * 
+ * @param x1 X-coordinate of the line's starting point.
+ * @param y1 Y-coordinate of the line's starting point.
+ * @param x2 X-coordinate of the line's ending point.
+ * @param y2 Y-coordinate of the line's ending point.
+ * @param thickness Thickness of the line.
+ * @return -1 if an event interrupts the drawing, 0 otherwise.
+ */
+int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, int thickness, Uint32 color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid animatedLine type: %s\n", type);
@@ -790,6 +837,7 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
         Uint8 g = (color >> 16) & 0xFF;
         Uint8 b = (color >> 8) & 0xFF;
         Uint8 a = color & 0xFF;
+
         SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
         // Initialisation des variables pour l'algorithme de Bresenham
@@ -827,8 +875,40 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
 }
 
 
-
-int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *shape, ...) {
+/**
+ * @brief Draws and registers a shape based on the specified parameters.
+ *
+ * @param shape String representing the type of shape to draw ("circle", "rectangle", "arc", etc.).
+ * @param mode Drawing mode: "animated" for progressive drawing or any other value for instant drawing.
+ * @param ... Variable arguments based on the shape:
+ *      - "circle": int x, int y, int radius
+ *      - "rectangle": int x, int y, int w, int h
+ *      - "arc": int x, int y, int radius, int start_angle, int end_angle
+ *      - "roundedRectangle": (animated) int x, int y, int w, int h, int radius 
+ *                            (instant) Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 radius
+ *      - "ellipse": int x, int y, int rx, int ry
+ *      - "line": Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 thickness
+ *      - "polygon": int cx, int cy, int radius, int sides
+ *
+ * @return void
+ *
+ * @details
+ * This function handles the rendering and registration of different shapes.
+ * It uses variadic arguments (`...`) to dynamically adapt to the parameters
+ * required for each shape type. The function:
+ * - Sets the target texture for rendering.
+ * - Verifies the drawing mode ("animated" or instant).
+ * - Calls the appropriate drawing function based on the shape type.
+ * - Registers the drawn shape in a global shape list for further operations like transformation or selection.
+ * - Restores the default rendering target after drawing.
+ *
+ * @note Each shape has specific constraints:
+ * - The radius for "circle" and "arc" must be >= 5 to avoid rendering issues.
+ * - Angles for "arc" must be within [0, 360].
+ * - "polygon" must have a minimum of 3 sides and a reasonable number of sides for proper rendering.
+ * - Ensure that "type" is either "filled" or "empty".
+ */
+int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *mode, char *type, Uint32 color, ...) {
     va_list args;
     va_start(args, shape);
 
@@ -844,8 +924,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         int x = va_arg(args, int);
         int y = va_arg(args, int);
         int radius = va_arg(args, int);
-        Uint32 color = va_arg(args, Uint32);
-        char *type = va_arg(args, char*);
 
         if (isAnimated) {
             if(drawAnimatedCircle(renderer, texture, x, y, radius, color, type) == -1) return -1;
@@ -871,8 +949,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         int y = va_arg(args, int);
         int w = va_arg(args, int);
         int h = va_arg(args, int);
-        Uint32 color = va_arg(args, Uint32);
-        char *type = va_arg(args, char*);
 
         if (isAnimated) {
 
@@ -920,8 +996,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
             start_angle = end_angle;
             end_angle = temp;
         }
-        Uint32 color = va_arg(args, Uint32);
-        char *type = va_arg(args, char*);
 
         if (isAnimated) {
             if(drawAnimatedArc(renderer, texture, x, y, radius, start_angle, end_angle, color, type) == -1) return -1;
@@ -952,9 +1026,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
             int w = va_arg(args, int);
             int h = va_arg(args, int);
             int rad = va_arg(args, int);
-            Uint32 color = va_arg(args, Uint32);
-            char *type = va_arg(args, char*);
-            printf("%d", rad);
             
             if(drawAnimatedRoundedRectangle(renderer, texture, x, y, w, h, rad, color, type) == -1) return -1;
 
@@ -978,8 +1049,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
             Sint16 x2 = va_arg(args, int);
             Sint16 y2 = va_arg(args, int);
             Sint16 radius = va_arg(args, int);
-            Uint32 color = va_arg(args, Uint32);
-            char *type = va_arg(args, char*);
 
             if(drawRoundedRectangle(renderer, texture, x1, y1, x2, y2, radius, color, type) == -1) return -1;
 
@@ -1004,8 +1073,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         int y = va_arg(args, int);
         int rx = va_arg(args, int);
         int ry = va_arg(args, int);
-        Uint32 color = va_arg(args, Uint32);
-        char *type = va_arg(args, char*);
 
         if (isAnimated) {
             if(drawAnimatedEllipse(renderer, texture, x, y, rx, ry, color, type) == -1) return -1;
@@ -1033,13 +1100,11 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         Sint16 x2 = va_arg(args, int);
         Sint16 y2 = va_arg(args, int);
         Uint8 thick = va_arg(args, int);
-        Uint32 color = va_arg(args, Uint32);
-        char *type = va_arg(args, char*);
 
         if (isAnimated) {
-            if(drawAnimatedLine(renderer, texture, x1, y1, x2, y2, color, thick, type) == -1) return -1;
+            if(drawAnimatedLine(renderer, texture, x1, y1, x2, y2, thick, color, type) == -1) return -1;
         } else {
-            if(drawLine(renderer, texture, x1, y1, x2, y2, color, thick, type) == -1) return -1;
+            if(drawLine(renderer, texture, x1, y1, x2, y2, thick, color, type) == -1) return -1;
         }
 
         // Enregistrer la forme
@@ -1062,8 +1127,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *mode, char *sh
         int cy = va_arg(args, int);
         int radius = va_arg(args, int);
         int sides = va_arg(args, int);
-        Uint32 color = va_arg(args, Uint32);
-        char *type = va_arg(args, char*);
 
         if (isAnimated) {
             if(drawAnimatedCustomPolygon(renderer, texture, cx, cy, radius, sides, color, type) == -1) return -1;

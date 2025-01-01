@@ -2,17 +2,37 @@
 #include "../files.h/formEvents.h"
 #include "../files.h/main.h"
 
+/**
+ * @brief Handles SDL events, including quitting the program.
+ * 
+ * @param renderer SDL renderer instance used for drawing.
+ * @param texture SDL texture associated with the renderer.
+ * 
+ * @return int Returns -1 if a quit event is detected; otherwise 0.
+ */
+int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyTexture(texture);
+            SDL_Quit();
+            return -1;
+        }
+    }
+    return 0;
+}
 
 /**
- * @brief Initializes a cursor with default properties.
+ * @brief Initializes a new cursor with specified properties.
  * 
- * @param x Initial x-coordinate.
- * @param y Initial y-coordinate.
- * @param color Initial color of the cursor.
- * @param thickness Line thickness for the cursor.
- * @param visible Visibility of the cursor.
+ * @param x Initial x-coordinate of the cursor.
+ * @param y Initial y-coordinate of the cursor.
+ * @param color Color of the cursor in SDL_Color format.
+ * @param thickness Thickness of the cursor outline.
+ * @param visible Visibility state of the cursor (true or false).
  * 
- * @return A new instance of Cursor.
+ * @return Cursor The newly created cursor instance.
  */
 Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible) {
     Cursor cursor;
@@ -25,10 +45,10 @@ Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible) 
 }
 
 /**
- * @brief Renders the cursor as an arrow with a smaller point below the triangle.
+ * @brief Renders the cursor on the screen.
  * 
- * @param renderer The SDL renderer used for drawing.
- * @param cursor The cursor to render.
+ * @param renderer SDL renderer instance used for drawing.
+ * @param cursor Pointer to the cursor instance to render.
  */
 void renderCursor(SDL_Renderer *renderer, const Cursor *cursor) {
     if (!cursor->visible) return; // Ne rien dessiner si le curseur n'est pas visible
@@ -55,20 +75,26 @@ void renderCursor(SDL_Renderer *renderer, const Cursor *cursor) {
     SDL_RenderFillRect(renderer, &tail);
 }
 
-
 /**
- * @brief Moves the cursor by a relative offset.
+ * @brief Moves the cursor by a specified offset.
  * 
- * @param cursor Pointer to the cursor to move.
- * @param dx Horizontal offset in pixels.
- * @param dy Vertical offset in pixels.
+ * @param cursor Pointer to the cursor instance.
+ * @param dx Horizontal movement in pixels.
+ * @param dy Vertical movement in pixels.
  */
 void moveCursor(Cursor *cursor, int dx, int dy) {
     cursor->x += dx;
     cursor->y += dy;
 }
 
-
+/**
+ * @brief Finds the shape at the given cursor coordinates.
+ * 
+ * @param x X-coordinate of the cursor.
+ * @param y Y-coordinate of the cursor.
+ * 
+ * @return int Index of the shape at the cursor position, or -1 if none is found.
+ */
 int findShapeAtCursor(int x, int y) {
     for (int i = 0; i < shapeCount; i++) {
         Shape *shape = &shapes[i];
@@ -109,6 +135,16 @@ int findShapeAtCursor(int x, int y) {
     return -1; // Aucune forme trouvée
 }
 
+
+
+/**
+ * @brief Common parameters for functions.
+ * 
+ * @param cursorX X-coordinate of the cursor.
+ * @param cursorY Y-coordinate of the cursor.
+ */
+
+
 void handleCursorSelection(int cursorX, int cursorY) {
     int index = findShapeAtCursor(cursorX, cursorY);
     if (index != -1) {
@@ -125,7 +161,6 @@ void handleCursorSelection(int cursorX, int cursorY) {
         }
     }
 }
-
 
 void handleShapeDeletion(int cursorX, int cursorY) {
     int index = findShapeAtCursor(cursorX, cursorY);
