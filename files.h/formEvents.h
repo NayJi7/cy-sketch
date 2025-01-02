@@ -17,23 +17,23 @@ typedef enum
 } ShapeType;
 
 typedef struct {
-    ShapeType type;       // Type de la forme
-    bool selected;        // Indique si la forme est sélectionnée
-    Uint32 color;         // Couleur de la forme
-    double rotation;      // Rotation en degrés
+    ShapeType type;       // Type of shape
+    bool selected;        // Indicates whether the shape is selected
+    Uint32 color;         // Shape colour
+    double rotation;      // Rotation in degrees
     char* typeForm;
     union {
-        struct { int x, y, radius; } circle;           // Données pour un cercle
-        struct { int x, y, rx, ry; } ellipse;          // Données pour une ellipse
-        struct { int x, y, radius, start_angle, end_angle; } arc; // Données pour un arc
-        struct { int x, y, width, height;} rectangle; // Données pour un rectangle
-        struct { Sint16 x1, y1, x2, y2, radius; int x, y, w, h, rad ;} rounded_rectangle; // Rectangle arrondi
-        struct { int cx, cy, radius, sides; } polygon; // Données pour un polygone
-        struct { Sint16 x1, y1, x2, y2; Uint8 thickness; } line; // Données pour une ligne
-    } data; // Union contenant les données spécifiques à chaque forme
+        struct { int x, y, radius; } circle;           // Data for a circle
+        struct { int x, y, rx, ry; } ellipse;          // Data for an ellipse
+        struct { int x, y, radius, start_angle, end_angle; } arc; // Data for an arc
+        struct { int x, y, width, height;} rectangle; // Data for a rectangle
+        struct { Sint16 x1, y1, x2, y2, radius; int x, y, w, h, rad ;} rounded_rectangle; // Data for a rounded Rectangle
+        struct { int cx, cy, radius, sides; } polygon; // Data for a polygon
+        struct { Sint16 x1, y1, x2, y2; Uint8 thickness; } line; // Data for a line
+    } data; //  Union containing data specific to each form
 } Shape;
 
-// Déclaration de la liste des formes et de son compteur
+// Declaration of the list of shapes and its counter
 #define MAX_SHAPES 100
 extern Shape shapes[MAX_SHAPES];
 extern int shapeCount;

@@ -5,18 +5,18 @@
 #include <stdbool.h>
 
 typedef struct {
-    int x, y;               // Position actuelle
-    SDL_Color color;        // Couleur du curseur
-    int thickness;          // Épaisseur du curseur
-    bool visible;           // Visibilité du curseur
+    int x, y;               // Current position
+    SDL_Color color;        // Cursor color
+    int thickness;          // Cursor thickness
+    bool visible;           // Cursor visibility
 } Cursor;
 
 
 typedef struct {
-    int x, y;       // Coordonnées du centre
-    int radius;     // Rayon
-    SDL_Color color; // Couleur de la forme
-    bool selected;  // Indique si la forme est sélectionnée
+    int x, y;       // Centre contact details
+    int radius;     // Radius
+    SDL_Color color; // Form color
+    bool selected;  // Indicates whether the shape is selected
 } Circle;
 
 

@@ -21,16 +21,19 @@
  */
 int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, Uint32 color, char *type) {
 
+    // Check if the type is valid ("filled" or "empty")
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid instantCircle type: %s\n", type);
     }
     else
     {
+        // Set the drawing color
         setRenderColor(renderer, color);
 
+        // Handle events to allow user interaction during rendering
         if (handleEvents(renderer, texture) == -1) return -1;
 
-        // Dessin
+        // Draw the circle based on the type
         if (strcmp(type, "empty") == 0) {
             if (circleColor(renderer, x, y, radius, color) != 0) {
                 printf("Error in circleColor: %s\n", SDL_GetError());
@@ -42,9 +45,13 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
             }
         } 
 
+        // Render the texture to the screen with a delay
         renderTexture(renderer, texture, 750);
+
+        // Handle events again to check for user actions
         if (handleEvents(renderer, texture) == -1) return -1;
-        // Rétablir la cible de rendu par défaut
+
+        // Reset the rendering target to default
         SDL_SetRenderTarget(renderer, NULL);
  
     }
@@ -68,7 +75,6 @@ int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int 
 
         if (handleEvents(renderer, texture) == -1) return -1;
 
-        // Dessin
         if (strcmp(type, "empty") == 0) {
             if (ellipseColor(renderer, x, y, rx, ry, color) != 0) {
                 printf("Error in ellipseColor: %s\n", SDL_GetError());
@@ -81,7 +87,6 @@ int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int 
         
         renderTexture(renderer, texture, 750);
         if (handleEvents(renderer, texture) == -1) return -1;
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
     }  
 }
@@ -101,29 +106,21 @@ int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radi
     if (handleEvents(renderer, texture) == -1) return -1;
 
     if (strcmp(type, "filled") == 0) {
-    // Convertir les angles en radians
+        // Convert angles to radians
         double startRad = start_angle * M_PI / 180.0;
         double endRad = end_angle * M_PI / 180.0;
-            // Décomposer la couleur
-        Uint8 r = (color >> 24) & 0xFF;
-        Uint8 g = (color >> 16) & 0xFF;
-        Uint8 b = (color >> 8) & 0xFF;
-        Uint8 a = color & 0xFF;
 
-        // Définir la couleur pour le dessin
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        setRenderColor(renderer, color);
 
-        // Décomposer l'arc en points concentriques pour le remplir
-        for (int r = 0; r <= radius; ++r) { // Itérer sur chaque rayon jusqu'à `radius`
-            for (double angle = startRad; angle <= endRad; angle += 0.01) { // Itérer sur chaque angle
+        // Draw the filled arc by iterating over concentric radius and angles
+        for (int r = 0; r <= radius; ++r) { 
+            for (double angle = startRad; angle <= endRad; angle += 0.01) { // Iterate on each angle
                 int px = x + (int)(r * cos(angle));
                 int py = y + (int)(r * sin(angle));
-                // Dessiner une ligne du centre au bord de l'arc
                 SDL_RenderDrawLine(renderer, x, y, px, py);
             }
         }
     } else if (strcmp(type, "empty") == 0) {
-        // Dessiner un arc classique
         if (arcColor(renderer, x, y, radius, start_angle, end_angle, color) != 0) {
             printf("Error in arcColor: %s\n", SDL_GetError());
         }
@@ -131,7 +128,6 @@ int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radi
 
     renderTexture(renderer, texture, 750);
     if (handleEvents(renderer, texture) == -1) return -1;
-    // Rétablir la cible de rendu par défaut
     SDL_SetRenderTarget(renderer, NULL); 
 }
 
@@ -150,14 +146,9 @@ int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, in
     }
     else
     {
-        // Définir la couleur de dessin
-        Uint8 r = (color & 0xFF000000) >> 24; // Rouge
-        Uint8 g = (color & 0x00FF0000) >> 16; // Vert
-        Uint8 b = (color & 0x0000FF00) >> 8;  // Bleu
-        Uint8 a = (color & 0x000000FF);       // Alpha
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        setRenderColor(renderer, color);
 
-        // Créer un SDL_Rect avec les dimensions fournies
+        // Create a SDL_Rect structure for the rectangle
         SDL_Rect rect = {x, y, w, h};
 
         if (handleEvents(renderer, texture) == -1) return -1;
@@ -211,7 +202,6 @@ int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1
         
         renderTexture(renderer, texture, 750);
         if (handleEvents(renderer, texture) == -1) return -1;
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
     } 
 }
@@ -264,6 +254,7 @@ void drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint1
  */
 int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, int sides, Uint32 color, char *type) 
 {
+    // Validate the number of sides
     if (sides < 3 || sides > 12) 
     {
         printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
@@ -271,20 +262,19 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
     else
     {
 
-        Sint16 vx[12]; // Tableau pour les coordonnées X
-        Sint16 vy[12]; // Tableau pour les coordonnées Y
+        Sint16 vx[12]; // Array for x-coordinates of vertices
+        Sint16 vy[12]; // Array for y-coordinates of vertices
 
         for (int i = 0; i < sides; i++) {
             if (handleEvents(renderer, texture) == -1) return -1;
-            float angle = i * (2 * PI / sides); // Calculer l'angle pour chaque sommet
-            vx[i] = cx + radius * cos(angle); // Coordonnée X
-            vy[i] = cy + radius * sin(angle); // Coordonnée Y
+            float angle = i * (2 * M_PI / sides); // Calculate the angle for each vertex
+            vx[i] = cx + radius * cos(angle); // x-coordinate
+            vy[i] = cy + radius * sin(angle); // y-coordinate
         }
 
-        // Appeler la fonction pour dessiner le polygone
+        // Call the function to draw the polygon
         drawPolygon(renderer, texture, vx, vy, sides, color, type);
         if (handleEvents(renderer, texture) == -1) return -1;
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
     }
 }
@@ -325,7 +315,6 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
         
         renderTexture(renderer, texture, 750);
         if (handleEvents(renderer, texture) == -1) return -1;
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL);
     }
 }
@@ -335,6 +324,7 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
 
 /**
  * @brief Draws an animated circle progressively.
+ * @param We using SDL_RenderDrawPoint to have this effect
  * 
  * @param x X-coordinate of the circle's center.
  * @param y Y-coordinate of the circle's center.
@@ -348,24 +338,25 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int 
     }
     else
     {
-        // Changer la cible de rendu pour la texture
+        // Set the rendering target to the provided texture.
         SDL_SetRenderTarget(renderer, texture);
 
         setRenderColor(renderer, color);
-
+        
+        // Iterate through the vertical range of the circle.
         for (int dy = -radius; dy <= radius; ++dy) 
         {
-            // Gestion des événements pour permettre la fermeture
             if (handleEvents(renderer, texture) == -1) return -1;
 
+            // Iterate through the horizontal range of the circle.
             for (int dx = -radius; dx <= radius; ++dx) {
-                // Vérifie si le point est sur le bord du cercle
                 if(strcmp(type, "empty") == 0)
                 {
                     int distanceSquared = dx * dx + dy * dy;
+                    // The point is on the border if its distance is within the acceptable range.
                     if (distanceSquared >= (radius - 1) * (radius - 1) && distanceSquared <= radius * radius) {
                         SDL_RenderDrawPoint(renderer, x + dx, y + dy);
-                        renderTexture(renderer, texture, 3);
+                        renderTexture(renderer, texture, 3); // Update the rendering progressively.
                     }
                 }
                 else if(strcmp(type, "filled") == 0)
@@ -378,10 +369,11 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int 
             }
         }
     }
-    // Rétablir la cible de rendu par défaut
+    // Reset the rendering target to the default.
     SDL_SetRenderTarget(renderer, NULL);
 
 }
+
 
 /**
  * @brief Draws an animated rectangle progressively.
@@ -399,15 +391,14 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
     }
     else
     {
-        // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
         if(strcmp(type, "empty") == 0)
         {
 
-            SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+            setRenderColor(renderer, color);
 
-            // Dessiner le côté supérieur
+            // Draw the top edge of the rectangle.
             for (int i = 0; i < w; ++i) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
@@ -415,7 +406,7 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
                 renderTexture(renderer, texture, 3);
             }
 
-            // Dessiner le côté droit
+            // Draw the right edge.
             for (int j = 0; j < h; ++j) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
@@ -423,7 +414,7 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
                 renderTexture(renderer, texture, 3);
             }
 
-            // Dessiner le côté inférieur
+            // Draw the bottom edge.
             for (int i = w - 1; i >= 0; --i) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
@@ -431,7 +422,7 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
                 renderTexture(renderer, texture, 3);
             }
 
-            // Dessiner le côté gauche
+            // Draw the left edge.
             for (int j = h - 1; j >= 0; --j) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
@@ -442,7 +433,8 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
         }
         else if(strcmp(type, "filled") == 0)
         {
-            SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+            setRenderColor(renderer, color);
+
             for (int i = 0; i < w; ++i) 
             {
                 if (handleEvents(renderer, texture) == -1) return -1;
@@ -457,11 +449,11 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
         {
             printf("Invalid animatedRectangle type: %s\n", type);
         }
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL);
     }
     
 }
+
 
 /**
  * @brief Draws an animated rounded rectangle progressively.
@@ -474,6 +466,8 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
  * @return -1 if an event interrupts the drawing, 0 otherwise.
  */
 int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int w, int h, int radius, Uint32 color, char *type) {
+    
+    // Validate that the radius fits within the dimensions.
     if (radius * 2 > w || radius * 2 > h) {
         printf("Invalid radius: too large for the rectangle dimensions.\n");
     }
@@ -482,66 +476,66 @@ int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, i
     }
     else
     {
-        // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
-        SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+        setRenderColor(renderer, color);
 
         if (strcmp(type, "empty") == 0) {
-            // Dessiner les coins arrondis (arcs partiels)
+            // Draw rounded corners
             for (double theta = 0; theta <= M_PI / 2; theta += 0.01) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
-                // Coin supérieur gauche
+                // Top-Left corner 
                 SDL_RenderDrawPoint(renderer, x + radius - (int)(radius * cos(theta)), y + radius - (int)(radius * sin(theta)));
                 renderTexture(renderer, texture, 1);
 
-                // Coin supérieur droit
+                // Top-Right corner
                 SDL_RenderDrawPoint(renderer, x + w - radius + (int)(radius * cos(theta)), y + radius - (int)(radius * sin(theta)));
                 renderTexture(renderer, texture, 1);
 
-                // Coin inférieur gauche
+                // Bottom-Left corner
                 SDL_RenderDrawPoint(renderer, x + radius - (int)(radius * cos(theta)), y + h - radius + (int)(radius * sin(theta)));
                 renderTexture(renderer, texture, 1);
 
-                // Coin inférieur droit
+                // Bottom-Right corner
                 SDL_RenderDrawPoint(renderer, x + w - radius + (int)(radius * cos(theta)), y + h - radius + (int)(radius * sin(theta)));
                 renderTexture(renderer, texture, 1);
             }
 
-            // Dessiner les côtés droits et gauches
+            // Draw the left and right edges 
             for (int j = radius; j < h - radius; ++j) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
-                SDL_RenderDrawPoint(renderer, x, y + j); // Gauche
-                SDL_RenderDrawPoint(renderer, x + w - 1, y + j); // Droite
+                SDL_RenderDrawPoint(renderer, x, y + j); // left
+                SDL_RenderDrawPoint(renderer, x + w - 1, y + j); // right
                 renderTexture(renderer, texture, 2);
             }
 
-            // Dessiner les côtés supérieur et inférieur
+            // Draw the top and bottom edges 
             for (int i = radius; i < w - radius; ++i) {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
-                SDL_RenderDrawPoint(renderer, x + i, y); // Haut
-                SDL_RenderDrawPoint(renderer, x + i, y + h - 1); // Bas
+                SDL_RenderDrawPoint(renderer, x + i, y); // top
+                SDL_RenderDrawPoint(renderer, x + i, y + h - 1); // bottom
                 renderTexture(renderer, texture, 4);
             }
         } 
         else if (strcmp(type, "filled") == 0) {
-            // Dessiner l'intérieur du rectangle avec coins arrondis
+            // Fill the rectangle with rounded corners row by row.
             for (int j = 0; j < h; ++j) {
                 for (int i = 0; i < w; ++i) {
-                    // Vérifier si le point est à l'intérieur des coins arrondis
+                    // Check if the point is within rounded corners.
                     int dist_top_left = (i - radius) * (i - radius) + (j - radius) * (j - radius);
                     int dist_top_right = (i - (w - radius - 1)) * (i - (w - radius - 1)) + (j - radius) * (j - radius);
                     int dist_bottom_left = (i - radius) * (i - radius) + (j - (h - radius - 1)) * (j - (h - radius - 1));
                     int dist_bottom_right = (i - (w - radius - 1)) * (i - (w - radius - 1)) + (j - (h - radius - 1)) * (j - (h - radius - 1));
 
+                    // Skip points outside the rounded corners.
                     if ((dist_top_left > radius * radius && j < radius && i < radius) ||
                         (dist_top_right > radius * radius && j < radius && i >= w - radius) ||
                         (dist_bottom_left > radius * radius && j >= h - radius && i < radius) ||
                         (dist_bottom_right > radius * radius && j >= h - radius && i >= w - radius)) {
-                        continue; // En dehors des coins arrondis
+                        continue;
                     }
 
                     SDL_RenderDrawPoint(renderer, x + i, y + j);
@@ -551,7 +545,6 @@ int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, i
                 renderTexture(renderer, texture, 6);
             }
         }
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
     }
 }
@@ -573,30 +566,23 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
     }
     else
     {
-        // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
-        // Décomposer la couleur en RGBA
-        Uint8 r = (color >> 24) & 0xFF;
-        Uint8 g = (color >> 16) & 0xFF;
-        Uint8 b = (color >> 8) & 0xFF;
-        Uint8 a = color & 0xFF;
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        setRenderColor(renderer, color);
 
         if (strcmp(type, "empty") == 0) 
         {
-            // Paramètre pour parcourir l'ellipse avec un pas angulaire
-            const int steps = 360;  // Plus de steps = plus précis, mais plus lent
+            // Number of steps to approximate the ellipse
+            const int steps = 360;  // More steps = More more precise, but more slow
             for (int i = 0; i < steps; i++) 
             {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
-                // Calculer l'angle en radians
+                // Calculate the angle and point on the ellipse's boundary
                 float angle = (i * 2 * M_PI) / steps;
-                // Calculer les coordonnées du point sur le contour de l'ellipse
                 int dx = (int)(rx * cos(angle));
                 int dy = (int)(ry * sin(angle));
-                // Dessiner un seul point sur le contour de l'ellipse
+
                 SDL_RenderDrawPoint(renderer, x + dx, y + dy);
                 renderTexture(renderer, texture, 6);
             }
@@ -608,15 +594,12 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
             {
                 if (handleEvents(renderer, texture) == -1) return -1;
 
-                // Calculer l'angle en radians
                 float angle = (i * 2 * M_PI) / steps;
-
-                // Calculer les coordonnées du point sur le contour de l'ellipse
                 int dx = (int)(rx * cos(angle));
                 int dy = (int)(ry * sin(angle));
                 
 
-                // Dessiner les points à l'intérieur de l'ellipse
+                // Fill the ellipse by drawing points inside its boundary
                 for (int xOffset = -dx; xOffset <= dx; xOffset++) {
                     if (handleEvents(renderer, texture) == -1) return -1;
 
@@ -629,10 +612,10 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
                 renderTexture(renderer, texture, 6);
             }
         }
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL);  
     }
 }
+
 
 /**
  * @brief Draws an animated arc progressively.
@@ -651,46 +634,34 @@ int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, 
     }
     else
     {
-        // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
-        // Décomposer la couleur en RGBA
-        Uint8 r = (color >> 24) & 0xFF;
-        Uint8 g = (color >> 16) & 0xFF;
-        Uint8 b = (color >> 8) & 0xFF;
-        Uint8 a = color & 0xFF;
-        
-        
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        setRenderColor(renderer, color);
 
-        // Convertir les angles en radians
+        // Convert start and end angles to radians
         double startRad = start_angle * M_PI / 180.0;
         double endRad = end_angle * M_PI / 180.0;
 
         if (strcmp(type, "empty") == 0) {
-            // Dessin progressif pour un arc vide
             for (double theta = startRad; theta <= endRad; theta += 0.01) {
                 int px = (int)(radius * cos(theta));
                 int py = (int)(radius * sin(theta));
-
-                SDL_RenderDrawPoint(renderer, x + px, y - py); // Dessiner le point
-                renderTexture(renderer, texture, 5);          // Mettre à jour la texture
-                if (handleEvents(renderer, texture) == -1) return -1; // Gérer les événements
-            }
-        } else if (strcmp(type, "filled") == 0) {
-            // Dessin progressif pour un arc rempli
-            for (int currentRadius = 0; currentRadius <= radius; ++currentRadius) { // Progresser en augmentant le rayon
-                for (double angle = startRad; angle <= endRad; angle += 0.01) { // Itérer sur chaque angle
-                    int px = x + (int)(currentRadius * cos(angle));
-                    int py = y + (int)(currentRadius * sin(angle));
-
-                    SDL_RenderDrawLine(renderer, x, y, px, py); // Dessiner le point correspondant
-                }
-                renderTexture(renderer, texture, 5);          // Mettre à jour la texture
-                if (handleEvents(renderer, texture) == -1) return -1; // Gérer les événements       
+                SDL_RenderDrawPoint(renderer, x + px, y - py);
+                renderTexture(renderer, texture, 5);
+                if (handleEvents(renderer, texture) == -1) return -1;
             }
         }
-        // Rétablir la cible de rendu par défaut
+        else if (strcmp(type, "filled") == 0) {
+            for (int currentRadius = 0; currentRadius <= radius; ++currentRadius) {
+                for (double angle = startRad; angle <= endRad; angle += 0.01) {
+                    int px = x + (int)(currentRadius * cos(angle));
+                    int py = y + (int)(currentRadius * sin(angle));
+                    SDL_RenderDrawLine(renderer, x, y, px, py);
+                }
+                renderTexture(renderer, texture, 5);
+                if (handleEvents(renderer, texture) == -1) return -1;
+            }
+        }
         SDL_SetRenderTarget(renderer, NULL); 
     }
 }
@@ -716,13 +687,12 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
     }
     else {
 
-        // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
-        Sint16 vx[12]; // Tableau pour les coordonnées X
-        Sint16 vy[12]; // Tableau pour les coordonnées Y
+        Sint16 vx[12]; 
+        Sint16 vy[12];
 
-        // Calculer les sommets du polygone
+        // Calculate vertices of the polygon
         for (int i = 0; i < sides; i++) 
         {
             float angle = i * (2 * PI / sides);
@@ -730,14 +700,10 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
             vy[i] = cy + radius * sin(angle);
         }
 
-        // Couleur (décomposer Uint32 en RGB)
-        Uint8 r = (color >> 16) & 0xFF;
-        Uint8 g = (color >> 8) & 0xFF;
-        Uint8 b = color & 0xFF;
-        SDL_SetRenderDrawColor(renderer, r, g, b, SDL_ALPHA_OPAQUE);
+        setRenderColor(renderer, color);
 
         if (strcmp(type, "empty") == 0) {
-            // Dessiner les contours du polygone
+            // draw the contours of the polygon
             for (int i = 0; i < sides; i++) 
             {
                 int x1 = vx[i];
@@ -762,7 +728,7 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
             }
         } 
         else if (strcmp(type, "filled") == 0) {
-            // Remplir le polygone en traçant des lignes horizontales
+            // Fill in the polygon by drawing horizontal lines
             int ymin = vy[0], ymax = vy[0];
             for (int i = 1; i < sides; i++) {
                 if (vy[i] < ymin) ymin = vy[i];
@@ -770,21 +736,21 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
             }
 
             for (int y = ymin; y <= ymax; y++) {
-                int intersections[12]; // Points d'intersection pour une ligne horizontale
+                int intersections[12]; // Intersection points for a horizontal line
                 int count = 0;
 
-                // Calculer les points d'intersection entre la ligne horizontale et chaque bord
+                // Calculate the points of intersection between the horizontal line and each edge
                 for (int i = 0; i < sides; i++) {
                     int x1 = vx[i], y1 = vy[i];
                     int x2 = vx[(i + 1) % sides], y2 = vy[(i + 1) % sides];
 
-                    if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y)) { // Intersecte la ligne horizontale
+                    if ((y1 <= y && y2 > y) || (y2 <= y && y1 > y)) { // Intersects the horizontal line
                         int x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
                         intersections[count++] = x;
                     }
                 }
 
-                // Trier les intersections par ordre croissant
+                // Sort intersections in ascending order
                 for (int i = 0; i < count - 1; i++) {
                     for (int j = i + 1; j < count; j++) {
                         if (intersections[i] > intersections[j]) {
@@ -795,7 +761,7 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
                     }
                 }
 
-                // Dessiner des lignes entre les paires d'intersections
+                // Draw lines between pairs of intersections
                 for (int i = 0; i < count; i += 2) {
                     if (handleEvents(renderer, texture) == -1) return -1;
                     for (int x = intersections[i]; x <= intersections[i + 1]; x++) {
@@ -805,7 +771,6 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
                 }
             }
         }
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
     } 
 }
@@ -828,18 +793,11 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
     }
     else
     {
-        // Changer la cible de rendu pour la texture
         SDL_SetRenderTarget(renderer, texture);
 
-        // Décomposer la couleur en RGBA
-        Uint8 r = (color >> 24) & 0xFF;
-        Uint8 g = (color >> 16) & 0xFF;
-        Uint8 b = (color >> 8) & 0xFF;
-        Uint8 a = color & 0xFF;
+        setRenderColor(renderer, color);
 
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
-
-        // Initialisation des variables pour l'algorithme de Bresenham
+        // Variable initialisation for the Bresenham algorithm
         int dx = abs(x2 - x1);
         int dy = abs(y2 - y1);
         int sx = (x1 < x2) ? 1 : -1;
@@ -849,7 +807,7 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
         while (x1 != x2 || y1 != y2) {
             if (handleEvents(renderer, texture) == -1) return -1;
 
-            // Dessiner le point actuel
+            // Draw the actual point
             if (strcmp(type, "filled") == 0) {
                 for (int tx = -thickness / 2; tx <= thickness / 2; tx++) {
                     for (int ty = -thickness / 2; ty <= thickness / 2; ty++) {
@@ -860,15 +818,13 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
                 SDL_RenderDrawPoint(renderer, x1, y1);
             }
 
-            // Afficher la progression
             renderTexture(renderer, texture, 10);
 
-            // Mise à jour des coordonnées pour l'algorithme de Bresenham
+            // Update of coordinates for the Bresenham algorithm
             int e2 = 2 * err;
             if (e2 > -dy) { err -= dy; x1 += sx; }
             if (e2 < dx) { err += dx; y1 += sy; }
         }
-        // Rétablir la cible de rendu par défaut
         SDL_SetRenderTarget(renderer, NULL); 
     }
 }
@@ -909,28 +865,30 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
  */
 int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *mode, char *type, Uint32 color, ...) {
     va_list args;
-    va_start(args, shape);
+    va_start(args, shape);// Initialize the variable argument list.
 
-    // Définir la texture comme cible temporaire
+    // Set the texture as the rendering target.
     SDL_SetRenderTarget(renderer, texture);
 
 
-    // Vérification du mode
+    // Determine if the shape should be drawn with animation.
     int isAnimated = (strcmp(mode, "animated") == 0);
 
-    // Sélection du type de forme
+    // Handle drawing for each shape type.
     if (strcmp(shape, "circle") == 0) {
+        // Extract arguments specific
         int x = va_arg(args, int);
         int y = va_arg(args, int);
         int radius = va_arg(args, int);
 
+        // Call the appropriate drawing function based on the mode.
         if (isAnimated) {
             if(drawAnimatedCircle(renderer, texture, x, y, radius, color, type) == -1) return -1;
         } else {
             if(drawCircle(renderer, texture, x, y, radius, color, type) == -1) return -1;
         }
 
-        // Enregistrer la forme
+        // Register the circle shape in the shapes list.
         Shape newShape;
         newShape.type = SHAPE_CIRCLE;
         newShape.selected = false;
@@ -959,7 +917,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             if(drawRectangle(renderer, texture, x, y, w, h, color, type) == -1) return -1;
         }
 
-        // Enregistrer la forme
+        
         Shape newShape;
         newShape.type = SHAPE_RECTANGLE;
         newShape.selected = false;
@@ -974,24 +932,23 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
 
     } 
     else if (strcmp(shape, "arc") == 0) {
+        // Extract arc parameters.
         int x = va_arg(args, int);
         int y = va_arg(args, int);
         int radius = va_arg(args, int);
-        // Rayon minimum pour éviter des bugs d'affichage
+
+        // Ensure a minimum radius.
         if (radius < 5) radius = 5;
 
-        // Gestion des angles
+        // Handle the start and end angles.
         int start_angle = va_arg(args, int);
-        if (start_angle < 0) start_angle = 0; // Minimum 0
-        if (start_angle > 360) start_angle = 360; // Maximum 360
-
+        start_angle = fmax(0, fmin(360, start_angle));
         int end_angle = va_arg(args, int);
-        if (end_angle < 0) end_angle = 0; // Minimum 0
-        if (end_angle > 360) end_angle = 360; // Maximum 360
+        end_angle = fmax(0, fmin(360, end_angle));
 
-        // Option : vérifier si start_angle > end_angle
+        // Swap angles if necessary.
         if (start_angle > end_angle) {
-            int temp = start_angle; // Inverser si nécessaire
+            int temp = start_angle;
             start_angle = end_angle;
             end_angle = temp;
         }
@@ -1002,7 +959,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             if(drawArc(renderer, texture, x, y, radius, start_angle, end_angle, color, type) == -1) return -1;
         }
 
-        // Enregistrer la forme
+        
         Shape newShape;
         newShape.type = SHAPE_ARC;
         newShape.selected = false;
@@ -1028,7 +985,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             
             if(drawAnimatedRoundedRectangle(renderer, texture, x, y, w, h, rad, color, type) == -1) return -1;
 
-            // Enregistrer la forme
+            
             Shape newShape;
             newShape.type = SHAPE_ROUNDED_RECTANGLE;
             newShape.selected = false;
@@ -1051,7 +1008,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
 
             if(drawRoundedRectangle(renderer, texture, x1, y1, x2, y2, radius, color, type) == -1) return -1;
 
-            // Enregistrer la forme
+            
             Shape newShape;
             newShape.type = SHAPE_ROUNDED_RECTANGLE;
             newShape.selected = false;
@@ -1079,7 +1036,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             if(drawEllipse(renderer, texture, x, y, rx, ry, color, type) == -1) return -1;
         }
 
-        // Enregistrer la forme
+        
         Shape newShape;
         newShape.type = SHAPE_ELLIPSE;
         newShape.selected = false;
@@ -1106,7 +1063,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             if(drawLine(renderer, texture, x1, y1, x2, y2, thick, color, type) == -1) return -1;
         }
 
-        // Enregistrer la forme
+        
         Shape newShape;
         newShape.type = SHAPE_LINE;
         newShape.selected = false;
@@ -1133,7 +1090,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             if(drawCustomPolygon(renderer, texture, cx, cy, radius, sides, color, type) == -1) return -1;
         }
 
-        // Enregistrer la forme
+        
         Shape newShape;
         newShape.type = SHAPE_POLYGON;
         newShape.selected = false;
@@ -1148,11 +1105,13 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
 
     } 
     else {
+        // Handle invalid shape types.
         printf("Invalid shape type: %s\n", shape);
     }
 
-    // Rétablir le rendu par défaut
+    // Restore the default rendering target.
     SDL_SetRenderTarget(renderer, NULL);
 
+    // End the variable argument processing.
     va_end(args);
 }
