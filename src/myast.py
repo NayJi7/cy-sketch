@@ -1056,7 +1056,7 @@ def translate_ast_to_c(ast, filename):
     c_code += "#include <stdlib.h>\n"
     c_code += "#include <string.h>\n"
     c_code += "#include <math.h>\n"
-    c_code += '#include "./dump/files.h/main.h"\n\n'
+    c_code += '#include "../files.h/main.h"\n\n'
 
     c_code += "#define TRUE 1\n"
     c_code += "#define FALSE 0\n\n"
