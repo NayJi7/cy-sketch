@@ -77,24 +77,24 @@ int main(){
     //if(drawShape(renderer, mainTexture, "rectangle", "animated", "filled", red, 100, 100, 200, 50) == -1) return 0;
     //if(drawShape(renderer, mainTexture, "rectangle", "instant", "empty", blue, 200, 200, 200, 50) == -1) return 0;
 
+    //arcs ------
+    //if(drawShape(renderer, mainTexture, "arc", "animated", "filled", red, 200, 400, 100, 90, 270) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "arc", "instant", "empty", red, 400, 200, 100, 90, 180) == -1) return 0;
+
 
 //A FAIRE AU PLUS VITE __________________________________________________________
     //changer la logique de l'arc pour s'inspirer de l'ellipse rx, ry (à voir à la fin)
-    
-    //COMMENTER LE CODE ET REVOIR DERRIERE MOI car j'ai pas assez commenté les calcules dans form.c pour les animated mais je me suis pas repeté pour certain commentaire si tu remarques
-    // (j'ai commenté le main.c, formEvents.c, form.c, form.h-structure, cursorEvent.h-structure)
-
     //REGLER LES COULEURS POUR LES ANIMATED FORMES
 
-    //regler les deselections avec souris avec l'arc
-        //arcs ------
-        //if(drawShape(renderer, mainTexture, "arc", "animated", "filled", red, 200, 400, 100, 90, 270) == -1) return 0;
-        //if(drawShape(renderer, mainTexture, "arc", "instant", "empty", red, 400, 200, 100, 90, 180) == -1) return 0;
 
-    //REVOIR CETTE FONCTION (rotation, dezoom au max)
+    
+    //REVOIR DERRIERE MOI LES COMMENTAIRES car j'ai pas assez commenté les calcules dans form.c pour les animated mais je me suis pas repeté pour certain commentaire si tu remarques
+    // (j'ai commenté toutes les fonctions)
+    
+    //REVOIR CETTE FONCTION (rotation, dezoom au max presque propre pour empty, zoom/dezoom pour filled)
         //roundedrectangles ------
-        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "empty", red, 100, 200, 200, 150, 10) == -1) return 0;
-        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "filled", red, 300, 100, 200, 150, 10) == -1) return 0;
+        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "empty", red, 100, 200, 400, 400, 10) == -1) return 0;
+        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "filled", red, 300, 100, 400, 400, 10) == -1) return 0;
 //____________________________________________________________________     
 
     SDL_SetRenderTarget(renderer, NULL); 

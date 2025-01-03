@@ -187,75 +187,102 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
 }
 
 /**
- * @brief Handles SDL events, including quitting the program.
+ * @brief Handles SDL events and checks for quit signals.
  * 
- * @param renderer SDL renderer instance used for drawing.
- * @param texture SDL texture associated with the renderer.
+ * This function processes SDL events in a loop. If an SDL_QUIT event 
+ * is detected (e.g., when the user closes the window), it cleans up 
+ * the SDL renderer and texture and exits the application.
  * 
- * @return int Returns -1 if a quit event is detected; otherwise 0.
+ * @param renderer SDL renderer to destroy if a quit event is detected.
+ * @param texture SDL texture to destroy if a quit event is detected.
+ * 
+ * @return -1 if a quit event occurs, 0 otherwise.
  */
 int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
     SDL_Event event;
+
+    // Process all pending events.
     while (SDL_PollEvent(&event)) {
+        // Check if the event is a quit signal.
         if (event.type == SDL_QUIT) {
+            // Destroy the renderer and texture to free resources.
             SDL_DestroyRenderer(renderer);
             SDL_DestroyTexture(texture);
+
+            // Quit SDL to clean up the environment.
             SDL_Quit();
+
+            // Return -1 to indicate a quit event was handled.
             return -1;
         }
     }
+
+    // Return 0 if no quit event was detected.
     return 0;
 }
 
 /**
  * @brief Initializes a new cursor with specified properties.
  * 
- * @param x Initial x-coordinate of the cursor.
- * @param y Initial y-coordinate of the cursor.
- * @param color Color of the cursor in SDL_Color format.
- * @param thickness Thickness of the cursor outline.
- * @param visible Visibility state of the cursor (true or false).
+ * This function creates and configures a `Cursor` instance using the 
+ * provided parameters for its position, color, thickness, and visibility.
  * 
- * @return Cursor The newly created cursor instance.
+ * @param x Initial x-coordinate of the cursor's position.
+ * @param y Initial y-coordinate of the cursor's position.
+ * @param color SDL_Color defining the cursor's color (RGBA).
+ * @param thickness Integer specifying the thickness of the cursor outline.
+ * @param visible Boolean indicating whether the cursor is visible.
+ * 
+ * @return Cursor A new cursor instance with the given properties.
  */
 Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible) {
+    // Initialize a cursor instance with provided attributes.
     Cursor cursor;
-    cursor.x = x;
-    cursor.y = y;
-    cursor.color = color;
-    cursor.thickness = thickness;
-    cursor.visible = visible;
-    return cursor;
+    cursor.x = x;                   // Set the x-coordinate.
+    cursor.y = y;                   // Set the y-coordinate.
+    cursor.color = color;           // Set the color using SDL_Color.
+    cursor.thickness = thickness;   // Set the thickness of the cursor outline.
+    cursor.visible = visible;       // Set the visibility status of the cursor.
+    return cursor;                  // Return the configured cursor.
 }
 
 /**
  * @brief Renders the cursor on the screen.
  * 
+ * This function draws the cursor on the SDL renderer as an arrow 
+ * with a triangular tip and a small square at the base. The cursor 
+ * is rendered only if it is marked as visible.
+ * 
  * @param renderer SDL renderer instance used for drawing.
- * @param cursor Pointer to the cursor instance to render.
+ * @param cursor Pointer to the `Cursor` instance to render.
  */
 void renderCursor(SDL_Renderer *renderer, const Cursor *cursor) {
-    if (!cursor->visible) return; // Ne rien dessiner si le curseur n'est pas visible
+    // Check if the cursor is visible; skip rendering if not.
+    if (!cursor->visible) return;
 
-    // Définir la couleur de la flèche
+    // Set the drawing color based on the cursor's RGBA color.
     SDL_SetRenderDrawColor(renderer, cursor->color.r, cursor->color.g, cursor->color.b, cursor->color.a);
 
-    // Dessiner le triangle représentant la pointe du curseur
+    // Define the triangular tip of the cursor (an arrowhead shape).
     SDL_Point triangle[4] = {
-        {cursor->x, cursor->y},                                // Pointe
-        {cursor->x - cursor->thickness, cursor->y + 2 * cursor->thickness}, // Coin gauche
-        {cursor->x + cursor->thickness, cursor->y + 2 * cursor->thickness}, // Coin droit
-        {cursor->x, cursor->y}                                 // Retour à la pointe
+        {cursor->x, cursor->y},                                // Tip of the arrow.
+        {cursor->x - cursor->thickness, cursor->y + 2 * cursor->thickness}, // Bottom-left corner.
+        {cursor->x + cursor->thickness, cursor->y + 2 * cursor->thickness}, // Bottom-right corner.
+        {cursor->x, cursor->y}                                 // Close the triangle.
     };
+
+    // Draw the triangular arrowhead using lines.
     SDL_RenderDrawLines(renderer, triangle, 4);
 
-    // Dessiner un point pour la base du curseur
+    // Define a small rectangular "tail" at the base of the cursor.
     SDL_Rect tail = {
-        cursor->x - cursor->thickness / 2,
-        cursor->y + 3 * cursor->thickness,
-        cursor->thickness,
-        cursor->thickness
+        cursor->x - cursor->thickness / 2,    // Center horizontally around `cursor->x`.
+        cursor->y + 3 * cursor->thickness,    // Place below the arrowhead.
+        cursor->thickness,                    // Width of the rectangle.
+        cursor->thickness                     // Height of the rectangle.
     };
+
+    // Fill the rectangle to represent the cursor's tail.
     SDL_RenderFillRect(renderer, &tail);
 }
 
@@ -277,21 +304,25 @@ void moveCursor(Cursor *cursor, int dx, int dy) {
  * @param x X-coordinate of the cursor.
  * @param y Y-coordinate of the cursor.
  * 
- * @return int Index of the shape at the cursor position, or -1 if none is found.
+ * @return The index of the shape under the cursor, or -1 if no shape is found.
  */
 int findShapeAtCursor(int x, int y) {
+    // Iterate through all the shapes in the global shapes array.
     for (int i = 0; i < shapeCount; i++) {
-        Shape *shape = &shapes[i];
+        Shape *shape = &shapes[i]; // Get a reference to the current shape.
 
-        // Vérifiez que le typeForm est valide pour éviter des formes incorrectes
+        // Validate the shape's type form (it must be "filled" or "empty").
         if ((strcmp(shape->typeForm, "filled") != 0) && (strcmp(shape->typeForm, "empty") != 0)) {
-            continue; // Ignorer cette forme
+            continue; // Skip invalid shapes.
         }
 
+        // Determine the type of the shape and check if the cursor is within it.
         switch (shape->type) 
         {
+            // Check if the cursor is inside the circle.
             case SHAPE_CIRCLE:
-                if (isPointInCircle(x, y, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius)) return i;
+                if (isPointInCircle(x, y, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius)) 
+                return i; // Return the index of the shape.
                 break;
             case SHAPE_RECTANGLE:
                 if (isPointInRectangle(x, y, shape->data.rectangle.x, shape->data.rectangle.y, shape->data.rectangle.width, shape->data.rectangle.height)) return i;
@@ -313,7 +344,7 @@ int findShapeAtCursor(int x, int y) {
                 break;
         }
     }
-    return -1; // Aucune forme trouvée
+    return -1; // No shape found at the cursor's position.
 }
 
 
@@ -325,28 +356,45 @@ int findShapeAtCursor(int x, int y) {
  * @param cursorY Y-coordinate of the cursor.
 */
 
-
 /**
  * @brief Handles the selection or deselection of shapes based on cursor position.
  * 
  * When the cursor is positioned over a shape and the mouse is clicked:
  * - If the shape is not selected, it will be selected.
  * - If the shape is already selected, it will be deselected.
- * 
- * @param cursorX The x-coordinate of the cursor.
- * @param cursorY The y-coordinate of the cursor.
  */
 void handleCursorSelection(int cursorX, int cursorY) {
     int index = findShapeAtCursor(cursorX, cursorY);
     if (index != -1) {
-        // Toggle selection status of the shape
+        // Deselect all other shapes first.
+        for (int i = 0; i < shapeCount; i++) {
+            if (i != index) {
+                shapes[i].selected = false; // Ensure only one shape is selected.
+            }
+        }
+        // Toggle selection for the clicked shape.
         shapes[index].selected = !shapes[index].selected;
+    } else {
+        // Deselect all shapes if no shape is clicked.
+        for (int i = 0; i < shapeCount; i++) {
+            shapes[i].selected = false;
+        }
     }
 }
 
+
+/**
+ * @brief Deletes the shape at the cursor's position.
+ * 
+ * This function removes the shape under the cursor from the global shapes array.
+ * If no shape is found under the cursor, no action is taken.
+ */
 void handleShapeDeletion(int cursorX, int cursorY) {
+    // Find the index of the shape under the cursor.
     int index = findShapeAtCursor(cursorX, cursorY);
+    
+    // If a shape is found, delete it.
     if (index != -1) {
-        deleteShape(index);
+        deleteShape(index); // Call the deleteShape function to remove the shape.
     }
 }

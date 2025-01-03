@@ -332,48 +332,42 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
  * @return -1 if an event interrupts the drawing, 0 otherwise.
  */
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, Uint32 color, char *type) { 
-
-    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
+    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
         printf("Invalid animatedCircle type: %s\n", type);
+        return -1;
     }
-    else
-    {
-        // Set the rendering target to the provided texture.
-        SDL_SetRenderTarget(renderer, texture);
 
-        setRenderColor(renderer, color);
-        
-        // Iterate through the vertical range of the circle.
-        for (int dy = -radius; dy <= radius; ++dy) 
-        {
-            if (handleEvents(renderer, texture) == -1) return -1;
+    SDL_SetRenderTarget(renderer, texture); // Set the texture as the rendering target.
+    setRenderColor(renderer, color);
 
-            // Iterate through the horizontal range of the circle.
-            for (int dx = -radius; dx <= radius; ++dx) {
-                if(strcmp(type, "empty") == 0)
-                {
-                    int distanceSquared = dx * dx + dy * dy;
-                    // The point is on the border if its distance is within the acceptable range.
-                    if (distanceSquared >= (radius - 1) * (radius - 1) && distanceSquared <= radius * radius) {
-                        SDL_RenderDrawPoint(renderer, x + dx, y + dy);
-                        renderTexture(renderer, texture, 3); // Update the rendering progressively.
-                    }
+    // Iterate through the vertical range of the circle.
+    for (int dy = -radius; dy <= radius; ++dy) {
+        if (handleEvents(renderer, texture) == -1) return -1; // Handle events less frequently.
+
+        // Calculate the horizontal range for the current row.
+        int dxLimit = (int)sqrt(radius * radius - dy * dy); // Limit of x for the current y.
+
+        for (int dx = -dxLimit; dx <= dxLimit; ++dx) {
+            int distanceSquared = dx * dx + dy * dy;
+
+            if (strcmp(type, "empty") == 0) {
+                // Check if the point lies on the border of the circle.
+                if (distanceSquared >= (radius - 1) * (radius - 1) && distanceSquared <= radius * radius) {
+                    SDL_RenderDrawPoint(renderer, x + dx, y + dy);
                 }
-                else if(strcmp(type, "filled") == 0)
-                { 
-                    if (dx * dx + dy * dy <= radius * radius) {
-                        SDL_RenderDrawPoint(renderer, x + dx, y + dy);
-                        renderTexture(renderer, texture, 0);
-                    }
-                }
+            } else if (strcmp(type, "filled") == 0) {
+                // Check if the point lies inside the circle.
+                SDL_RenderDrawPoint(renderer, x + dx, y + dy);
             }
         }
+
+        // Render the texture after finishing a row.
+        renderTexture(renderer, texture, 6);
     }
-    // Reset the rendering target to the default.
-    SDL_SetRenderTarget(renderer, NULL);
 
+    SDL_SetRenderTarget(renderer, NULL); // Reset the rendering target to the default.
+    return 0; // Return success.
 }
-
 
 /**
  * @brief Draws an animated rectangle progressively.

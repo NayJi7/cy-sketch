@@ -273,58 +273,61 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
         case SHAPE_ROUNDED_RECTANGLE: {
             setRenderColor(renderer, shape->color);
 
-            int cx = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
-            int cy = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
-            double angle = shape->rotation * M_PI / 180.0;
+            // Calculate the center of the rounded rectangle
+            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
+            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
+            double angle = shape->rotation * M_PI / 180.0; // Convert rotation to radians
 
-            int x1 = shape->data.rounded_rectangle.x1;
-            int y1 = shape->data.rounded_rectangle.y1;
-            int x2 = shape->data.rounded_rectangle.x2;
-            int y2 = shape->data.rounded_rectangle.y2;
+            // Calculate the dimensions
+            int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
+            int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
             int radius = shape->data.rounded_rectangle.radius;
 
-            // Calculer les coins du rectangle après rotation
+            // Calculate the four corners after rotation
             SDL_Point corners[4];
-            corners[0].x = cos(angle) * (x1 - cx) - sin(angle) * (y1 - cy) + cx;
-            corners[0].y = sin(angle) * (x1 - cx) + cos(angle) * (y1 - cy) + cy;
+            corners[0].x = cos(angle) * (-width / 2) - sin(angle) * (-height / 2) + centerX;
+            corners[0].y = sin(angle) * (-width / 2) + cos(angle) * (-height / 2) + centerY;
 
-            corners[1].x = cos(angle) * (x2 - cx) - sin(angle) * (y1 - cy) + cx;
-            corners[1].y = sin(angle) * (x2 - cx) + cos(angle) * (y1 - cy) + cy;
+            corners[1].x = cos(angle) * (width / 2) - sin(angle) * (-height / 2) + centerX;
+            corners[1].y = sin(angle) * (width / 2) + cos(angle) * (-height / 2) + centerY;
 
-            corners[2].x = cos(angle) * (x2 - cx) - sin(angle) * (y2 - cy) + cx;
-            corners[2].y = sin(angle) * (x2 - cx) + cos(angle) * (y2 - cy) + cy;
+            corners[2].x = cos(angle) * (width / 2) - sin(angle) * (height / 2) + centerX;
+            corners[2].y = sin(angle) * (width / 2) + cos(angle) * (height / 2) + centerY;
 
-            corners[3].x = cos(angle) * (x1 - cx) - sin(angle) * (y2 - cy) + cx;
-            corners[3].y = sin(angle) * (x1 - cx) + cos(angle) * (y2 - cy) + cy;
+            corners[3].x = cos(angle) * (-width / 2) - sin(angle) * (height / 2) + centerX;
+            corners[3].y = sin(angle) * (-width / 2) + cos(angle) * (height / 2) + centerY;
 
-            // Dessiner le rectangle arrondi
+            // Draw the rounded rectangle
             if (strcmp(shape->typeForm, "filled") == 0) {
-                // Remplir avec des coins arrondis
-                roundedBoxColor(renderer, corners[0].x, corners[0].y, corners[2].x, corners[2].y, radius, shape->color);
+                // Use `roundedBoxColor` to draw the filled rounded rectangle
+                roundedBoxColor(renderer,
+                                corners[0].x, corners[0].y,
+                                corners[2].x, corners[2].y,
+                                radius,
+                                shape->color);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                // Dessiner seulement le contour
-                roundedRectangleColor(renderer, corners[0].x, corners[0].y, corners[2].x, corners[2].y, radius, shape->color);
+                // Use `roundedRectangleColor` to draw the outline
+                roundedRectangleColor(renderer,
+                                    corners[0].x, corners[0].y,
+                                    corners[2].x, corners[2].y,
+                                    radius,
+                                    shape->color);
             }
 
-            // Dessiner le contour si sélectionné
+            // Add a selection highlight if the shape is selected
             if (shape->selected) {
-                SDL_SetRenderDrawColor(renderer, 240, 0, 130, 255);
-
+                SDL_SetRenderDrawColor(renderer, 240, 0, 130, 255); // Highlight color
                 if (strcmp(shape->typeForm, "filled") == 0) {
-                    roundedBoxColor(renderer, 
-                                    corners[0].x, 
-                                    corners[0].y, 
-                                    corners[2].x, 
-                                    corners[2].y, 
-                                    radius, 
-                                    yellow);
+                    roundedBoxColor(renderer,
+                                    corners[0].x, corners[0].y,
+                                    corners[2].x, corners[2].y,
+                                    radius,
+                                    yellow); // Use `yellow` for highlight
                 } else if (strcmp(shape->typeForm, "empty") == 0) {
-                    roundedRectangleColor(renderer, 
-                                        corners[0].x, 
-                                        corners[0].y, 
-                                        corners[2].x, 
-                                        corners[2].y, 
-                                        radius, 
+                    roundedRectangleColor(renderer,
+                                        corners[0].x, corners[0].y,
+                                        corners[2].x, corners[2].y,
+                                        radius,
                                         yellow);
                 }
             }
@@ -542,32 +545,50 @@ void zoomShape(Shape *shape, float zoomFactor) {
         }
 
         case SHAPE_ROUNDED_RECTANGLE: {
-            // Calculate the current dimensions and center of the rounded rectangle
+            // Calculate the current dimensions
             int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
             int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
-            int centerX = shape->data.rounded_rectangle.x1 + width / 2;
-            int centerY = shape->data.rounded_rectangle.y1 + height / 2;
 
-            // Define the zoom percentage (e.g., 5% by default)
-            float zoomPercentage = 0.05f * zoomFactor;
+            // Define minimum allowed dimensions to avoid collapse
+            const int minDimension = 40;
+            
+            if (zoomFactor < 0 && (width <= minDimension || height <= minDimension)) {
+                break; // Skip zooming if dezoom would shrink dimensions below minimum
+            }
 
-            // Calculate the new dimensions
-            int newWidth = width + (int)(width * zoomPercentage);
-            int newHeight = height + (int)(height * zoomPercentage);
+            // Apply zoom, ensuring the dimensions stay above the minimum
+            int newWidth = width + (int)(width * 0.05f * zoomFactor);
+            int newHeight = height + (int)(height * 0.05f * zoomFactor);
+            if (newWidth < minDimension) newWidth = minDimension;
+            if (newHeight < minDimension) newHeight = minDimension;
 
-            // Recalculate the coordinates to maintain the center position
+            // Calculate the center
+            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
+            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
+            
+            
+            // Update the coordinates to maintain the center
             shape->data.rounded_rectangle.x1 = centerX - newWidth / 2;
             shape->data.rounded_rectangle.y1 = centerY - newHeight / 2;
             shape->data.rounded_rectangle.x2 = centerX + newWidth / 2;
             shape->data.rounded_rectangle.y2 = centerY + newHeight / 2;
 
             // Adjust the corner radius proportionally
-            shape->data.rounded_rectangle.radius = (int)(newHeight * 0.2);
-            if (shape->data.rounded_rectangle.radius < 5) {
-                shape->data.rounded_rectangle.radius = 5; // Minimum radius
+            shape->data.rounded_rectangle.radius = (int)(newHeight * 0.2f);
+            if (shape->data.rounded_rectangle.radius < 10) {
+                shape->data.rounded_rectangle.radius = 10; // Set a minimum radius
             }
+            // Prevent further dezooming if dimensions are at their minimum
+            
             break;
         }
+
+
+
+
+
+
+
 
         case SHAPE_POLYGON: {
             // Adjust the radius of the polygon
@@ -621,80 +642,93 @@ void rotateShape(Shape *shape, int angle) {
  * @param cursor Pointer to the cursor structure for updating its position.
  */
 void moveShapesWithMouse(Shape *shapes, int shapeCount, SDL_Event *event, Cursor *cursor) {
+    // Iterate through all shapes in the scene
     for (int i = 0; i < shapeCount; i++) {
+        // Check if the current shape is selected
         if (shapes[i].selected) {
+            // Handle shape movement based on its type
             switch (shapes[i].type) {
                 case SHAPE_RECTANGLE: {
+                    // Update rectangle's top-left corner based on cursor position
                     shapes[i].data.rectangle.x = event->motion.x - shapes[i].data.rectangle.width / 2;
                     shapes[i].data.rectangle.y = event->motion.y - shapes[i].data.rectangle.height / 2;
 
+                    // Update cursor position to the rectangle's center
                     cursor->x = shapes[i].data.rectangle.x + shapes[i].data.rectangle.width / 2;
                     cursor->y = shapes[i].data.rectangle.y + shapes[i].data.rectangle.height / 2;
                     break;
                 }
 
                 case SHAPE_CIRCLE: {
+                    // Update circle's center to match cursor position
                     shapes[i].data.circle.x = event->motion.x;
                     shapes[i].data.circle.y = event->motion.y;
 
+                    // Update cursor position to the circle's center
                     cursor->x = shapes[i].data.circle.x;
                     cursor->y = shapes[i].data.circle.y;
                     break;
                 }
 
                 case SHAPE_ELLIPSE: {
+                    // Update ellipse's center to match cursor position
                     shapes[i].data.ellipse.x = event->motion.x;
                     shapes[i].data.ellipse.y = event->motion.y;
 
+                    // Update cursor position to the ellipse's center
                     cursor->x = shapes[i].data.ellipse.x;
                     cursor->y = shapes[i].data.ellipse.y;
                     break;
                 }
 
                 case SHAPE_LINE: {
+                    // Calculate the line's width and height
                     int lineWidth = shapes[i].data.line.x2 - shapes[i].data.line.x1;
                     int lineHeight = shapes[i].data.line.y2 - shapes[i].data.line.y1;
 
+                    // Update both endpoints of the line based on the cursor position
                     shapes[i].data.line.x1 = event->motion.x - lineWidth / 2;
                     shapes[i].data.line.y1 = event->motion.y - lineHeight / 2;
                     shapes[i].data.line.x2 = event->motion.x + lineWidth / 2;
                     shapes[i].data.line.y2 = event->motion.y + lineHeight / 2;
 
+                    // Update cursor position to match the current mouse position
                     cursor->x = event->motion.x;
                     cursor->y = event->motion.y;
                     break;
                 }
 
                 case SHAPE_ROUNDED_RECTANGLE: {
+                    // Get the relative movement of the mouse
                     int dx = event->motion.xrel;
                     int dy = event->motion.yrel;
 
-                    // Déplacer les coordonnées
+                    // Update the rectangle's corners based on relative movement
                     shapes[i].data.rounded_rectangle.x1 += dx;
                     shapes[i].data.rounded_rectangle.y1 += dy;
                     shapes[i].data.rounded_rectangle.x2 += dx;
                     shapes[i].data.rounded_rectangle.y2 += dy;
 
-                    // Assurez-vous que le rayon reste inchangé
-                    shapes[i].data.rounded_rectangle.radius = shapes[i].data.rounded_rectangle.radius;
                     break;
                 }
                 
                 case SHAPE_POLYGON: {
-                    shapes[i].data.polygon.cx = event->motion.x; // Déplacer le centre en x
-                    shapes[i].data.polygon.cy = event->motion.y; // Déplacer le centre en y
+                    // Update the polygon's center to match the current cursor position
+                    shapes[i].data.polygon.cx = event->motion.x;
+                    shapes[i].data.polygon.cy = event->motion.y;
 
-                    // Mettre à jour la position du curseur
+                    // Update cursor position to the polygon's center
                     cursor->x = shapes[i].data.polygon.cx;
                     cursor->y = shapes[i].data.polygon.cy;
                     break;
                 }
 
                 case SHAPE_ARC: {
-                    shapes[i].data.arc.x = event->motion.x; // Déplacer le centre en x
-                    shapes[i].data.arc.y = event->motion.y; // Déplacer le centre en y
+                    // Update the arc's center to match the current cursor position
+                    shapes[i].data.arc.x = event->motion.x;
+                    shapes[i].data.arc.y = event->motion.y;
 
-                    // Mettre à jour la position du curseur
+                    // Update cursor position to the arc's center
                     cursor->x = shapes[i].data.arc.x;
                     cursor->y = shapes[i].data.arc.y;
                     break;
@@ -713,29 +747,35 @@ void moveShapesWithMouse(Shape *shapes, int shapeCount, SDL_Event *event, Cursor
  * @param dy Vertical movement offset.
  */
 void moveSelectedShapes(Shape *shapes, int shapeCount, int dx, int dy) {
-    
+    // Iterate through all shapes
     for (int i = 0; i < shapeCount; i++) {
+        // Check if the shape is selected
         if (shapes[i].selected) {
+            // Move the shape based on its type
             switch (shapes[i].type) {
                 case SHAPE_RECTANGLE: {
+                    // Update rectangle's top-left corner by the offset
                     shapes[i].data.rectangle.x += dx;
                     shapes[i].data.rectangle.y += dy;
                     break;
                 }
 
                 case SHAPE_CIRCLE: {
+                    // Update circle's center by the offset
                     shapes[i].data.circle.x += dx;
                     shapes[i].data.circle.y += dy;
                     break;
                 }
 
                 case SHAPE_ELLIPSE: {
+                    // Update ellipse's center by the offset
                     shapes[i].data.ellipse.x += dx;
                     shapes[i].data.ellipse.y += dy;
                     break;
                 }
 
                 case SHAPE_LINE: {
+                    // Update both endpoints of the line by the offset
                     shapes[i].data.line.x1 += dx;
                     shapes[i].data.line.y1 += dy;
                     shapes[i].data.line.x2 += dx;
@@ -744,6 +784,7 @@ void moveSelectedShapes(Shape *shapes, int shapeCount, int dx, int dy) {
                 }
 
                 case SHAPE_ROUNDED_RECTANGLE: {
+                    // Update the rounded rectangle's corners by the offset
                     shapes[i].data.rounded_rectangle.x1 += dx;
                     shapes[i].data.rounded_rectangle.y1 += dy;
                     shapes[i].data.rounded_rectangle.x2 += dx;
@@ -752,12 +793,14 @@ void moveSelectedShapes(Shape *shapes, int shapeCount, int dx, int dy) {
                 }
 
                 case SHAPE_POLYGON: {
+                    // Update the polygon's center by the offset
                     shapes[i].data.polygon.cx += dx;
                     shapes[i].data.polygon.cy += dy; 
                     break;
                 }
 
                 case SHAPE_ARC: {
+                    // Update the arc's center by the offset
                     shapes[i].data.arc.x += dx;
                     shapes[i].data.arc.y += dy; 
                     break;
@@ -829,7 +872,7 @@ int isPointInArc(int x, int y, int cx, int cy, int radius, int startAngle, int e
 
     // Check if the point lies within the arc's radius.
     if (distanceSquared > radius * radius) {
-        return 0;
+        return 0; // Outside the arc's radius.
     }
 
     // Calculate the angle between the point and the center in degrees.
@@ -840,9 +883,16 @@ int isPointInArc(int x, int y, int cx, int cy, int radius, int startAngle, int e
         angle += 360;
     }
 
-    // Check if the angle is within the arc's range.
-    return (angle >= startAngle && angle <= endAngle);
+    // Handle cases where the arc wraps around the 0-degree mark.
+    if (startAngle <= endAngle) {
+        // Normal case: startAngle < endAngle.
+        return (angle >= startAngle && angle <= endAngle);
+    } else {
+        // Wrapped case: startAngle > endAngle.
+        return (angle >= startAngle || angle <= endAngle);
+    }
 }
+
 
 /**
  * @brief Checks if a point lies inside a rectangle.
