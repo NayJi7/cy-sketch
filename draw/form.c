@@ -247,37 +247,70 @@ void drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint1
 /**
  * @brief Draws a custom polygon with a specified number of sides, centered at (cx, cy).
  * 
+ * For a 4-sided polygon, this function will generate a rhombus instead of a square.
+ * 
  * @param cx The x-coordinate of the polygon's center.
  * @param cy The y-coordinate of the polygon's center.
  * @param radius The radius from the center to the vertices.
  * @param sides The number of sides of the polygon (must be between 3 and 12).
+ * @param rhombusOffset Multiplier for elongating the diagonals (use <1 for flat rhombus, >1 for tall rhombus).
+ * @param color The color of the polygon.
+ * @param type The type of polygon ("filled" or "empty").
  */
 int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, int sides, Uint32 color, char *type) 
 {
     // Validate the number of sides
-    if (sides < 3 || sides > 12) 
-    {
+    if (sides < 3 || sides > 12) {
         printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
+        return -1;
     }
-    else
-    {
 
-        Sint16 vx[12]; // Array for x-coordinates of vertices
-        Sint16 vy[12]; // Array for y-coordinates of vertices
+    Sint16 vx[12]; // Array for x-coordinates of vertices
+    Sint16 vy[12]; // Array for y-coordinates of vertices
 
-        for (int i = 0; i < sides; i++) {
-            if (handleEvents(renderer, texture) == -1) return -1;
-            float angle = i * (2 * M_PI / sides); // Calculate the angle for each vertex
+    for (int i = 0; i < sides; i++) {
+        if (handleEvents(renderer, texture) == -1) return -1;
+
+        float angle;
+
+        // Special case for a 4-sided polygon to create a true rhombus
+        if (sides == 4) {
+            switch (i) {
+                case 0: // Top vertex
+                    vx[i] = cx;
+                    vy[i] = cy - (int)(radius * 1.5); // Elongate vertical diagonal
+                    break;
+                case 1: // Right vertex
+                    vx[i] = cx + radius; // Keep horizontal distance constant
+                    vy[i] = cy;
+                    break;
+                case 2: // Bottom vertex
+                    vx[i] = cx;
+                    vy[i] = cy + (int)(radius * 1.5); // Elongate vertical diagonal
+                    break;
+                case 3: // Left vertex
+                    vx[i] = cx - radius; // Keep horizontal distance constant
+                    vy[i] = cy;
+                    break;
+            }
+        } else {
+            // For other polygons, calculate vertices normally
+            angle = i * (2 * M_PI / sides);
             vx[i] = cx + radius * cos(angle); // x-coordinate
             vy[i] = cy + radius * sin(angle); // y-coordinate
         }
-
-        // Call the function to draw the polygon
-        drawPolygon(renderer, texture, vx, vy, sides, color, type);
-        if (handleEvents(renderer, texture) == -1) return -1;
-        SDL_SetRenderTarget(renderer, NULL); 
     }
+
+    // Draw the polygon
+    drawPolygon(renderer, texture, vx, vy, sides, color, type);
+
+    // Reset rendering target
+    SDL_SetRenderTarget(renderer, NULL);
+
+    return 0;
 }
+
+
 
 
 /**

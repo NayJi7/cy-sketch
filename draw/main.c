@@ -70,8 +70,8 @@ int main(){
     //if(drawShape(renderer, mainTexture, "line", "instant", "filled", magenta, 100, 100, 400, 300, 20) == -1) return 0;
 
     //polygones -----
-    //if(drawShape(renderer, mainTexture, "polygon", "animated", "filled", dark_gray, 530, 130, 100, 3) == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "polygon", "instant", "empty", gray, 330, 130, 100, 12) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "polygon", "animated", "filled", dark_gray, 530, 130, 100, 4) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "polygon", "instant", "empty", gray, 330, 130, 100, 4) == -1) return 0;
     
     //rectangles ------
     //if(drawShape(renderer, mainTexture, "rectangle", "animated", "filled", red, 100, 100, 200, 50) == -1) return 0;
@@ -91,10 +91,10 @@ int main(){
     //REVOIR DERRIERE MOI LES COMMENTAIRES car j'ai pas assez commenté les calcules dans form.c pour les animated mais je me suis pas repeté pour certain commentaire si tu remarques
     // (j'ai commenté toutes les fonctions)
     
-    //REVOIR CETTE FONCTION (rotation, dezoom au max presque propre pour empty, zoom/dezoom pour filled)
+    //REVOIR CETTE FONCTION (rotation, dezoom au max presque propre pour empty, zoom/dezoom pour filled, la version animated)
         //roundedrectangles ------
-        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "empty", red, 100, 200, 400, 400, 10) == -1) return 0;
-        if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "filled", red, 300, 100, 400, 400, 10) == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "roundedRectangle", "animated", "empty", red, 100, 200, 200, 200, 10) == -1) return 0;
+        //if(drawShape(renderer, mainTexture, "roundedRectangle", "instant", "filled", red, 300, 100, 200, 200, 10) == -1) return 0;
 //____________________________________________________________________     
 
     SDL_SetRenderTarget(renderer, NULL); 
