@@ -6,7 +6,7 @@ OBJ_DIR_O = files.o
 OBJ_DIR_EXE = files.exe
 
 # List of source files
-SRC = draw/main.c draw/form.c draw/cursorEvents.c draw/formEvents.c draw/colors.c draw/animations.c
+SRC = .to_execute.c draw/form.c draw/cursorEvents.c draw/formEvents.c draw/colors.c draw/animations.c
 
 # List of object files (replace .c with .o and add the directory path)
 OBJ = $(addprefix $(OBJ_DIR_O)/, $(notdir $(SRC:.c=.o)))

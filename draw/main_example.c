@@ -81,7 +81,7 @@ int main(){
         cleanup(mainTexture, renderer, window);
         return -1;
     }
-
+    
     if(drawShape(renderer, mainTexture, "polygon", "instant", "filled", "zoom", black, 330, 130, 100, 4) == -1) {
         cleanup(mainTexture, renderer, window);
         return -1;
