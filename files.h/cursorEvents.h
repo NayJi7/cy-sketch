@@ -3,14 +3,8 @@
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
-
-typedef struct {
-    int x, y;               // Current position
-    SDL_Color color;        // Cursor color
-    int thickness;          // Cursor thickness
-    bool visible;           // Cursor visibility
-} Cursor;
-
+#include <SDL2/SDL_ttf.h>
+#include "main.h"
 
 typedef struct {
     int x, y;       // Centre contact details
@@ -19,19 +13,14 @@ typedef struct {
     bool selected;  // Indicates whether the shape is selected
 } Circle;
 
-
 int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture);
-
 Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible);
-
 void renderCursor(SDL_Renderer *renderer, const Cursor *cursor);
-
 void moveCursor(Cursor *cursor, int dx, int dy);
-
 int findShapeAtCursor(int x, int y);
-
 void handleCursorSelection(int cursorX, int cursorY);
-
+void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int y);
+void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape);
 void handleShapeDeletion(int cursorX, int cursorY);
 
 #endif // STRUCTFORMS_H

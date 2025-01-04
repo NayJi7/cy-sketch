@@ -1,4 +1,7 @@
 #include "../files.h/main.h"
+#include "../files.h/colors.h"
+#include "../files.h/cursorEvents.h"
+#include "../files.h/form.h"
 
 /**
  * @brief Main function that initializes SDL, creates a window and renderer, and draws shapes.
@@ -59,27 +62,27 @@ int main(){
 
     //circles ------
     //if(drawShape(renderer, mainTexture, "circle", "animated", "filled", yellow, 200, 170, 60) == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "circle", "instant", "empty", yellow, 400, 170, 60) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "circle", "instant", "filled", "zoom", green, 400, 170, 60) == -1) return 0;
 
     //ellipses ------
     //if(drawShape(renderer, mainTexture, "ellipse", "animated", "filled", red, 400, 270, 70, 50) == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "ellipse", "instant", "empty", gray, 300, 370, 70, 50) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "ellipse", "instant", "filled", "zoom", brown, 300, 370, 70, 50) == -1) return 0;
 
     //lines ------
     //if(drawShape(renderer, mainTexture, "line", "animated", "filled", magenta, 200, 200, 300, 200, 2) == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "line", "instant", "filled", magenta, 100, 100, 400, 300, 20) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "line", "instant", "filled", "rotate", pink, 100, 100, 400, 300, 2) == -1) return 0;
 
     //polygones -----
-    if(drawShape(renderer, mainTexture, "polygon", "animated", "filled", dark_gray, 530, 130, 100, 4) == -1) return 0;
-    if(drawShape(renderer, mainTexture, "polygon", "instant", "empty", gray, 330, 130, 100, 4) == -1) return 0;
+    //if(drawShape(renderer, mainTexture, "polygon", "animated", "filled", dark_gray, 530, 130, 100, 4) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "polygon", "instant", "filled", "zoom", black, 330, 130, 100, 4) == -1) return 0;
     
     //rectangles ------
     //if(drawShape(renderer, mainTexture, "rectangle", "animated", "filled", red, 100, 100, 200, 50) == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "rectangle", "instant", "empty", blue, 200, 200, 200, 50) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "rectangle", "instant", "filled", "zoom", gold, 200, 200, 200, 50) == -1) return 0;
 
     //arcs ------
     //if(drawShape(renderer, mainTexture, "arc", "animated", "filled", red, 200, 400, 100, 90, 270) == -1) return 0;
-    //if(drawShape(renderer, mainTexture, "arc", "instant", "empty", red, 400, 200, 100, 90, 180) == -1) return 0;
+    if(drawShape(renderer, mainTexture, "arc", "instant", "filled", "zoom", silver, 400, 200, 100, 90, 180) == -1) return 0;
 
 
 //A FAIRE AU PLUS VITE __________________________________________________________

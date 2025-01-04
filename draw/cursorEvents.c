@@ -1,6 +1,11 @@
-#include "../files.h/cursorEvents.h"
-#include "../files.h/formEvents.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include <math.h>
 #include "../files.h/main.h"
+#include "../files.h/formEvents.h"
+#include "../files.h/cursorEvents.h"
+
 
 /**
  * @brief Main loop of the application to handle user interactions and render shapes.
@@ -14,7 +19,20 @@
  * @param cursor Custom cursor structure used to represent and track the cursor's position.
  */
 void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
-    SDL_ShowCursor(SDL_DISABLE); // Hide the default system cursor.
+    SDL_ShowCursor(SDL_DISABLE);
+    /// Ensuite initialiser SDL_ttf
+    if (TTF_Init() == -1) {
+        printf("TTF_Init: %s\n", TTF_GetError());
+        return;
+    }
+
+    // Charger la police
+    TTF_Font *font = TTF_OpenFont("fonts/DejaVuMathTeXGyre.ttf", 16);
+    if (!font) {
+        printf("TTF_OpenFont: %s\n", TTF_GetError());
+        TTF_Quit();
+        return;
+    }
 
     int running = 1; // Main loop control flag.
     while (running) {
@@ -42,12 +60,9 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
                             dx = 10; // Move cursor right.
                             break;
                         case SDLK_ESCAPE:
-                            // Deselect all shapes.
-                            for (int i = 0; i < shapeCount; i++) {
-                                shapes[i].selected = false;
-                            }
+                            exit(0);
                             break;
-
+                            
                         case SDLK_PLUS:
                         case SDLK_KP_PLUS:
                             // Zoom in on selected shapes.
@@ -82,8 +97,25 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
                             }
                             break;
 
+                        case SDLK_z:
+                            // Move selected shape up in z-order
+                            moveShapeUp();
+                            break;
+
+                        case SDLK_s:
+                            // Move selected shape down in z-order
+                            moveShapeDown();
+                            break;
+
+                        case SDLK_a:
+                            // Toggle animation for selected shape
+                            toggleAnimation();
+                            break;
+
                         case SDLK_RETURN:
-                            // Select shapes at cursor position.
+                        case SDLK_e: {
+                            int topmostShapeIndex = -1;
+                            // Check if cursor is over any shape, keeping track of the last (topmost) one
                             for (int i = 0; i < shapeCount; i++) {
                                 bool isInside = false;
                                 switch (shapes[i].type) {
@@ -127,9 +159,36 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
                                             shapes[i].data.arc.end_angle);
                                         break;
                                 }
-                                shapes[i].selected = isInside;
+                                
+                                if (isInside) {
+                                    topmostShapeIndex = i;  // Keep track of the last (topmost) shape found
+                                }
+                            }
+                            
+                            // If we found a shape under the cursor
+                            if (topmostShapeIndex != -1) {
+                                if (shapes[topmostShapeIndex].selected) {
+                                    // If the topmost shape is already selected, just deselect it
+                                    shapes[topmostShapeIndex].selected = false;
+                                    shapes[topmostShapeIndex].isAnimating = false;
+                                } else {
+                                    // If the topmost shape is not selected, select it and deselect others
+                                    for (int i = 0; i < shapeCount; i++) {
+                                        shapes[i].selected = (i == topmostShapeIndex);
+                                        if (!shapes[i].selected) {
+                                            shapes[i].isAnimating = false;
+                                        }
+                                    }
+                                }
+                            } else {
+                                // If no shape under cursor, deselect all
+                                for (int i = 0; i < shapeCount; i++) {
+                                    shapes[i].selected = false;
+                                    shapes[i].isAnimating = false;
+                                }
                             }
                             break;
+                        }
 
                         case SDLK_BACKSPACE:
                             // Delete selected shape.
@@ -147,6 +206,7 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
 
                     // Move the cursor and selected shapes based on key input.
                     moveCursor(&cursor, dx, dy);
+                    renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
                     moveSelectedShapes(shapes, shapeCount, dx, dy);
                 }
                 break;
@@ -171,18 +231,30 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
         SDL_SetRenderDrawColor(renderer, 229, 229, 229, 255);
         SDL_RenderClear(renderer);
 
-        // Render all shapes.
-        for (int i = 0; i < shapeCount; i++) {
-            renderShape(renderer, &shapes[i]);
-        }
+        // Update animations
+        updateAnimations(renderer);
+
+        // Render all shapes in z-order
+        renderAllShapes(renderer);
 
         // Render the custom cursor.
         renderCursor(renderer, &cursor);
+        renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
+        
+        // Afficher les informations de rotation pour la forme sélectionnée
+        for (int i = 0; i < shapeCount; i++) {
+            if (shapes[i].selected) {
+                renderShapeInfo(renderer, font, &shapes[i]);
+                break; // On ne montre que pour la première forme sélectionnée
+            }
+        }
 
         // Present the updated frame.
         SDL_RenderPresent(renderer);
     }
 
+    TTF_CloseFont(font);
+    TTF_Quit();
     SDL_ShowCursor(SDL_ENABLE); // Restore the default system cursor.
 }
 
@@ -370,16 +442,178 @@ void handleCursorSelection(int cursorX, int cursorY) {
         for (int i = 0; i < shapeCount; i++) {
             if (i != index) {
                 shapes[i].selected = false; // Ensure only one shape is selected.
+                shapes[i].isAnimating = false; // Stop animation when deselected
             }
         }
         // Toggle selection for the clicked shape.
         shapes[index].selected = !shapes[index].selected;
+        // If deselected, stop animation
+        if (!shapes[index].selected) {
+            shapes[index].isAnimating = false;
+        }
     } else {
         // Deselect all shapes if no shape is clicked.
         for (int i = 0; i < shapeCount; i++) {
             shapes[i].selected = false;
+            shapes[i].isAnimating = false; // Stop animation when deselected
         }
     }
+}
+
+/**
+ * @brief Displays the current cursor coordinates in the top-left corner of the window.
+ * 
+ * @param renderer The SDL renderer used for drawing
+ * @param font The font used for text rendering
+ * @param x Current X coordinate of the cursor
+ * @param y Current Y coordinate of the cursor
+ */
+void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int y) {
+    if (!font) return;
+
+    // Create text string with cursor coordinates
+    char text[32];
+    snprintf(text, sizeof(text), "x: %d, y: %d", x, y);
+
+    // Create text surface with black color
+    SDL_Color textColor = {0, 0, 0, 255}; // Black color (R=0, G=0, B=0, A=255)
+    SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
+    if (!surface) return;
+
+    // Convert surface to texture for rendering
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    if (!texture) return;
+
+    // Position the text in the top-left corner with margins
+    SDL_Rect textRect;
+    SDL_QueryTexture(texture, NULL, NULL, &textRect.w, &textRect.h);
+    textRect.x = 10;  // 10 pixels margin from left
+    textRect.y = 10;  // 10 pixels margin from top
+
+    // Render the text and cleanup
+    SDL_RenderCopy(renderer, texture, NULL, &textRect);
+    SDL_DestroyTexture(texture);
+}
+
+/**
+ * @brief Displays detailed information about the selected shape in the bottom-right corner.
+ * Updates in real-time when shape properties change (rotation, position, size).
+ * 
+ * @param renderer The SDL renderer used for drawing
+ * @param font The font used for text rendering
+ * @param shape Pointer to the currently selected shape
+ */
+void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
+    if (!font || !shape->selected) return;
+
+    // Create text string with shape information
+    char text[128];
+    // Determine if shape is empty or filled
+    const char *formType = (strcmp(shape->typeForm, "empty") == 0) ? "(empty)" : "(filled)";
+    
+    char animation[20];
+    switch(shape->animation) {
+        case ANIM_ROTATE:
+            strcpy(animation, "Rotate");
+            break;
+        case ANIM_ZOOM:
+            strcpy(animation, "Zoom"); 
+            break;
+        default:
+            strcpy(animation, "None");
+            break;
+    }
+    // Format text based on shape type
+    switch (shape->type) {
+        case SHAPE_CIRCLE: 
+            snprintf(text, sizeof(text), "Form: Circle %s\nRotation: %.1f deg\nRadius: %d\nPosition: (%d,%d) \nAnimation: %s", 
+                    formType, shape->rotation, 
+                    shape->data.circle.radius,
+                    shape->data.circle.x, shape->data.circle.y,
+                    animation);
+            break;
+        case SHAPE_RECTANGLE: 
+            snprintf(text, sizeof(text), "Form: Rectangle %s\nRotation: %.1f deg\nSize: %dx%d\nPosition: (%d,%d) \nAnimation: %s", 
+                    formType, shape->rotation, 
+                    shape->data.rectangle.width, shape->data.rectangle.height,
+                    shape->data.rectangle.x, shape->data.rectangle.y,
+                    animation);
+            break;
+        case SHAPE_ELLIPSE: 
+            snprintf(text, sizeof(text), "Form: Ellipse %s\nRotation: %.1f deg\nRadius: %dx%d\nPosition: (%d,%d) \nAnimation: %s", 
+                    formType, shape->rotation, 
+                    shape->data.ellipse.rx, shape->data.ellipse.ry,
+                    shape->data.ellipse.x, shape->data.ellipse.y,
+                    animation);
+            break;
+        case SHAPE_LINE: 
+            snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation: %s", 
+                    shape->rotation,
+                    (int)sqrt(pow(shape->data.line.x2 - shape->data.line.x1, 2) + 
+                             pow(shape->data.line.y2 - shape->data.line.y1, 2)),
+                    shape->data.line.thickness,
+                    shape->data.line.x1, shape->data.line.y1,
+                    shape->data.line.x2, shape->data.line.y2,
+                    animation);
+            break;
+        case SHAPE_ROUNDED_RECTANGLE: 
+            snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation: %s", 
+                    formType, shape->rotation, 
+                    shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1,
+                    shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1,
+                    shape->data.rounded_rectangle.radius,
+                    shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
+                    animation);
+            break;
+        case SHAPE_POLYGON: 
+            snprintf(text, sizeof(text), "Form: Polygon %s\nRotation: %.1f deg\nRadius: %d\nSides: %d\nPosition: (%d,%d) \nAnimation: %s", 
+                    formType, shape->rotation, 
+                    shape->data.polygon.radius,
+                    shape->data.polygon.sides,
+                    shape->data.polygon.cx, shape->data.polygon.cy,
+                    animation);
+            break;
+        case SHAPE_ARC: 
+            snprintf(text, sizeof(text), "Form: Arc %s\nRotation: %.1f deg\nRadius: %d\nAngles: %d deg to %d deg\nPosition: (%d,%d) \nAnimation: %s", 
+                    formType, shape->rotation, 
+                    shape->data.arc.radius,
+                    shape->data.arc.start_angle,
+                    shape->data.arc.end_angle,
+                    shape->data.arc.x, shape->data.arc.y,
+                    animation);
+            break;
+        default: 
+            snprintf(text, sizeof(text), "Form: Unknown %s\nRotation: %.1f deg \nAnimation: %s", 
+                    formType, shape->rotation,
+                    animation);
+            break;
+    }
+
+    // Create text surface with enhanced quality rendering
+    SDL_Color textColor = {0, 0, 0, 255}; // Black color
+    // Use blended rendering for smoother text with word wrap at 300 pixels
+    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, text, textColor, 300);
+    if (!surface) return;
+
+    // Convert surface to texture for rendering
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    if (!texture) return;
+
+    // Get window dimensions for positioning
+    int windowWidth, windowHeight;
+    SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
+
+    // Position the text in the bottom-right corner with margins
+    SDL_Rect textRect;
+    SDL_QueryTexture(texture, NULL, NULL, &textRect.w, &textRect.h);
+    textRect.x = windowWidth - textRect.w + 80;  // Adjust position from right edge
+    textRect.y = windowHeight - textRect.h - 10; // 10 pixels margin from bottom
+
+    // Render the text and cleanup
+    SDL_RenderCopy(renderer, texture, NULL, &textRect);
+    SDL_DestroyTexture(texture);
 }
 
 

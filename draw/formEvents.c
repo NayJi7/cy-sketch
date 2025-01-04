@@ -1,7 +1,11 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
 #include "../files.h/formEvents.h"
 #include "../files.h/cursorEvents.h"
+#include "../files.h/colors.h"
 
 #include <math.h>
+#include <limits.h>
 
 // Global table to storage the forms
 Shape shapes[MAX_SHAPES];
@@ -17,19 +21,13 @@ int shapeCount = 0;
  * @param renderer The SDL renderer whose draw color is to be set.
  * @param color A 32-bit RGBA color value (e.g., 0xRRGGBBAA).
  */
-void setRenderColor(SDL_Renderer* renderer, Uint32 color) {
-    static Uint32 currentColor = 0xFFFFFFFF; // Default color is white
-    if (currentColor != color) {
+void setRenderColor(SDL_Renderer* renderer, SDL_Color color) {
+    static SDL_Color currentColor = {255, 255, 255, 255}; // Default color is white
+    if (currentColor.r != color.r || currentColor.g != color.g || currentColor.b != color.b || currentColor.a != color.a) {
         currentColor = color;
 
-        // Extract the RGBA components from the 32-bit color value
-        Uint8 r = (color >> 24) & 0xFF;
-        Uint8 g = (color >> 16) & 0xFF;
-        Uint8 b = (color >> 8) & 0xFF;
-        Uint8 a = color & 0xFF;
-
         // Set the draw color in the renderer
-        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        SDL_SetRenderDrawColor(renderer, currentColor.r, currentColor.g, currentColor.b, currentColor.a);
     }
 }
 
@@ -40,23 +38,15 @@ void setRenderColor(SDL_Renderer* renderer, Uint32 color) {
  * by a brightness factor. The alpha component remains unchanged.
  * 
  * @param color The original 32-bit RGBA color.
- * @param factor A scaling factor for the brightness (e.g., 0.5 for 50% darker, 1.5 for 50% brighter).
- * @return The adjusted color as a 32-bit RGBA value.
+ * @return The selected color as a 32-bit RGBA value.
  */
-Uint32 adjustBrightness(Uint32 color, float factor) {
-    // Extract RGBA components from the color
-    Uint8 r = (color >> 24) & 0xFF;
-    Uint8 g = (color >> 16) & 0xFF;
-    Uint8 b = (color >> 8) & 0xFF;
-    Uint8 a = color & 0xFF;
-
-    // Adjust the RGB components using the factor, clamping to the range [0, 255]
-    r = (Uint8)fminf(255, fmaxf(0, r * factor));
-    g = (Uint8)fminf(255, fmaxf(0, g * factor));
-    b = (Uint8)fminf(255, fmaxf(0, b * factor));
-
-    // Combine the adjusted components back into a 32-bit RGBA color
-    return (r << 24) | (g << 16) | (b << 8) | a;
+SDL_Color selectColor(SDL_Color color) {
+    // Brighten the original color for selection by changing the RGB values
+    SDL_Color selectedColor = color;
+    selectedColor.r = (Uint8)fminf(255, color.r * 0.8);
+    selectedColor.g = (Uint8)fminf(255, color.g * 0.8);
+    selectedColor.b = (Uint8)fminf(255, color.b * 0.8);
+    return selectedColor;
 }
 
 
@@ -78,43 +68,42 @@ void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
 /**
  * @brief Renders a shape on the screen based on its type and properties.
  * 
+ * @param renderer The SDL renderer to use for drawing
  * @param shape Pointer to the shape structure containing its type, dimensions, color, etc.
  */
 void renderShape(SDL_Renderer *renderer, Shape *shape) {
-
-    
     if (shape->typeForm == NULL || (strcmp(shape->typeForm, "filled") != 0 && strcmp(shape->typeForm, "empty") != 0)) {
         return; // Skip rendering if the typeForm is invalid.
     }
 
-// Switch based on the shape type
+    // Switch based on the shape type
     switch (shape->type) {  
         case SHAPE_CIRCLE: {
             setRenderColor(renderer, shape->color);
 
             // Render the filled or empty circle based on typeForm
             if (strcmp(shape->typeForm, "filled") == 0) {
-                filledCircleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, shape->color);
+                filledCircleRGBA(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, 
+                                shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, shape->color);
+                circleRGBA(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius, 
+                          shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             }
 
             // Highlight the circle if selected
             if (shape->selected) {
-                Uint32 highlightColor = adjustBrightness(shape->color, 0.8); // Darken the color by 20%.
-                circleColor(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, highlightColor);
+                SDL_Color selectedColor = selectColor(shape->color);
+                if (strcmp(shape->typeForm, "filled") == 0) {
+                    filledCircleRGBA(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, 
+                                   selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                } else {
+                    circleRGBA(renderer, shape->data.circle.x, shape->data.circle.y, shape->data.circle.radius + 5, 
+                              selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                }
             }
-
-            // Draw an indicator line for rotation
-            double angle1 = shape->rotation * M_PI / 180.0; // Convert angle to radians.
-            int endX = shape->data.circle.x + cos(angle1) * shape->data.circle.radius;
-            int endY = shape->data.circle.y + sin(angle1) * shape->data.circle.radius;
-
-            setRenderColor(renderer, red); // Use red for the indicator line.
-            SDL_RenderDrawLine(renderer, shape->data.circle.x, shape->data.circle.y, endX, endY);
             break;
         }
-        
+
         case SHAPE_RECTANGLE: {
             setRenderColor(renderer, shape->color);
 
@@ -123,58 +112,61 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             int cy = shape->data.rectangle.y + shape->data.rectangle.height / 2;
             double angle = shape->rotation * M_PI / 180.0;
 
-            SDL_Point pointsR[5];  // Array to store rotated rectangle vertices
-            SDL_Point selectionPoints[5];  // Array for the selection contour
-            int offset = 25;  // Extra space around the rectangle for the contour
+            SDL_Point points[5];  // Array to store rotated rectangle vertices
 
             // Calculate rotated rectangle vertices
-            pointsR[0].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
-            pointsR[0].y = sin(angle) * (shape->data.rectangle.x - cx) + cos(angle) * (shape->data.rectangle.y - cy) + cy;
+            points[0].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
+            points[0].y = sin(angle) * (shape->data.rectangle.x - cx) + cos(angle) * (shape->data.rectangle.y - cy) + cy;
 
-            pointsR[1].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
-            pointsR[1].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) + cos(angle) * (shape->data.rectangle.y - cy) + cy;
+            points[1].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) - sin(angle) * (shape->data.rectangle.y - cy) + cx;
+            points[1].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) + cos(angle) * (shape->data.rectangle.y - cy) + cy;
 
-            pointsR[2].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cx;
-            pointsR[2].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cy;
+            points[2].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cx;
+            points[2].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cy;
 
-            pointsR[3].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cx;
-            pointsR[3].y = sin(angle) * (shape->data.rectangle.x - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cy;
+            points[3].x = cos(angle) * (shape->data.rectangle.x - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cx;
+            points[3].y = sin(angle) * (shape->data.rectangle.x - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height - cy) + cy;
 
-            pointsR[4] = pointsR[0];  // Close the rectangle by repeating the first point.
-
-            // Calculate selection contour points
-            for (int i = 0; i < 4; i++) {
-                double dx = pointsR[i].x - cx;
-                double dy = pointsR[i].y - cy;
-                double length = sqrt(dx * dx + dy * dy);
-
-                selectionPoints[i].x = cx + (dx / length) * (length + offset);
-                selectionPoints[i].y = cy + (dy / length) * (length + offset);
-            }
-            selectionPoints[4] = selectionPoints[0];  // Close the contour.
+            points[4] = points[0];  // Close the rectangle by repeating the first point
 
             // Render the rectangle
             if (strcmp(shape->typeForm, "filled") == 0) {
-                filledPolygonColor(renderer, 
-                                (Sint16[]){pointsR[0].x, pointsR[1].x, pointsR[2].x, pointsR[3].x}, 
-                                (Sint16[]){pointsR[0].y, pointsR[1].y, pointsR[2].y, pointsR[3].y}, 
-                                4, shape->color);
+                filledPolygonRGBA(renderer, 
+                                (Sint16[]){points[0].x, points[1].x, points[2].x, points[3].x}, 
+                                (Sint16[]){points[0].y, points[1].y, points[2].y, points[3].y}, 
+                                4, shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                SDL_RenderDrawLines(renderer, pointsR, 5);
+                SDL_RenderDrawLines(renderer, points, 5);
             }
 
             // Render selection highlight if selected
             if (shape->selected) {
+                SDL_Color selectedColor = selectColor(shape->color);
+                // Calculate enlarged rectangle vertices (5 pixels larger)
+                int enlargement = 5;
+                SDL_Point enlargedPoints[5];
+                
+                enlargedPoints[0].x = cos(angle) * (shape->data.rectangle.x - enlargement - cx) - sin(angle) * (shape->data.rectangle.y - enlargement - cy) + cx;
+                enlargedPoints[0].y = sin(angle) * (shape->data.rectangle.x - enlargement - cx) + cos(angle) * (shape->data.rectangle.y - enlargement - cy) + cy;
+
+                enlargedPoints[1].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width + enlargement - cx) - sin(angle) * (shape->data.rectangle.y - enlargement - cy) + cx;
+                enlargedPoints[1].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width + enlargement - cx) + cos(angle) * (shape->data.rectangle.y - enlargement - cy) + cy;
+
+                enlargedPoints[2].x = cos(angle) * (shape->data.rectangle.x + shape->data.rectangle.width + enlargement - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height + enlargement - cy) + cx;
+                enlargedPoints[2].y = sin(angle) * (shape->data.rectangle.x + shape->data.rectangle.width + enlargement - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height + enlargement - cy) + cy;
+
+                enlargedPoints[3].x = cos(angle) * (shape->data.rectangle.x - enlargement - cx) - sin(angle) * (shape->data.rectangle.y + shape->data.rectangle.height + enlargement - cy) + cx;
+                enlargedPoints[3].y = sin(angle) * (shape->data.rectangle.x - enlargement - cx) + cos(angle) * (shape->data.rectangle.y + shape->data.rectangle.height + enlargement - cy) + cy;
+
+                enlargedPoints[4] = enlargedPoints[0];
+
                 if (strcmp(shape->typeForm, "filled") == 0) {
-                    filledPolygonColor(renderer, 
-                                    (Sint16[]){pointsR[0].x, pointsR[1].x, pointsR[2].x, pointsR[3].x}, 
-                                    (Sint16[]){pointsR[0].y, pointsR[1].y, pointsR[2].y, pointsR[3].y}, 
-                                    4, yellow);
-                } else if (strcmp(shape->typeForm, "empty") == 0) {
-                    polygonColor(renderer, 
-                                (Sint16[]){pointsR[0].x, pointsR[1].x, pointsR[2].x, pointsR[3].x}, 
-                                (Sint16[]){pointsR[0].y, pointsR[1].y, pointsR[2].y, pointsR[3].y}, 
-                                4, yellow);
+                    filledPolygonRGBA(renderer, 
+                                    (Sint16[]){enlargedPoints[0].x, enlargedPoints[1].x, enlargedPoints[2].x, enlargedPoints[3].x}, 
+                                    (Sint16[]){enlargedPoints[0].y, enlargedPoints[1].y, enlargedPoints[2].y, enlargedPoints[3].y}, 
+                                    4, selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                } else {
+                    SDL_RenderDrawLines(renderer, enlargedPoints, 5);
                 }
             }
             break;
@@ -208,7 +200,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                     xCoords[i] = ellipsePoints[i].x;
                     yCoords[i] = ellipsePoints[i].y;
                 }
-                filledPolygonColor(renderer, xCoords, yCoords, pointCount, shape->color);
+                filledPolygonRGBA(renderer, xCoords, yCoords, pointCount, shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
                 SDL_RenderDrawLines(renderer, ellipsePoints, pointCount);
                 SDL_RenderDrawLine(renderer, ellipsePoints[pointCount - 1].x, ellipsePoints[pointCount - 1].y, ellipsePoints[0].x, ellipsePoints[0].y);
@@ -216,6 +208,7 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
             // Render selection if the shape is selected.
             if (shape->selected) {
+                SDL_Color selectedColor = selectColor(shape->color);
                 SDL_Point selectionPoints[36];
                 for (int i = 0; i < pointCount; i++) {
                     double theta = (2 * M_PI * i) / pointCount;
@@ -224,9 +217,20 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                     selectionPoints[i].x = cos(angleE) * dx - sin(angleE) * dy + cxE;
                     selectionPoints[i].y = sin(angleE) * dx + cos(angleE) * dy + cyE;
                 }
-                setRenderColor(renderer, blue);
-                SDL_RenderDrawLines(renderer, selectionPoints, pointCount);
-                SDL_RenderDrawLine(renderer, selectionPoints[pointCount - 1].x, selectionPoints[pointCount - 1].y, selectionPoints[0].x, selectionPoints[0].y);
+                
+                if (strcmp(shape->typeForm, "filled") == 0) {
+                    Sint16 xCoords[36];
+                    Sint16 yCoords[36];
+                    for (int i = 0; i < pointCount; i++) {
+                        xCoords[i] = selectionPoints[i].x;
+                        yCoords[i] = selectionPoints[i].y;
+                    }
+                    filledPolygonRGBA(renderer, xCoords, yCoords, pointCount, selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                } else if (strcmp(shape->typeForm, "empty") == 0) {
+                    setRenderColor(renderer, selectedColor);
+                    SDL_RenderDrawLines(renderer, selectionPoints, pointCount);
+                    SDL_RenderDrawLine(renderer, selectionPoints[pointCount - 1].x, selectionPoints[pointCount - 1].y, selectionPoints[0].x, selectionPoints[0].y);
+                }
             }
             break;
         }
@@ -242,11 +246,10 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
             // Apply rotation if necessary.
             if (shape->rotation != 0) {
-                int cx = (shape->data.line.x1 + shape->data.line.x2) / 2; // Center of rotation.
+                int cx = (shape->data.line.x1 + shape->data.line.x2) / 2;
                 int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
                 double angle = shape->rotation * M_PI / 180.0;
 
-                // Calculate rotated points.
                 int rotatedX1 = cos(angle) * (shape->data.line.x1 - cx) - sin(angle) * (shape->data.line.y1 - cy) + cx;
                 int rotatedY1 = sin(angle) * (shape->data.line.x1 - cx) + cos(angle) * (shape->data.line.y1 - cy) + cy;
                 int rotatedX2 = cos(angle) * (shape->data.line.x2 - cx) - sin(angle) * (shape->data.line.y2 - cy) + cx;
@@ -258,127 +261,120 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                 y2 = rotatedY2;
             }
 
-            // Render the line.
-            thickLineColor(renderer, x1, y1, x2, y2, thickness, shape->color);
+            // Render the line
+            thickLineRGBA(renderer, x1, y1, x2, y2, thickness, shape->color.r, shape->color.g, shape->color.b, shape->color.a);
 
-            // Highlight if the line is selected.
+            // Highlight if the line is selected
             if (shape->selected) {
-                SDL_SetRenderDrawColor(renderer, 0, 139, 0, 255); // Yellow.
-                SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+                SDL_Color selectedColor = selectColor(shape->color);
+                thickLineRGBA(renderer, x1, y1, x2, y2, thickness + 5, selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
             }
             break;
         }
-
 
         case SHAPE_ROUNDED_RECTANGLE: {
             setRenderColor(renderer, shape->color);
 
-            // Calculate the center of the rounded rectangle
-            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
-            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
-            double angle = shape->rotation * M_PI / 180.0; // Convert rotation to radians
-
-            // Calculate the dimensions
-            int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
-            int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
-            int radius = shape->data.rounded_rectangle.radius;
-
-            // Calculate the four corners after rotation
-            SDL_Point corners[4];
-            corners[0].x = cos(angle) * (-width / 2) - sin(angle) * (-height / 2) + centerX;
-            corners[0].y = sin(angle) * (-width / 2) + cos(angle) * (-height / 2) + centerY;
-
-            corners[1].x = cos(angle) * (width / 2) - sin(angle) * (-height / 2) + centerX;
-            corners[1].y = sin(angle) * (width / 2) + cos(angle) * (-height / 2) + centerY;
-
-            corners[2].x = cos(angle) * (width / 2) - sin(angle) * (height / 2) + centerX;
-            corners[2].y = sin(angle) * (width / 2) + cos(angle) * (height / 2) + centerY;
-
-            corners[3].x = cos(angle) * (-width / 2) - sin(angle) * (height / 2) + centerX;
-            corners[3].y = sin(angle) * (-width / 2) + cos(angle) * (height / 2) + centerY;
-
             // Draw the rounded rectangle
             if (strcmp(shape->typeForm, "filled") == 0) {
-                // Use `roundedBoxColor` to draw the filled rounded rectangle
-                roundedBoxColor(renderer,
-                                corners[0].x, corners[0].y,
-                                corners[2].x, corners[2].y,
-                                radius,
-                                shape->color);
+                roundedBoxRGBA(renderer,
+                            shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
+                            shape->data.rounded_rectangle.x2, shape->data.rounded_rectangle.y2,
+                            shape->data.rounded_rectangle.radius,
+                            shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                // Use `roundedRectangleColor` to draw the outline
-                roundedRectangleColor(renderer,
-                                    corners[0].x, corners[0].y,
-                                    corners[2].x, corners[2].y,
-                                    radius,
-                                    shape->color);
+                roundedRectangleRGBA(renderer,
+                                shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
+                                shape->data.rounded_rectangle.x2, shape->data.rounded_rectangle.y2,
+                                shape->data.rounded_rectangle.radius,
+                                shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             }
 
             // Add a selection highlight if the shape is selected
             if (shape->selected) {
-                SDL_SetRenderDrawColor(renderer, 240, 0, 130, 255); // Highlight color
+                SDL_Color selectedColor = selectColor(shape->color);
+                int enlargement = 5;
                 if (strcmp(shape->typeForm, "filled") == 0) {
-                    roundedBoxColor(renderer,
-                                    corners[0].x, corners[0].y,
-                                    corners[2].x, corners[2].y,
-                                    radius,
-                                    yellow); // Use `yellow` for highlight
-                } else if (strcmp(shape->typeForm, "empty") == 0) {
-                    roundedRectangleColor(renderer,
-                                        corners[0].x, corners[0].y,
-                                        corners[2].x, corners[2].y,
-                                        radius,
-                                        yellow);
+                    roundedBoxRGBA(renderer,
+                                shape->data.rounded_rectangle.x1 - enlargement, 
+                                shape->data.rounded_rectangle.y1 - enlargement,
+                                shape->data.rounded_rectangle.x2 + enlargement, 
+                                shape->data.rounded_rectangle.y2 + enlargement,
+                                shape->data.rounded_rectangle.radius + enlargement,
+                                selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                } else {
+                    roundedRectangleRGBA(renderer,
+                                    shape->data.rounded_rectangle.x1 - enlargement, 
+                                    shape->data.rounded_rectangle.y1 - enlargement,
+                                    shape->data.rounded_rectangle.x2 + enlargement, 
+                                    shape->data.rounded_rectangle.y2 + enlargement,
+                                    shape->data.rounded_rectangle.radius + enlargement,
+                                    selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
                 }
             }
-
             break;
         }
-
 
         case SHAPE_POLYGON: {
             setRenderColor(renderer, shape->color);
 
             int sides = shape->data.polygon.sides;
-            if (sides < 3) return; // Do not draw if the number of sides is less than 3.
+            if (sides < 3) return;
 
-            double angleStep = 2 * M_PI / sides; // Calculate the angle between each vertex.
-            SDL_Point pointsP[13]; // Array to store the vertices of the polygon.
+            double angleStep = 2 * M_PI / sides;
+            SDL_Point pointsP[13];
 
-            // Calculate the vertices of the polygon with rotation applied.
+            // Calculate the vertices of the polygon with rotation applied
             for (int i = 0; i < sides; i++) {
-                double angle = i * angleStep + (shape->rotation * M_PI / 180.0); // Add rotation to each vertex.
-                pointsP[i].x = shape->data.polygon.cx + cos(angle) * shape->data.polygon.radius; // X-coordinate.
-                pointsP[i].y = shape->data.polygon.cy + sin(angle) * shape->data.polygon.radius; // Y-coordinate.
+                double angle = i * angleStep + (shape->rotation * M_PI / 180.0);
+                pointsP[i].x = shape->data.polygon.cx + cos(angle) * shape->data.polygon.radius;
+                pointsP[i].y = shape->data.polygon.cy + sin(angle) * shape->data.polygon.radius;
             }
-            pointsP[sides] = pointsP[0]; // Close the polygon by connecting the last vertex to the first.
+            pointsP[sides] = pointsP[0];
 
-            // Render the polygon.
+            // Render the polygon
+            Sint16 xCoords[sides];
+            Sint16 yCoords[sides];
+            for (int i = 0; i < sides; i++) {
+                xCoords[i] = pointsP[i].x;
+                yCoords[i] = pointsP[i].y;
+            }
+
             if (strcmp(shape->typeForm, "filled") == 0) {
-                Sint16 xCoords[sides];
-                Sint16 yCoords[sides];
-                for (int i = 0; i < sides; i++) {
-                    xCoords[i] = pointsP[i].x;
-                    yCoords[i] = pointsP[i].y;
-                }
-                filledPolygonColor(renderer, xCoords, yCoords, sides, shape->color); // Draw a filled polygon.
+                filledPolygonRGBA(renderer, xCoords, yCoords, sides, 
+                                shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             } else if (strcmp(shape->typeForm, "empty") == 0) {
-                SDL_RenderDrawLines(renderer, pointsP, sides + 1); // Draw the outline of the polygon.
+                polygonRGBA(renderer, xCoords, yCoords, sides,
+                        shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             }
 
-            // Add a color highlight if the polygon is selected.
+            // Add a selection highlight if the shape is selected
             if (shape->selected) {
-                Sint16 xCoords[sides];
-                Sint16 yCoords[sides];
+                SDL_Color selectedColor = selectColor(shape->color);
+                SDL_Point enlargedPoints[13];
+                int enlargement = 5;
+
+                // Calculate enlarged polygon vertices
                 for (int i = 0; i < sides; i++) {
-                    xCoords[i] = pointsP[i].x;
-                    yCoords[i] = pointsP[i].y;
+                    double angle = i * angleStep + (shape->rotation * M_PI / 180.0);
+                    enlargedPoints[i].x = shape->data.polygon.cx + cos(angle) * (shape->data.polygon.radius + enlargement);
+                    enlargedPoints[i].y = shape->data.polygon.cy + sin(angle) * (shape->data.polygon.radius + enlargement);
+                }
+                enlargedPoints[sides] = enlargedPoints[0];
+
+                Sint16 enlargedX[sides];
+                Sint16 enlargedY[sides];
+                for (int i = 0; i < sides; i++) {
+                    enlargedX[i] = enlargedPoints[i].x;
+                    enlargedY[i] = enlargedPoints[i].y;
                 }
 
                 if (strcmp(shape->typeForm, "filled") == 0) {
-                    filledPolygonColor(renderer, xCoords, yCoords, sides, yellow); // Highlight the filled polygon.
-                } else if (strcmp(shape->typeForm, "empty") == 0) {
-                    polygonColor(renderer, xCoords, yCoords, sides, yellow); // Highlight the outline.
+                    filledPolygonRGBA(renderer, enlargedX, enlargedY, sides,
+                                    selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                } else {
+                    polygonRGBA(renderer, enlargedX, enlargedY, sides,
+                            selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
                 }
             }
             break;
@@ -387,39 +383,80 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
         case SHAPE_ARC: {
             setRenderColor(renderer, shape->color);
 
-            // Ensure start and end angles are within valid bounds.
             int startAngle = shape->data.arc.start_angle % 360;
             int endAngle = shape->data.arc.end_angle % 360;
             if (startAngle < 0) startAngle += 360;
             if (endAngle < 0) endAngle += 360;
 
-            // Apply rotation to the arc.
-            int centerX = shape->data.arc.x; // X-coordinate of the arc's center.
-            int centerY = shape->data.arc.y; // Y-coordinate of the arc's center.
-            double rotationRad = shape->rotation * M_PI / 180.0; // Convert rotation to radians.
-
-            // Adjust start and end angles based on the rotation.
+            int centerX = shape->data.arc.x;
+            int centerY = shape->data.arc.y;
             startAngle = (startAngle + (int)shape->rotation) % 360;
             endAngle = (endAngle + (int)shape->rotation) % 360;
 
-            // Render the arc.
+            // Render the arc
             if (strcmp(shape->typeForm, "empty") == 0) {
-                arcColor(renderer, centerX, centerY, shape->data.arc.radius, startAngle, endAngle, shape->color); // Draw an arc outline.
+                arcRGBA(renderer, centerX, centerY, shape->data.arc.radius, 
+                        startAngle, endAngle, 
+                        shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             } else if (strcmp(shape->typeForm, "filled") == 0) {
-                filledPieColor(renderer, centerX, centerY, shape->data.arc.radius, startAngle, endAngle, shape->color); // Draw a filled arc.
+                filledPieRGBA(renderer, centerX, centerY, shape->data.arc.radius,
+                            startAngle, endAngle,
+                            shape->color.r, shape->color.g, shape->color.b, shape->color.a);
             }
 
-            // Add a color highlight if the arc is selected.
+            // Add a selection highlight if the shape is selected
             if (shape->selected) {
+                SDL_Color selectedColor = selectColor(shape->color);
+                int enlargement = 5;
                 if (strcmp(shape->typeForm, "empty") == 0) {
-                    arcColor(renderer, centerX, centerY, shape->data.arc.radius, startAngle, endAngle, yellow); // Highlight the outline.
-                } else if (strcmp(shape->typeForm, "filled") == 0) {
-                    filledPieColor(renderer, centerX, centerY, shape->data.arc.radius, startAngle, endAngle, yellow); // Highlight the filled arc.
+                    arcRGBA(renderer, centerX, centerY, shape->data.arc.radius + enlargement,
+                            startAngle, endAngle,
+                            selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                } else {
+                    filledPieRGBA(renderer, centerX, centerY, shape->data.arc.radius + enlargement,
+                                startAngle, endAngle,
+                                selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
                 }
             }
             break;
         }
     }
+}
+
+/**
+ * @brief Renders all shapes in order of their z-index
+ * 
+ * @param renderer The SDL renderer to use for drawing
+ */
+void renderAllShapes(SDL_Renderer *renderer) {
+    // Create a temporary array for sorting
+    Shape *sortedShapes = malloc(sizeof(Shape) * shapeCount);
+    if (!sortedShapes) {
+        printf("Error: Failed to allocate memory for sorted shapes.\n");
+        return;
+    }
+
+    // Copy shapes to temporary array
+    memcpy(sortedShapes, shapes, sizeof(Shape) * shapeCount);
+
+    // Sort shapes by z-index
+    for (int i = 0; i < shapeCount - 1; i++) {
+        for (int j = 0; j < shapeCount - i - 1; j++) {
+            if (sortedShapes[j].zIndex > sortedShapes[j + 1].zIndex) {
+                Shape temp = sortedShapes[j];
+                sortedShapes[j] = sortedShapes[j + 1];
+                sortedShapes[j + 1] = temp;
+            }
+        }
+    }
+
+    // Render shapes in order
+    for (int i = 0; i < shapeCount; i++) {
+        renderShape(renderer, &sortedShapes[i]);
+    }
+
+    // Free temporary array
+    free(sortedShapes);
 }
 
 /**
@@ -433,6 +470,14 @@ void addShape(Shape shape) {
         printf("Error : Maximum number of shapes reached.\n");
         return;
     }
+
+    // Set initial z-index to the current shape count (new shapes appear on top)
+    shape.zIndex = shapeCount;
+
+    // Initialize animation state
+    shape.isAnimating = false;
+    shape.zoom = 1.0f;  // Initialize zoom to 1.0 (normal size)
+    shape.zoom_direction = 1.0f;  // Start with growing direction
 
     // Add the new shape to the array and increment the shape count
     shapes[shapeCount++] = shape;
@@ -480,67 +525,29 @@ void zoomShape(Shape *shape, float zoomFactor) {
                 shape->data.rectangle.width = minWidth;
                 shape->data.rectangle.height = (int)(minWidth / aspectRatio); // Adjust height proportionally
             }
-
-            // Optionally, also enforce a minimum height
-            const int minHeight = 10;
-            if (shape->data.rectangle.height < minHeight) {
-                shape->data.rectangle.height = minHeight;
-                shape->data.rectangle.width = (int)(minHeight * aspectRatio); // Adjust width proportionally
-            }
             break;
         }
 
         case SHAPE_CIRCLE: {
-            // Increase the radius based on the zoom factor
+            // Adjust the radius of the circle
             shape->data.circle.radius += (int)(zoomFactor * 5);
 
-            // Ensure a minimum radius to prevent rendering issues
-            if (shape->data.circle.radius < 20) shape->data.circle.radius = 20;
+            // Ensure a minimum radius to keep the circle visible
+            if (shape->data.circle.radius < 10) {
+                shape->data.circle.radius = 10;
+            }
             break;
         }
 
         case SHAPE_ELLIPSE: {
-            // Increase the radii based on the zoom factor
+            // Adjust both radii while maintaining aspect ratio
+            float aspectRatio = (float)shape->data.ellipse.rx / shape->data.ellipse.ry;
             shape->data.ellipse.rx += (int)(zoomFactor * 5);
-            shape->data.ellipse.ry += (int)(zoomFactor * 5);
+            shape->data.ellipse.ry = (int)(shape->data.ellipse.rx / aspectRatio);
 
-            // Ensure minimum values for the radii to avoid flattening the ellipse
-            // Preserve the aspect ratio to prevent the ellipse from becoming a perfect circle
-            if (shape->data.ellipse.rx < 20) {
-                shape->data.ellipse.rx = 20;
-                shape->data.ellipse.ry = 20 * 2; // Example: maintain a 1:2 ratio
-            } else if (shape->data.ellipse.ry < 20) {
-                shape->data.ellipse.ry = 20;
-                shape->data.ellipse.rx = 20 * 2; // Example: maintain a 2:1 ratio
-            }
-            break;
-        }
-
-        case SHAPE_LINE: {
-            // Calculate the center of the line
-            int cx = (shape->data.line.x1 + shape->data.line.x2) / 2;
-            int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
-
-            // Adjust the endpoints to zoom in or out while preserving the center
-            shape->data.line.x1 += (int)((shape->data.line.x1 - cx) * zoomFactor * 0.1);
-            shape->data.line.y1 += (int)((shape->data.line.y1 - cy) * zoomFactor * 0.1);
-            shape->data.line.x2 += (int)((shape->data.line.x2 - cx) * zoomFactor * 0.1);
-            shape->data.line.y2 += (int)((shape->data.line.y2 - cy) * zoomFactor * 0.1);
-
-            // Calculate the new length of the line
-            int dx = shape->data.line.x2 - shape->data.line.x1;
-            int dy = shape->data.line.y2 - shape->data.line.y1;
-            double length = sqrt(dx * dx + dy * dy);
-
-            // Ensure a minimum length to keep the line visible
-            const double minLength = 50.0;
-            if (length < minLength) {
-                double scale = minLength / length;
-                shape->data.line.x1 = cx + (int)((shape->data.line.x1 - cx) * scale);
-                shape->data.line.y1 = cy + (int)((shape->data.line.y1 - cy) * scale);
-                shape->data.line.x2 = cx + (int)((shape->data.line.x2 - cx) * scale);
-                shape->data.line.y2 = cy + (int)((shape->data.line.y2 - cy) * scale);
-            }
+            // Ensure minimum radii
+            if (shape->data.ellipse.rx < 15) shape->data.ellipse.rx = 15;
+            if (shape->data.ellipse.ry < 10) shape->data.ellipse.ry = 10;
             break;
         }
 
@@ -566,7 +573,6 @@ void zoomShape(Shape *shape, float zoomFactor) {
             int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
             int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
             
-            
             // Update the coordinates to maintain the center
             shape->data.rounded_rectangle.x1 = centerX - newWidth / 2;
             shape->data.rounded_rectangle.y1 = centerY - newHeight / 2;
@@ -578,24 +584,45 @@ void zoomShape(Shape *shape, float zoomFactor) {
             if (shape->data.rounded_rectangle.radius < 10) {
                 shape->data.rounded_rectangle.radius = 10; // Set a minimum radius
             }
-            // Prevent further dezooming if dimensions are at their minimum
-            
             break;
         }
-
-
-
-
-
-
-
 
         case SHAPE_POLYGON: {
             // Adjust the radius of the polygon
             shape->data.polygon.radius += (int)(zoomFactor * 5);
 
             // Ensure a minimum radius to keep the polygon visible
-            if (shape->data.polygon.radius < 35) shape->data.polygon.radius = 35;
+            if (shape->data.polygon.radius < 35) {
+                shape->data.polygon.radius = 35;
+            }
+            break;
+        }
+
+        case SHAPE_LINE: {
+            // Calculate the center point of the line
+            int centerX = (shape->data.line.x1 + shape->data.line.x2) / 2;
+            int centerY = (shape->data.line.y1 + shape->data.line.y2) / 2;
+
+            // Calculate current line vector
+            float dx = shape->data.line.x2 - shape->data.line.x1;
+            float dy = shape->data.line.y2 - shape->data.line.y1;
+
+            // Apply zoom factor to the line length
+            float zoomMultiplier = 1.0f + (zoomFactor * 0.1f);
+            dx *= zoomMultiplier;
+            dy *= zoomMultiplier;
+
+            // Update line endpoints while keeping the center fixed
+            shape->data.line.x1 = centerX - dx/2;
+            shape->data.line.y1 = centerY - dy/2;
+            shape->data.line.x2 = centerX + dx/2;
+            shape->data.line.y2 = centerY + dy/2;
+
+            // Adjust the thickness
+            int newThickness = shape->data.line.thickness + (int)(zoomFactor * 2);
+            if (newThickness < 1) newThickness = 1;
+            if (newThickness > 255) newThickness = 255;  // Max value for Uint8
+            shape->data.line.thickness = newThickness;
             break;
         }
 
@@ -618,7 +645,7 @@ void zoomShape(Shape *shape, float zoomFactor) {
  * @param shape The shape to rotate.
  * @param angle The angle in degrees (positive for clockwise, negative for counterclockwise).
  */
-void rotateShape(Shape *shape, int angle) {
+void rotateShape(Shape *shape, float angle) {
     // Only rotate the shape if it is selected
     if (!shape->selected) return;
 
@@ -626,10 +653,11 @@ void rotateShape(Shape *shape, int angle) {
     shape->rotation += angle;
 
     // Normalize the rotation to stay within [0, 360)
-    if (shape->rotation >= 360) {
-        shape->rotation -= 360; // Wrap around for overflow
-    } else if (shape->rotation < 0) {
-        shape->rotation += 360; // Wrap around for underflow
+    while (shape->rotation >= 360.0f) {
+        shape->rotation -= 360.0f; // Wrap around for overflow
+    }
+    while (shape->rotation < 0.0f) {
+        shape->rotation += 360.0f; // Wrap around for underflow
     }
 }
 
@@ -1003,12 +1031,190 @@ int isPointInPolygon(int x, int y, int cx, int cy, int radius, int sides) {
  * @return 1 if the point is near the line, 0 otherwise.
  */
 int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
-    // Calculate the length of the line segment.
-    float lineLength = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    // Calculate the length of the line segment squared
+    float lineLength2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+    
+    if (lineLength2 == 0) {
+        // If the line is actually a point, just check distance to that point
+        float dx = x - x1;
+        float dy = y - y1;
+        return (dx * dx + dy * dy) <= (tolerance * tolerance);
+    }
 
-    // Calculate the perpendicular distance from the point to the line.
-    float distance = fabs((float)(y2 - y1) * x - (float)(x2 - x1) * y + (float)(x2 * y1) - (float)(y2 * x1)) / lineLength;
+    // Calculate the cross product to get the perpendicular distance
+    float crossProduct = abs((x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1));
+    float distance = crossProduct / sqrt(lineLength2);
 
-    // Return true if the distance is within the specified tolerance.
-    return (distance <= tolerance);
+    // Calculate the projection of the point onto the line
+    float dot = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / lineLength2;
+
+    // Add a tiny buffer to make endpoint selection easier, but not too much
+    float buffer = 0.005;
+    
+    // Check if point is within tolerance distance and between line endpoints (with small buffer)
+    return distance <= tolerance && dot >= -buffer && dot <= 1 + buffer;
+}
+
+/**
+ * @brief Moves a selected shape one layer up in the z-order
+ */
+void moveShapeUp() {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].selected) {
+            // Find the shape with the next highest z-index
+            int currentZ = shapes[i].zIndex;
+            int swapIndex = -1;
+            int nextHighestZ = INT_MAX;
+            
+            for (int j = 0; j < shapeCount; j++) {
+                if (shapes[j].zIndex > currentZ && shapes[j].zIndex < nextHighestZ) {
+                    nextHighestZ = shapes[j].zIndex;
+                    swapIndex = j;
+                }
+            }
+            
+            // If we found a shape to swap with, swap their z-indices
+            if (swapIndex != -1) {
+                int temp = shapes[i].zIndex;
+                shapes[i].zIndex = shapes[swapIndex].zIndex;
+                shapes[swapIndex].zIndex = temp;
+            }
+            break;
+        }
+    }
+}
+
+/**
+ * @brief Moves a selected shape one layer down in the z-order
+ */
+void moveShapeDown() {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].selected) {
+            // Find the shape with the next lowest z-index
+            int currentZ = shapes[i].zIndex;
+            int swapIndex = -1;
+            int nextLowestZ = -1;
+            
+            for (int j = 0; j < shapeCount; j++) {
+                if (shapes[j].zIndex < currentZ && shapes[j].zIndex > nextLowestZ) {
+                    nextLowestZ = shapes[j].zIndex;
+                    swapIndex = j;
+                }
+            }
+            
+            // If we found a shape to swap with, swap their z-indices
+            if (swapIndex != -1) {
+                int temp = shapes[i].zIndex;
+                shapes[i].zIndex = shapes[swapIndex].zIndex;
+                shapes[swapIndex].zIndex = temp;
+            }
+            break;
+        }
+    }
+}
+
+/**
+ * @brief Deletes the currently selected shape.
+ */
+void deleteSelectedShape() {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].selected) {
+            deleteShape(i);
+            break;
+        }
+    }
+}
+
+/**
+ * @brief Toggles animation on the selected shape if it's a rotation animation
+ */
+void toggleAnimation() {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].selected) {
+            shapes[i].isAnimating = !shapes[i].isAnimating;
+            break;
+        }
+    }
+}
+
+/**
+ * @brief Updates animations for all shapes
+ * 
+ * @param renderer The SDL renderer to use for drawing
+ */
+void updateAnimations(SDL_Renderer *renderer) {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].isAnimating) {
+            switch (shapes[i].animation) {
+                case ANIM_ROTATE:
+                    rotateShape(&shapes[i], 0.15);
+                    break;
+                case ANIM_ZOOM:
+                    animation_zoom(&shapes[i]);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void animation_zoom(Shape *shape) {
+    // Update zoom value using shape's own direction (slower speed)
+    shape->zoom += 0.0005f * shape->zoom_direction;
+    
+    // Check bounds and reverse direction if needed
+    if (shape->zoom >= 1.5f) {
+        shape->zoom = 1.5f;
+        shape->zoom_direction = -1.0f;
+    } else if (shape->zoom <= 0.5f) {
+        shape->zoom = 0.5f;
+        shape->zoom_direction = 1.0f;
+    }
+    
+    // Apply zoom based on current zoom value
+    switch (shape->type) {
+        case SHAPE_RECTANGLE: {
+            int originalWidth = 200;  // Base width
+            int originalHeight = 50;  // Base height
+            shape->data.rectangle.width = (int)(originalWidth * shape->zoom);
+            shape->data.rectangle.height = (int)(originalHeight * shape->zoom);
+            break;
+        }
+        case SHAPE_CIRCLE: {
+            shape->data.circle.radius = (int)(60 * shape->zoom);  // Base radius 60
+            break;
+        }
+        case SHAPE_ELLIPSE: {
+            shape->data.ellipse.rx = (int)(70 * shape->zoom);  // Base rx 70
+            shape->data.ellipse.ry = (int)(50 * shape->zoom);  // Base ry 50
+            break;
+        }
+        case SHAPE_POLYGON: {
+            shape->data.polygon.radius = (int)(100 * shape->zoom);  // Base radius 100
+            break;
+        }
+        case SHAPE_ARC: {
+            shape->data.arc.radius = (int)(100 * shape->zoom);  // Base radius 100
+            break;
+        }
+        case SHAPE_LINE: {
+            shape->animation = ANIM_NONE; // disabling animation for line
+            break;
+        }
+        case SHAPE_ROUNDED_RECTANGLE: {
+            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
+            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
+            int originalWidth = 200;  // Base width
+            int originalHeight = 100;  // Base height
+            int newWidth = (int)(originalWidth * shape->zoom);
+            int newHeight = (int)(originalHeight * shape->zoom);
+            shape->data.rounded_rectangle.x1 = centerX - newWidth/2;
+            shape->data.rounded_rectangle.y1 = centerY - newHeight/2;
+            shape->data.rounded_rectangle.x2 = centerX + newWidth/2;
+            shape->data.rounded_rectangle.y2 = centerY + newHeight/2;
+            shape->data.rounded_rectangle.radius = (int)(20 * shape->zoom);  // Base radius 20
+            break;
+        }
+    }
 }
