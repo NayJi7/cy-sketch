@@ -22,7 +22,10 @@ void handleCursorSelection(int cursorX, int cursorY);
 void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int y);
 char* getAnimationName(AnimationType animation);
 void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape);
+void renderLastKeyPressed(SDL_Renderer *renderer, TTF_Font *font);
 void handleShapeDeletion(int cursorX, int cursorY);
 void cleanup(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window);
+
+extern char lastKeyPressed[32];  // Buffer to store the last pressed key
 
 #endif // CURSOREVENTS_H

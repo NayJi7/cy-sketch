@@ -15,6 +15,9 @@
 #define DEBUG 1 
 #endif
 
+// Definition of the global variable
+char lastKeyPressed[32] = "";
+
 void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* window){
     if (mainTexture) SDL_DestroyTexture(mainTexture);
     if (renderer) SDL_DestroyRenderer(renderer);
@@ -45,7 +48,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
         return;
     }
 
-    // Charger la police
+    // Load the font
     const char* font_paths[] = {
         "SDL/fonts/DejaVuMathTeXGyre.ttf",
         "../SDL/fonts/DejaVuMathTeXGyre.ttf",
@@ -74,7 +77,12 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
 
                 
                 case SDL_TEXTINPUT: {
-                    printf("Key Pressed - %s\n", event.text.text);
+                    strncpy(lastKeyPressed, event.text.text, sizeof(lastKeyPressed) - 1);
+                    lastKeyPressed[sizeof(lastKeyPressed) - 1] = '\0';  // Ensure null termination
+                    
+                    if (DEBUG) {
+                        printf("Key Pressed - %s\n", event.text.text);
+                    }
                     int dx = 0, dy = 0; // Variables to track cursor movement.
 
                     // Check for special characters
@@ -306,7 +314,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                 }
                 break;
 
-                case SDL_KEYDOWN:
+                case SDL_KEYDOWN: {
+                    strncpy(lastKeyPressed, SDL_GetKeyName(event.key.keysym.sym), sizeof(lastKeyPressed) - 1);
+                    lastKeyPressed[sizeof(lastKeyPressed) - 1] = '\0';
                     switch (event.key.keysym.sym) {
                         case SDLK_ESCAPE:
                             if (DEBUG) {
@@ -374,8 +384,16 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 }
                             }
                             break;
+                        case SDLK_DELETE:  // Touche SUPPR/DEL
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Delete selected shape\n\n");
+                            }
+                            deleteSelectedShape();  // Utiliser la fonction existante
+                            break;
                     }
                     break;
+                }
 
                 case SDL_MOUSEWHEEL:
                     if (DEBUG) {
@@ -447,15 +465,18 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
         renderCursor(renderer, &cursor);
         renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
         
-        // Afficher les informations de rotation pour la forme sélectionnée
+        // Display rotation information for the selected shape
         for (int i = 0; i < shapeCount; i++) {
             if (shapes[i].selected) {
                 renderShapeInfo(renderer, font, &shapes[i]);
-                break; // On ne montre que pour la première forme sélectionnée
+                break; // Show only for the first selected shape
             }
         }
 
-        // Present the updated frame.
+        // Display the last key pressed
+        renderLastKeyPressed(renderer, font);
+        
+        // Present the updated frame
         SDL_RenderPresent(renderer);
     }
     TTF_CloseFont(font);
@@ -865,6 +886,42 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
     SDL_DestroyTexture(texture2);
 }
 
+/**
+ * @brief Renders the last pressed key in the top-right corner of the window
+ * 
+ * @param renderer The SDL renderer used for drawing
+ * @param font The font used for text rendering
+ */
+void renderLastKeyPressed(SDL_Renderer *renderer, TTF_Font *font) {
+    // Return if font is not loaded or no key has been pressed yet
+    if (!font || lastKeyPressed[0] == '\0') return;
+
+    // Create the display text with the last key pressed
+    char keyText[64];
+    snprintf(keyText, sizeof(keyText), "Key Pressed: %s", lastKeyPressed);
+    
+    // Set text color to black
+    SDL_Color textColor = {0, 0, 0, 255}; // Black color (R=0, G=0, B=0, A=255)
+    SDL_Surface* keySurface = TTF_RenderText_Solid(font, keyText, textColor);
+    if (!keySurface) return;
+
+    // Convert surface to texture for rendering
+    SDL_Texture* keyTexture = SDL_CreateTextureFromSurface(renderer, keySurface);
+    SDL_FreeSurface(keySurface);
+    if (!keyTexture) return;
+
+    // Position the text in the top-right corner
+    int windowWidth, windowHeight;
+    SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
+    SDL_Rect keyRect;
+    SDL_QueryTexture(keyTexture, NULL, NULL, &keyRect.w, &keyRect.h);
+    keyRect.x = windowWidth - keyRect.w - 10;  // 10 pixels margin from right
+    keyRect.y = 10;                            // 10 pixels margin from top
+
+    // Render the text and cleanup
+    SDL_RenderCopy(renderer, keyTexture, NULL, &keyRect);
+    SDL_DestroyTexture(keyTexture);
+}
 
 /**
  * @brief Deletes the shape at the cursor's position.
