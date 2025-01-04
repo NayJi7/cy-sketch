@@ -1,6 +1,6 @@
 #include "../files.h/colors.h"
 
-// Définition des variables de couleur globales
+// Definition of global color variables
 SDL_Color red = {255, 0, 0, 255};
 SDL_Color blue = {0, 0, 255, 255};
 SDL_Color green = {0, 255, 0, 255};
