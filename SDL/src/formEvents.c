@@ -135,6 +135,16 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                               selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
                 }
             }
+
+            // Draw an indicator line for rotation
+            double angle1 = shape->rotation * M_PI / 180.0; // Convert angle to radians
+            int endX = shape->data.circle.x + cos(angle1) * shape->data.circle.radius;
+            int endY = shape->data.circle.y + sin(angle1) * shape->data.circle.radius;
+
+            
+            setRenderColor(renderer, black); // Use red for the indicator line
+            SDL_RenderDrawLine(renderer, shape->data.circle.x, shape->data.circle.y, endX, endY);
+
             break;
         }
 
