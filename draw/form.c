@@ -1,5 +1,8 @@
 #include "../files.h/form.h"
 
+// ANSI escape codes for colors
+#define RED_COLOR "\033[1;31m"
+#define RESET_COLOR "\033[0m"
 
 /**
  * @brief Common parameters for functions.
@@ -20,42 +23,51 @@
  * @param radius The radius of the circle.
  */
 int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, SDL_Color color, char *type) {
-
     // Check if the type is valid ("filled" or "empty")
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid instantCircle type: %s\n", type);
+        printf("%sExecutionError: Invalid instantCircle type: \"%s\". Must be filled or empty.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     }
-    else
-    {
-        // Set the drawing color
-        setRenderColor(renderer, color);
 
-        // Handle events to allow user interaction during rendering
-        if (handleEvents(renderer, texture) == -1) return -1;
+    // Set the drawing color
+    setRenderColor(renderer, color);
 
-        // Draw the circle based on the type
-        if (strcmp(type, "empty") == 0) {
-            if (circleRGBA(renderer, x, y, radius, color.r, color.g, color.b, color.a) != 0) {
-                printf("Error in circleColor: %s\n", SDL_GetError());
-            }
+    // Handle events to allow user interaction during rendering
+    if (handleEvents(renderer, texture) == -1) return -1;
 
-        } else if (strcmp(type, "filled") == 0) {
-            if (filledCircleRGBA(renderer, x, y, radius, color.r, color.g, color.b, color.a) != 0) {
-                printf("Error in filledCircleColor: %s\n", SDL_GetError());
-            }
-        } 
-
-        // Render the texture to the screen with a delay
-        renderTexture(renderer, texture, 750);
-
-        // Handle events again to check for user actions
-        if (handleEvents(renderer, texture) == -1) return -1;
-
-        // Reset the rendering target to default
-        SDL_SetRenderTarget(renderer, NULL);
- 
+    // Draw the circle based on the type
+    if (strcmp(type, "empty") == 0) {
+        if (circleRGBA(renderer, x, y, radius, color.r, color.g, color.b, color.a) != 0) {
+            printf("%sExecutionError: Failed to draw empty circle: %s%s\n", 
+                   RED_COLOR, SDL_GetError(), RESET_COLOR);
+            return -1;
+        }
+    } else if (strcmp(type, "filled") == 0) {
+        if (filledCircleRGBA(renderer, x, y, radius, color.r, color.g, color.b, color.a) != 0) {
+            printf("%sExecutionError: Failed to draw filled circle: %s%s\n", 
+                   RED_COLOR, SDL_GetError(), RESET_COLOR);
+            return -1;
+        }
     }
+
+    // Render the texture to the screen with a delay
+    if (renderTexture(renderer, texture, 750) == -1) {
+        printf("%sExecutionError: Failed to render circle to texture%s\n", 
+               RED_COLOR, RESET_COLOR);
+        return -1;
+    }
+
+    // Handle events again to check for user actions
+    if (handleEvents(renderer, texture) == -1) return -1;
+
+    // Reset the rendering target to default
+    if (SDL_SetRenderTarget(renderer, NULL) != 0) {
+        printf("%sExecutionError: Failed to reset render target: %s%s\n", 
+               RED_COLOR, SDL_GetError(), RESET_COLOR);
+        return -1;
+    }
+
     return 0;
 }
 
@@ -70,7 +82,7 @@ int drawCircle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int r
  */
 int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int rx, int ry, SDL_Color color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid instantEllipse type: %s\n", type);
+        printf("Invalid instantEllipse type: \"%s.\". Must be filled or empty.\n", type);
         return -1;
     }
     else
@@ -80,11 +92,13 @@ int drawEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int 
 
         if (strcmp(type, "empty") == 0) {
             if (ellipseRGBA(renderer, x, y, rx, ry, color.r, color.g, color.b, color.a) != 0) {
-                printf("Error in ellipseColor: %s\n", SDL_GetError());
+                printf("%sExecutionError: Failed to draw empty ellipse: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+                return -1;
             }
         } else if (strcmp(type, "filled") == 0) {
             if (filledEllipseRGBA(renderer, x, y, rx, ry, color.r, color.g, color.b, color.a) != 0) {
-                printf("Error in filledEllipseColor: %s\n", SDL_GetError());
+                printf("%sExecutionError: Failed to draw filled ellipse: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+                return -1;
             }
         } 
         
@@ -126,7 +140,8 @@ int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radi
         }
     } else if (strcmp(type, "empty") == 0) {
         if (arcRGBA(renderer, x, y, radius, start_angle, end_angle, color.r, color.g, color.b, color.a) != 0) {
-            printf("Error in arcColor: %s\n", SDL_GetError());
+            printf("%sExecutionError: Failed to draw arc: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+            return -1;
         }
     }
 
@@ -147,7 +162,7 @@ int drawArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radi
  */
 int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, SDL_Color color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid instantRectangle type: %s\n", type);
+        printf("Invalid instantRectangle type: \"%s.\". Must be filled or empty.\n", type);
         return -1;
     }
     else
@@ -188,7 +203,8 @@ int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, in
 int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid instantRoundedRectangle type: %s\n", type);
+        printf("%sExecutionError: Invalid type for rounded rectangle '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     }
     else
@@ -198,13 +214,13 @@ int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1
 
         if (strcmp(type, "empty") == 0) {
             if (roundedRectangleRGBA(renderer, x1, y1, x2, y2, rad, color.r, color.g, color.b, color.a) != 0) {
-                printf("Error in roundedRectangleColor: %s\n", SDL_GetError());
-                 
+                printf("%sExecutionError: Failed to draw empty rounded rectangle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+                return -1;
             }
         } else if (strcmp(type, "filled") == 0) {
             if (roundedBoxRGBA(renderer, x1, y1, x2, y2, rad, color.r, color.g, color.b, color.a) != 0) {
-                printf("Error in roundedBoxColor: %s\n", SDL_GetError());
-                 
+                printf("%sExecutionError: Failed to draw filled rounded rectangle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+                return -1;
             }
         } 
         
@@ -222,34 +238,34 @@ int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1
  * @param vx Array of x-coordinates for the vertices of the polygon.
  * @param vy Array of y-coordinates for the vertices of the polygon.
  * @param n The number of vertices in the polygon.
+ * @return int Returns 0 on success, -1 on failure.
  */
-void drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint16 *vy, int n, SDL_Color color, char *type)
+int drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint16 *vy, int n, SDL_Color color, char *type)
 {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid instantPolygon type: %s\n", type);
+        printf("%sExecutionError: Invalid type for polygon '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
+        return -1;
     }
-    else
+
+    if(strcmp(type, "empty") == 0)
     {
-
-        if(strcmp(type, "empty") == 0)
+        if(polygonRGBA(renderer, vx, vy, n, color.r, color.g, color.b, color.a) != 0)
         {
-            if(polygonRGBA(renderer, vx, vy, n, color.r, color.g, color.b, color.a) != 0)
-            {
-                printf("Error in polygonColor: %s\n", SDL_GetError());
-                 
-            }
+            printf("%sExecutionError: Failed to draw empty polygon: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+            return -1;
         }
-        else if(strcmp(type, "filled") == 0)
-        {
-            if(filledPolygonRGBA(renderer, vx, vy, n, color.r, color.g, color.b, color.a) != 0)
-            {
-                printf("Error in filledPolygonColor: %s\n", SDL_GetError());
-                 
-            }
-        }
-        renderTexture(renderer, texture, 750);
     }
-
+    else if(strcmp(type, "filled") == 0)
+    {
+        if(filledPolygonRGBA(renderer, vx, vy, n, color.r, color.g, color.b, color.a) != 0)
+        {
+            printf("%sExecutionError: Failed to draw filled polygon: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+            return -1;
+        }
+    }
+    renderTexture(renderer, texture, 750);
+    return 0;
 }
 
 
@@ -270,7 +286,8 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
 {
     // Validate the number of sides
     if (sides < 3 || sides > 12) {
-        printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
+        printf("%sExecutionError: Invalid number of polygon sides %d. Must be between 3 and 12.%s\n", 
+               RED_COLOR, sides, RESET_COLOR);
         return -1;
     }
 
@@ -306,7 +323,8 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
  */
 int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, SDL_Color color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid instantLine type: %s\n", type);
+        printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     }
     else
@@ -315,7 +333,8 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
 
         // Always use thickLineRGBA for consistent thickness
         if (thickLineRGBA(renderer, x1, y1, x2, y2, width, color.r, color.g, color.b, color.a) != 0) {
-            printf("Error in thickLineColor: %s\n", SDL_GetError());
+            printf("%sExecutionError: Failed to draw line: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+            return -1;
         }
         
         renderTexture(renderer, texture, 750);
@@ -339,7 +358,8 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
  */
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, SDL_Color color, char *type) { 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("Invalid animatedCircle type: %s\n", type);
+        printf("%sExecutionError: Invalid type for animated circle '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     }
 
@@ -387,7 +407,7 @@ int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int 
 int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int w, int h, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid animatedCircle type: %s\n", type);
+        printf("Invalid animatedCircle type: \"%s.\". Must be filled or empty.\n", type);
         return -1;
     }
     else
@@ -448,7 +468,7 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
         }
         else
         {
-            printf("Invalid animatedRectangle type: %s\n", type);
+            printf("Invalid animatedRectangle type: \"%s.\". Must be filled or empty.\n", type);
         }
         SDL_SetRenderTarget(renderer, NULL);
     }
@@ -475,7 +495,7 @@ int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, i
         return -1;
     }
     else if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("Invalid animatedRoundedRectangle type: %s\n", type);
+        printf("Invalid animatedRoundedRectangle type: \"%s.\". Must be filled or empty.\n", type);
         return -1;
     }
     else
@@ -567,7 +587,7 @@ int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, i
 int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int rx, int ry, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid animatedEllipse type: %s\n", type);
+        printf("Invalid animatedEllipse type: \"%s.\". Must be filled or empty.\n", type);
         return -1;
     }
     else
@@ -637,7 +657,8 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
 int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, SDL_Color color, char *type) {
     
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid animatedArc type: %s\n", type);
+        printf("%sExecutionError: Invalid type for animated arc '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     }
     else
@@ -689,11 +710,13 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
 {
     
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("Invalid animatedPolygon type: %s\n", type);
+        printf("%sExecutionError: Invalid type for animated polygon '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     } 
     else if (sides < 3 || sides > 12) {
-        printf("Invalid number of sides: %d. Must be between 3 and 12.\n", sides);
+        printf("%sExecutionError: Invalid number of polygon sides %d. Must be between 3 and 12.%s\n", 
+               RED_COLOR, sides, RESET_COLOR);
         return -1;
     }
     else {
@@ -801,7 +824,8 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
 int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, int thickness, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("Invalid animatedLine type: %s\n", type);
+        printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.%s\n", 
+               RED_COLOR, type, RESET_COLOR);
         return -1;
     }
     else
@@ -1100,7 +1124,8 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
     } 
     else {
         // Handle invalid shape types.
-        printf("Invalid shape type: %s\n", shape);
+        printf("%sExecutionError: Invalid shape type: %s%s\n", RED_COLOR, shape, RESET_COLOR);
+        return -1;
     }
 
     // Restore the default rendering target.

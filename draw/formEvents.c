@@ -7,6 +7,10 @@
 #include <math.h>
 #include <limits.h>
 
+// ANSI escape codes for colors
+#define RED_COLOR "\033[1;31m"
+#define RESET_COLOR "\033[0m"
+
 // Global table to storage the forms
 Shape shapes[MAX_SHAPES];
 int shapeCount = 0;
@@ -49,20 +53,50 @@ SDL_Color selectColor(SDL_Color color) {
     return selectedColor;
 }
 
-
 /**
  * @brief Renders the content of a texture onto the screen and handles optional delays.
- * 
+ *
  * @param renderer Renderer used for drawing.
  * @param texture Texture to be rendered.
  * @param time Delay in milliseconds after rendering (set to 0 for no delay).
+ * @return int Returns 0 on success, -1 on failure
  */
-void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
-    SDL_SetRenderTarget(renderer, NULL); // Reset the render target to the screen
-    SDL_RenderCopy(renderer, texture, NULL, NULL); // Copy the texture to the renderer
-    if (time != 0) SDL_Delay(time); // Optional delay
-    SDL_RenderPresent(renderer); // Present the rendered content to the screen
-    SDL_SetRenderTarget(renderer, texture); // Restore the texture as the render target
+int renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
+    // Validate parameters
+    if (!renderer || !texture) {
+        printf("%sExecutionError: Invalid renderer or texture provided%s\n", 
+               RED_COLOR, RESET_COLOR);
+        return -1;
+    }
+
+    // Reset render target to screen
+    if (SDL_SetRenderTarget(renderer, NULL) != 0) {
+        printf("%sExecutionError: Failed to reset render target: %s%s\n", 
+               RED_COLOR, SDL_GetError(), RESET_COLOR);
+        return -1;
+    }
+
+    // Copy texture to renderer
+    if (SDL_RenderCopy(renderer, texture, NULL, NULL) != 0) {
+        printf("%sExecutionError: Failed to copy texture to renderer: %s%s\n", 
+               RED_COLOR, SDL_GetError(), RESET_COLOR);
+        return -1;
+    }
+
+    // Add optional delay
+    if (time != 0) SDL_Delay(time);
+
+    // Present the rendered content
+    SDL_RenderPresent(renderer);
+
+    // Restore texture as render target
+    if (SDL_SetRenderTarget(renderer, texture) != 0) {
+        printf("%sExecutionError: Failed to restore render target: %s%s\n", 
+               RED_COLOR, SDL_GetError(), RESET_COLOR);
+        return -1;
+    }
+
+    return 0;
 }
 
 /**
@@ -430,20 +464,22 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
  */
 void renderAllShapes(SDL_Renderer *renderer) {
     // Create a temporary array for sorting
-    Shape *sortedShapes = malloc(sizeof(Shape) * shapeCount);
+    Shape** sortedShapes = malloc(shapeCount * sizeof(Shape*));
     if (!sortedShapes) {
-        printf("Error: Failed to allocate memory for sorted shapes.\n");
+        printf("%sExecutionError: Failed to allocate memory for sorted shapes%s\n", RED_COLOR, RESET_COLOR);
         return;
     }
 
-    // Copy shapes to temporary array
-    memcpy(sortedShapes, shapes, sizeof(Shape) * shapeCount);
+    // Copy pointers to shapes to temporary array
+    for (int i = 0; i < shapeCount; i++) {
+        sortedShapes[i] = &shapes[i];
+    }
 
     // Sort shapes by z-index
     for (int i = 0; i < shapeCount - 1; i++) {
         for (int j = 0; j < shapeCount - i - 1; j++) {
-            if (sortedShapes[j].zIndex > sortedShapes[j + 1].zIndex) {
-                Shape temp = sortedShapes[j];
+            if (sortedShapes[j]->zIndex > sortedShapes[j + 1]->zIndex) {
+                Shape* temp = sortedShapes[j];
                 sortedShapes[j] = sortedShapes[j + 1];
                 sortedShapes[j + 1] = temp;
             }
@@ -452,7 +488,7 @@ void renderAllShapes(SDL_Renderer *renderer) {
 
     // Render shapes in order
     for (int i = 0; i < shapeCount; i++) {
-        renderShape(renderer, &sortedShapes[i]);
+        renderShape(renderer, sortedShapes[i]);
     }
 
     // Free temporary array
@@ -467,7 +503,8 @@ void renderAllShapes(SDL_Renderer *renderer) {
 void addShape(Shape shape) {
     // Check if the maximum number of shapes has been reached
     if (shapeCount >= MAX_SHAPES) {
-        printf("Error : Maximum number of shapes reached.\n");
+        printf("%sExecutionError: Cannot add more shapes. Maximum limit of %d shapes reached.%s\n", 
+               RED_COLOR, MAX_SHAPES, RESET_COLOR);
         return;
     }
 

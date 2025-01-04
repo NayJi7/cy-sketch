@@ -16,7 +16,7 @@ int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, in
 
 int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, SDL_Color color, char *type);
 
-void drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint16 *vy, int n, SDL_Color color, char *type);
+int drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint16 *vy, int n, SDL_Color color, char *type);
 
 int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, int sides, SDL_Color color, char *type);
 

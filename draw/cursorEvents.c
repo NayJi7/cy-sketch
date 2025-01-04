@@ -6,6 +6,9 @@
 #include "../files.h/formEvents.h"
 #include "../files.h/cursorEvents.h"
 
+// ANSI escape codes for colors
+#define RED_COLOR "\033[1;31m"
+#define RESET_COLOR "\033[0m"
 
 /**
  * @brief Main loop of the application to handle user interactions and render shapes.
@@ -21,15 +24,15 @@
 void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
     SDL_ShowCursor(SDL_DISABLE);
     /// Ensuite initialiser SDL_ttf
-    if (TTF_Init() == -1) {
-        printf("TTF_Init: %s\n", TTF_GetError());
+    if (TTF_Init() < 0) {
+        printf("%sExecutionError: Failed to initialize TTF: %s%s\n", RED_COLOR, TTF_GetError(), RESET_COLOR);
         return;
     }
 
     // Charger la police
-    TTF_Font *font = TTF_OpenFont("fonts/DejaVuMathTeXGyre.ttf", 16);
+    TTF_Font *font = TTF_OpenFont("./fonts/DejaVuMathTeXGyre.ttf", 16);
     if (!font) {
-        printf("TTF_OpenFont: %s\n", TTF_GetError());
+        printf("%sExecutionError: Failed to open font: %s%s\n", RED_COLOR, TTF_GetError(), RESET_COLOR);
         TTF_Quit();
         return;
     }
@@ -285,6 +288,8 @@ int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
             SDL_Quit();
 
             // Return -1 to indicate a quit event was handled.
+            printf("%sExecutionError: Application terminated by user. Cleaning up resources...%s\n", 
+                   RED_COLOR, RESET_COLOR);
             return -1;
         }
     }

@@ -23,31 +23,56 @@ LDFLAGS = -lSDL2 -lSDL2_gfx -lSDL2_ttf -lm
 # Files for logs
 ERROR_LOG = error.log
 
+# Debug mode control (use make DEBUG=1 for debug mode)
+DEBUG ?= 0
+ifeq ($(DEBUG),1)
+  SILENT =
+  LOG = @echo
+else
+  SILENT = @
+  LOG = @true
+endif
+
 # Default rule to generate the executable
 all: clean_log $(EXEC)
+	$(LOG) "\n=== Build Completed Successfully ===\n"
+
+# Debug target (automatically sets DEBUG=1)
+debug: export DEBUG=1
+debug: all
 
 # Clean error log
 clean_log:
-	@echo -n > $(ERROR_LOG)
+	$(LOG) "\n=== Initializing Build Environment ==="
+	$(LOG) "→ Cleaning error log..."
+	$(SILENT)echo -n > $(ERROR_LOG)
 
 # Link object files to create the executable
 $(EXEC): $(OBJ)
-	mkdir -p $(OBJ_DIR_EXE)
-	@$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS) 2>> $(ERROR_LOG)
+	$(LOG) "\n=== Linking Phase ==="
+	$(LOG) "→ Linking object files into executable..."
+	$(SILENT)mkdir -p $(OBJ_DIR_EXE)
+	$(SILENT)$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS) 2>> $(ERROR_LOG)
 
 # Rule to generate object files in the files.o directory
 $(OBJ_DIR_O)/%.o: draw/%.c
-	mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
-	@$(CC) $(CFLAGS) -c $< -o $@ 2>> $(ERROR_LOG)
+	$(LOG) "\n=== Compilation Phase ==="
+	$(LOG) "→ Compiling $<..."
+	$(SILENT)mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
+	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@ 2>> $(ERROR_LOG)
 
 # Run the program and overwrite the run log
 run: clean clean_log all
-	@./$(EXEC) 
+	$(LOG) "\n=== Launching Application ==="
+	$(LOG) "→ Starting the program..."
+	$(SILENT)./$(EXEC) || true
 
 # Rule to clean up object files, the executable, and the logs
 clean:
-	rm -f $(OBJ) $(EXEC) $(ERROR_LOG)
-	rmdir $(OBJ_DIR_O) $(OBJ_DIR_EXE) 2>/dev/null || true  
+	$(LOG) "\n=== Cleanup Phase ==="
+	$(LOG) "→ Removing build artifacts..."
+	$(SILENT)rm -f $(OBJ) $(EXEC) $(ERROR_LOG)
+	$(SILENT)rm -rf $(OBJ_DIR_O) $(OBJ_DIR_EXE) 2>/dev/null || true  
 
-# Indicate that clean and run are not files
-.PHONY: all clean run clean_log
+# Indicate that clean, run, and debug are not files
+.PHONY: all clean run clean_log debug

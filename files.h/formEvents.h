@@ -14,11 +14,10 @@ extern Shape shapes[MAX_SHAPES];
 extern int shapeCount;
 
 void setRenderColor(SDL_Renderer* renderer, SDL_Color color);
-
 SDL_Color adjustBrightness(SDL_Color color, float factor);
 SDL_Color selectColor(SDL_Color color);
 
-void renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time);
+int renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time);
 void renderShape(SDL_Renderer *renderer, Shape *shape);
 void renderAllShapes(SDL_Renderer *renderer);
 void addShape(Shape shape);
@@ -45,4 +44,4 @@ void toggleAnimation(void);
 void updateAnimations(SDL_Renderer *renderer);
 void animation_zoom(Shape *shape);
 
-#endif // FORMEVENTS_H
+#endif
