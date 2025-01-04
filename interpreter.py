@@ -3,9 +3,9 @@ import sys
 import argparse
 import atexit
 import readline
-from src.lexer import init_lexer
-from src.parser import init_parser
-from src.myast import *
+from compilator.src.lexer import init_lexer
+from compilator.src.parser import init_parser
+from compilator.src.myast import *
 
 DEBUG = False  # Debug mode is off by default
 
@@ -158,10 +158,6 @@ def run_interactive():
 # @details Handles command-line arguments for file execution or interactive mode.
 def main():
     # DEBUG
-    sys.argv.append("-d")
-    sys.argv.append(".to_run.dpp")
-    sys.argv.append("-n test")
-
     """Main entry point for the Draw++ interpreter."""
     argparser = argparse.ArgumentParser(description="Draw++ Language Interpreter")
     argparser.add_argument("file", nargs="?", help="Source file to execute (optional)")

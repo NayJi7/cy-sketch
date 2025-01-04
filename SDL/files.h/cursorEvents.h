@@ -22,5 +22,6 @@ void handleCursorSelection(int cursorX, int cursorY);
 void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int y);
 void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape);
 void handleShapeDeletion(int cursorX, int cursorY);
+void cleanup(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window);
 
 #endif // CURSOREVENTS_H

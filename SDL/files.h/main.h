@@ -25,6 +25,8 @@ typedef enum
     SHAPE_RECTANGLE, 
     SHAPE_ROUNDED_RECTANGLE, 
     SHAPE_POLYGON, 
+    SHAPE_TRIANGLE,
+    SHAPE_SQUARE,
     SHAPE_LINE 
 } ShapeType;
 
@@ -82,9 +84,17 @@ typedef struct {
             Uint8 thickness;
             Uint8 initial_thickness;  // Initial values
         } line;
+        struct { 
+            int cx, cy, radius;
+            int initial_cx, initial_cy, initial_radius;  // Initial values
+        } triangle;
+        struct { 
+            int x, y, c;
+            int initial_x, initial_y, initial_c;  // Initial values
+        } square;
     } data;
 } Shape;
 
-void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor);
+void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB);
 
 #endif
