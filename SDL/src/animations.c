@@ -1,107 +1,83 @@
 #include "../files.h/animations.h"
 #include <math.h>
 
-void applyAnimation(Shape *shape){
+/**
+ * @brief Applies or removes an animation to/from a shape
+ * 
+ * This function manages the animation stack of a shape. It can:
+ * - Add a new animation if it's not already present
+ * - Remove an existing animation if it's already present
+ * - Maintain the animation array organized (no gaps between animations)
+ * 
+ * The function handles up to 3 simultaneous animations per shape.
+ * The animation to apply/remove is determined by shape->animation_parser.
+ * 
+ * @param shape Pointer to the shape whose animations are being modified
+ */
+void applyAnimation(Shape *shape) {
+    // Check if we've already reached the maximum number of animations
+    if (shape->num_animations >= 3) {
+        return;  // Don't add more animations if we've reached the limit
+    }
+
     int check = 0;
-    int idx = 100;
-    if (shape->animations[2] == ANIM_NONE) {idx = 2;}
-    if (shape->animations[1] == ANIM_NONE) {idx = 1;}
-    if (shape->animations[0] == ANIM_NONE) {idx = 0;}
-    if (idx == 0){
-        shape->animations[0] = shape->animations[1];
-        shape->animations[1] = shape->animations[2];
-        shape->animations[2] = ANIM_NONE;
-    }
-    else if (idx == 1){
-        shape->animations[1] = shape->animations[2];
-        shape->animations[2] = ANIM_NONE;
-    }
-
-    if (shape->animation_parser == ANIM_ROTATE) {
-
-        for (int i = 0; i < 3; i++) {
-            if (shape->animations[i] == ANIM_ROTATE) {
-               shape->animations[i] = ANIM_NONE;
-               check = 1;
-               shape->num_animations--;
+    
+    // Check if the animation is already present and remove it if so
+    for (int i = 0; i < 3; i++) {
+        if (shape->animations[i] == shape->animation_parser) {
+            shape->animations[i] = ANIM_NONE;
+            check = 1;
+            if (shape->num_animations > 0) {
+                shape->num_animations--;
             }
-        }
-        if (check == 0) {
-            shape->animations[shape->num_animations] = ANIM_ROTATE;
-            shape->num_animations++;
-        }
-    } else if (shape->animation_parser == ANIM_ZOOM) {
-        for (int i = 0; i < 3; i++) {
-            if (shape->animations[i] == ANIM_ZOOM) {
-               shape->animations[i] = ANIM_NONE;
-               check = 1;
-               shape->num_animations--;
-            }
-        }
-        if (check == 0) {
-            shape->animations[shape->num_animations] = ANIM_ZOOM;
-            shape->num_animations++;
-        }
-    } else if (shape->animation_parser == ANIM_COLOR) {
-        for (int i = 0; i < 3; i++) {
-            if (shape->animations[i] == ANIM_COLOR) {
-               shape->animations[i] = ANIM_NONE;
-               check = 1;
-               shape->num_animations--;
-            }
-        }
-        if (check == 0) {
-            shape->animations[shape->num_animations] = ANIM_COLOR;
-            shape->num_animations++;
-        }
-    } else if (shape->animation_parser == ANIM_BOUNCE) {
-        for (int i = 0; i < shape->num_animations; i++) {
-            if (shape->animations[i] == ANIM_BOUNCE) {
-               shape->animations[i] = ANIM_NONE;
-               check = 1;
-               shape->num_animations--;
-            }
-        }
-        if (check == 0) {
-            shape->animations[shape->num_animations] = ANIM_BOUNCE;
-            shape->num_animations++;
         }
     }
 
-    if (shape->animations[2] == ANIM_NONE) {idx = 2;}
-    if (shape->animations[1] == ANIM_NONE) {idx = 1;}
-    if (shape->animations[0] == ANIM_NONE) {idx = 0;}
-    if (idx == 0){
-        shape->animations[0] = shape->animations[1];
-        shape->animations[1] = shape->animations[2];
-        shape->animations[2] = ANIM_NONE;
+    // Add the new animation if it wasn't already present
+    if (check == 0) {
+        shape->animations[shape->num_animations] = shape->animation_parser;
+        shape->num_animations++;
     }
-    else if (idx == 1){
-        shape->animations[1] = shape->animations[2];
-        shape->animations[2] = ANIM_NONE;
+
+    // Reorganize the array to avoid gaps between animations
+    for (int i = 0; i < 2; i++) {
+        if (shape->animations[i] == ANIM_NONE && shape->animations[i + 1] != ANIM_NONE) {
+            shape->animations[i] = shape->animations[i + 1];
+            shape->animations[i + 1] = ANIM_NONE;
+        }
     }
 }
 
+/**
+ * @brief Applies a bouncing animation to a shape
+ * 
+ * Implements a DVD logo style bouncing animation where the shape moves at a constant
+ * velocity and bounces off the window boundaries. The movement is slowed down by
+ * only updating every 7 frames.
+ * 
+ * @param shape Pointer to the shape to animate
+ * @param animation The type of animation being applied
+ * @param width The window width for boundary checking
+ * @param height The window height for boundary checking
+ */
 void animation_bounce(Shape *shape, AnimationType animation, int width, int height) {
-    // DVD logo style bouncing - constant velocity with direction changes
     static const float velocity = 1.0f;  // Base velocity
     static int frameCounter = 0;  // Counter to slow down movement
     
     // Initialize velocities if not set
     if (shape->bounce_velocity == 0 && shape->bounce_direction == 0) {
         shape->bounce_velocity = velocity;  // Initial x velocity
-        shape->bounce_direction = velocity;      // Initial y velocity
+        shape->bounce_direction = velocity; // Initial y velocity
     }
 
     // Only move every 7 frames to slow down movement
     frameCounter++;
     if (frameCounter >= 7) {
         frameCounter = 0;
-        // Move shape based on current velocities
         moveShape(shape, (int)shape->bounce_velocity, (int)shape->bounce_direction);
     }
 
-    // Bounce off window boundaries
+    // Check and handle boundary collisions based on shape type
     switch (shape->type) {
         case SHAPE_CIRCLE: {
             if (shape->data.circle.x - shape->data.circle.radius <= 0 || 
@@ -164,14 +140,31 @@ void animation_bounce(Shape *shape, AnimationType animation, int width, int heig
     }
 }
 
+/**
+ * @brief Applies a rotation animation to a shape
+ * 
+ * Rotates the shape by 0.15 degrees per frame. The rotation wraps around
+ * at 360 degrees back to 0.
+ * 
+ * @param shape Pointer to the shape to animate
+ * @param animation The type of animation being applied
+ */
 void animation_rotate(Shape *shape, AnimationType animation) {
-    // Rotation animation (0.15 degrees per frame)
-    shape->rotation += 0.15;
+    shape->rotation += 0.15;  // Increment rotation by 0.15 degrees
     if (shape->rotation >= 360.0f) {
-        shape->rotation = 0.0f;
+        shape->rotation = 0.0f;  // Wrap around at 360 degrees
     }
 }
 
+/**
+ * @brief Applies a zoom animation to a shape
+ * 
+ * Creates a pulsing effect by scaling the shape between 50% and 150%
+ * of its original size. The zoom direction reverses at these limits.
+ * 
+ * @param shape Pointer to the shape to animate
+ * @param animation The type of animation being applied
+ */
 void animation_zoom(Shape *shape, AnimationType animation) {
     // Update zoom value using shape's own direction (slower speed)
     shape->zoom += 0.0005f * shape->zoom_direction;
@@ -188,6 +181,16 @@ void animation_zoom(Shape *shape, AnimationType animation) {
     apply_zoom_to_shape(shape, shape->zoom, animation);
 }
 
+/**
+ * @brief Applies the current zoom factor to a shape's dimensions
+ * 
+ * Updates the shape's dimensions based on the current zoom value.
+ * Each shape type has its own base dimensions that are scaled.
+ * 
+ * @param shape Pointer to the shape being zoomed
+ * @param zoom Current zoom factor (0.5 to 1.5)
+ * @param animation The type of animation being applied
+ */
 void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
     // Apply zoom based on current zoom value
     switch (shape->type) {
@@ -246,6 +249,16 @@ void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
     }
 }
 
+/**
+ * @brief Applies a color cycling animation to a shape
+ * 
+ * Creates a rainbow effect by cycling through the HSV color space
+ * and converting to RGB for display. The cycle completes when the
+ * color phase reaches 1.0.
+ * 
+ * @param shape Pointer to the shape to animate
+ * @param animation The type of animation being applied
+ */
 void animation_color(Shape *shape, AnimationType animation) {
     // Update the color phase (controls the position in the color cycle)
     shape->color_phase += 0.0004f;

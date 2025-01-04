@@ -73,18 +73,18 @@ SDL/src/cursorEvents.c:809:13: note: ‘snprintf’ output between 102 and 456 b
   815 |                     animation_chose);
       |                     ~~~~~~~~~~~~~~~~
 SDL/src/animations.c: In function ‘animation_bounce’:
-SDL/src/animations.c:85:51: warning: unused parameter ‘animation’ [-Wunused-parameter]
-   85 | void animation_bounce(Shape *shape, AnimationType animation, int width, int height) {
+SDL/src/animations.c:51:51: warning: unused parameter ‘animation’ [-Wunused-parameter]
+   51 | void animation_bounce(Shape *shape, AnimationType animation, int width, int height) {
       |                                     ~~~~~~~~~~~~~~^~~~~~~~~
 SDL/src/animations.c: In function ‘animation_rotate’:
-SDL/src/animations.c:167:51: warning: unused parameter ‘animation’ [-Wunused-parameter]
-  167 | void animation_rotate(Shape *shape, AnimationType animation) {
+SDL/src/animations.c:133:51: warning: unused parameter ‘animation’ [-Wunused-parameter]
+  133 | void animation_rotate(Shape *shape, AnimationType animation) {
       |                                     ~~~~~~~~~~~~~~^~~~~~~~~
 SDL/src/animations.c: In function ‘apply_zoom_to_shape’:
-SDL/src/animations.c:191:66: warning: parameter ‘animation’ set but not used [-Wunused-but-set-parameter]
-  191 | void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
+SDL/src/animations.c:157:66: warning: parameter ‘animation’ set but not used [-Wunused-but-set-parameter]
+  157 | void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
       |                                                    ~~~~~~~~~~~~~~^~~~~~~~~
 SDL/src/animations.c: In function ‘animation_color’:
-SDL/src/animations.c:249:50: warning: unused parameter ‘animation’ [-Wunused-parameter]
-  249 | void animation_color(Shape *shape, AnimationType animation) {
+SDL/src/animations.c:215:50: warning: unused parameter ‘animation’ [-Wunused-parameter]
+  215 | void animation_color(Shape *shape, AnimationType animation) {
       |                                    ~~~~~~~~~~~~~~^~~~~~~~~
