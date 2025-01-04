@@ -1461,6 +1461,9 @@ void updateAnimations(SDL_Renderer *renderer) {
                 case ANIM_COLOR:
                     animation_color(&shapes[i]);
                     break;
+                case ANIM_BOUNCE:
+                    animation_bounce(&shapes[i]);
+                    break;
                 default:
                     break;
             }
@@ -1481,6 +1484,7 @@ void resetShape(Shape *shape) {
     shape->zoom = 1.0f;
     shape->zoom_direction = 1.0f;
     shape->color_phase = 0.0f;
+    shape->bounce_velocity = 0.0f;
 
     // Reset shape-specific properties (excluding position)
     switch (shape->type) {
@@ -1518,6 +1522,60 @@ void resetShape(Shape *shape) {
             shape->data.arc.radius = shape->data.arc.initial_radius;
             shape->data.arc.start_angle = shape->data.arc.initial_start_angle;
             shape->data.arc.end_angle = shape->data.arc.initial_end_angle;
+            break;
+    }
+}
+
+/**
+ * @brief Moves a shape by the specified delta x and y.
+ * 
+ * @param shape Pointer to the shape to move
+ * @param dx Change in x position
+ * @param dy Change in y position
+ */
+void moveShape(Shape *shape, int dx, int dy) {
+    if (!shape) return;
+
+    switch (shape->type) {
+        case SHAPE_CIRCLE:
+            shape->data.circle.x += dx;
+            shape->data.circle.y += dy;
+            break;
+        case SHAPE_RECTANGLE:
+            shape->data.rectangle.x += dx;
+            shape->data.rectangle.y += dy;
+            break;
+        case SHAPE_SQUARE:
+            shape->data.square.x += dx;
+            shape->data.square.y += dy;
+            break;
+        case SHAPE_ELLIPSE:
+            shape->data.ellipse.x += dx;
+            shape->data.ellipse.y += dy;
+            break;
+        case SHAPE_LINE:
+            shape->data.line.x1 += dx;
+            shape->data.line.y1 += dy;
+            shape->data.line.x2 += dx;
+            shape->data.line.y2 += dy;
+            break;
+        case SHAPE_ROUNDED_RECTANGLE:
+            shape->data.rounded_rectangle.x1 += dx;
+            shape->data.rounded_rectangle.y1 += dy;
+            shape->data.rounded_rectangle.x2 += dx;
+            shape->data.rounded_rectangle.y2 += dy;
+            break;
+        case SHAPE_POLYGON:
+            shape->data.polygon.cx += dx;
+            shape->data.polygon.cy += dy;
+            break;
+        case SHAPE_TRIANGLE:
+            shape->data.triangle.cx += dx;
+            shape->data.triangle.cy += dy;
+            break;
+        case SHAPE_ARC:
+            shape->data.arc.x += dx;
+            shape->data.arc.y += dy;
             break;
     }
 }

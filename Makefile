@@ -15,7 +15,7 @@ OBJ = $(addprefix $(OBJ_DIR_O)/, $(notdir $(SRC:.c=.o)))
 CC = gcc
 
 # Compilation options
-CFLAGS = -Wall -Wextra 
+CFLAGS = -Wall -Wextra -g
 
 # Linker flags (SDL2 and SDL2_gfx libraries included)
 LDFLAGS = -lSDL2 -lSDL2_gfx -lSDL2_ttf -lm
@@ -36,8 +36,8 @@ else
   INTERPRETER_FLAGS =
 endif
 
-# Name for the program (must be provided)
-NAME ?=
+# Name for the program (defaults to Draw++)
+NAME ?= "Draw ++"
 
 # Default target: compile and run
 .DEFAULT_GOAL := compil_run
@@ -51,9 +51,6 @@ all: clean_log $(EXEC)
 
 # Compilation target for the interpreter
 compil: clean_log
-ifndef NAME
-	$(error NAME of the program is required. Usage: make NAME=your_program_name)
-endif
 	$(LOG) "\n=== Running Interpreter ==="
 	$(LOG) "→ Processing .to_compil.dpp..."
 	$(SILENT)python3 interpreter.py .to_compil.dpp $(INTERPRETER_FLAGS) -n $(NAME) 2>> $(COMPILATOR_ERROR_LOG)

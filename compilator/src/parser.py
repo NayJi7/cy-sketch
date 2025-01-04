@@ -77,10 +77,7 @@ def p_specialparam(p):
     '''specialparam : ANIMATED
                     | INSTANT
                     | FILLED
-                    | EMPTY
-                    | ZOOM
-                    | ROTATE
-                    | COLOR'''
+                    | EMPTY'''
     p[0] = p[1]
 
 def p_color(p):

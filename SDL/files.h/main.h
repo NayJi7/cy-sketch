@@ -35,8 +35,11 @@ typedef enum
     ANIM_NONE,
     ANIM_ROTATE,
     ANIM_ZOOM,
-    ANIM_COLOR
+    ANIM_COLOR,
+    ANIM_BOUNCE
 } AnimationType;
+
+#define MAX_ANIMATIONS 5  // Maximum number of animations per shape
 
 typedef struct {
     ShapeType type;       // Type of shape
@@ -47,11 +50,17 @@ typedef struct {
     double initial_rotation;  // Initial rotation when created
     char* typeForm;
     int zIndex;          // Z-index for layer ordering
-    AnimationType animation;  // Type of animation
-    bool isAnimating;        // Whether animation is currently active
-    float zoom;          // Current zoom factor for zoom animation
-    float zoom_direction;    // Direction of zoom animation (1.0 = growing, -1.0 = shrinking)
-    float color_phase;    // Phase for color cycling animation (0.0 to 1.0)
+    
+    // Animation properties
+    AnimationType animations[MAX_ANIMATIONS];  // List of animations
+    int num_animations;                       // Number of animations currently stored
+    int current_animation;                    // Currently selected animation (for + and -)
+    bool isAnimating;                         // Whether animations are currently active
+    float zoom;                              // Current zoom factor for zoom animation
+    float zoom_direction;                     // Direction of zoom animation
+    float color_phase;                        // Phase for color cycling animation
+    float bounce_velocity;                    // Velocity for bounce animation
+
     union {
         struct { 
             int x, y, radius;

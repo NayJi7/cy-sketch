@@ -1,6 +1,88 @@
 #include "../files.h/animations.h"
 #include <math.h>
 
+void animation_bounce(Shape *shape) {
+    // DVD logo style bouncing - constant velocity with direction changes
+    static const float velocity = 1.0f;  // Base velocity
+    static int frameCounter = 0;  // Counter to slow down movement
+    
+    // Initialize velocities if not set
+    if (shape->bounce_velocity == 0 && shape->color_phase == 0) {
+        shape->bounce_velocity = velocity;  // Initial x velocity
+        shape->color_phase = velocity;      // Initial y velocity
+    }
+
+    // Only move every 7 frames to slow down movement
+    frameCounter++;
+    if (frameCounter >= 7) {
+        frameCounter = 0;
+        // Move shape based on current velocities
+        moveShape(shape, (int)shape->bounce_velocity, (int)shape->color_phase);
+    }
+
+    // Bounce off window boundaries
+    switch (shape->type) {
+        case SHAPE_CIRCLE: {
+            if (shape->data.circle.x - shape->data.circle.radius <= 0 || 
+                shape->data.circle.x + shape->data.circle.radius >= 800) {
+                shape->bounce_velocity *= -1;  // Reverse x direction
+            }
+            if (shape->data.circle.y - shape->data.circle.radius <= 0 || 
+                shape->data.circle.y + shape->data.circle.radius >= 600) {
+                shape->color_phase *= -1;  // Reverse y direction
+            }
+            break;
+        }
+        case SHAPE_RECTANGLE: {
+            if (shape->data.rectangle.x <= 0 || 
+                shape->data.rectangle.x + shape->data.rectangle.width >= 800) {
+                shape->bounce_velocity *= -1;
+            }
+            if (shape->data.rectangle.y <= 0 || 
+                shape->data.rectangle.y + shape->data.rectangle.height >= 600) {
+                shape->color_phase *= -1;
+            }
+            break;
+        }
+        case SHAPE_SQUARE: {
+            if (shape->data.square.x <= 0 || 
+                shape->data.square.x + shape->data.square.c >= 800) {
+                shape->bounce_velocity *= -1;
+            }
+            if (shape->data.square.y <= 0 || 
+                shape->data.square.y + shape->data.square.c >= 600) {
+                shape->color_phase *= -1;
+            }
+            break;
+        }
+        case SHAPE_ELLIPSE: {
+            if (shape->data.ellipse.x - shape->data.ellipse.rx <= 0 || 
+                shape->data.ellipse.x + shape->data.ellipse.rx >= 800) {
+                shape->bounce_velocity *= -1;
+            }
+            if (shape->data.ellipse.y - shape->data.ellipse.ry <= 0 || 
+                shape->data.ellipse.y + shape->data.ellipse.ry >= 600) {
+                shape->color_phase *= -1;
+            }
+            break;
+        }
+        case SHAPE_POLYGON:
+        case SHAPE_TRIANGLE: {
+            if (shape->data.polygon.cx - shape->data.polygon.radius <= 0 || 
+                shape->data.polygon.cx + shape->data.polygon.radius >= 800) {
+                shape->bounce_velocity *= -1;
+            }
+            if (shape->data.polygon.cy - shape->data.polygon.radius <= 0 || 
+                shape->data.polygon.cy + shape->data.polygon.radius >= 600) {
+                shape->color_phase *= -1;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void animation_rotate(Shape *shape) {
     // Rotation animation (0.15 degrees per frame)
     shape->rotation += 0.15;

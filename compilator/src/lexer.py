@@ -81,8 +81,6 @@ keywords = {
     'set': 'SET',
     'animated': 'ANIMATED',
     'instant': 'INSTANT',
-    'zoom': 'ZOOM',
-    'rotate': 'ROTATE',
     'empty': 'EMPTY',
     'filled': 'FILLED',
     'var': 'VARIABLE',

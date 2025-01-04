@@ -7,6 +7,7 @@
 void animation_rotate(Shape *shape);
 void animation_zoom(Shape *shape);
 void animation_color(Shape *shape);
+void animation_bounce(Shape *shape);
 void apply_zoom_to_shape(Shape *shape, float zoom);
 
 #endif // ANIMATIONS_H

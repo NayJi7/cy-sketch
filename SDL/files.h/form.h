@@ -38,6 +38,6 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
 int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, int thickness, SDL_Color color, char *type);
 
 
-int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *mode, char *type, char *animation, SDL_Color color, ...);
+int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *mode, char *type, SDL_Color color, ...);
 
 #endif

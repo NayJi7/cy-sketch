@@ -105,7 +105,7 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
     elif isinstance(value, str):  # Variable name
         # Search the AST for the variable assignment, or modification
         colors = ['red', 'green', 'blue', 'white', 'black', 'yellow', 'cyan', 'magenta', 'gray', 'light_gray', 'dark_gray', 'orange', 'purple', 'brown', 'pink']
-        special_words = ["animated", "rotate", "zoom", "color", "instant", "filled", "empty"] + colors
+        special_words = ["animated", "instant", "filled", "empty"] + colors
         if value in special_words :
             return None, value
         for i, node in enumerate(ast):
@@ -260,7 +260,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         return node
     
     elif isinstance(node, str):
-        special_words = ["animated", "instant", "rotate", "zoom", "color", "filled", "empty"]
+        special_words = ["animated", "instant", "filled", "empty"]
         if node in special_words:
             return f'"{node}"'
         else:
@@ -275,21 +275,21 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             c_code += "\t" * tabulation
 
         if forme == "circle":
-            expected_args = 7
+            expected_args = 6
         elif forme == "ellipse":
-            expected_args = 8
+            expected_args = 7
         elif forme == "line":
-            expected_args = 9
+            expected_args = 8
         elif forme == "polygon":
-            expected_args = 8
+            expected_args = 7
         elif forme == "rectangle":
-            expected_args = 8
+            expected_args = 7
         elif forme == "arc":
-            expected_args = 9
+            expected_args = 8
         elif forme == "triangle":
-            expected_args = 7
+            expected_args = 6
         elif forme == "square":
-            expected_args = 7
+            expected_args = 6
 
         if expected_args == len(parametres):
             c_code += f'if(drawShape(renderer, mainTexture, "{forme}", '
@@ -308,7 +308,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             raise IndexError(f"IndexError : draw {forme} function requires {expected_args} arguments, but you gave {len(parametres)}")
 
         if forme == "circle":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center x
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -318,7 +318,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #center y
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -328,7 +328,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -339,7 +339,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
         elif forme == "ellipse":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center x
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -349,7 +349,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #center y
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -359,7 +359,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius x
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius x
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -369,7 +369,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #radius y
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius y
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -380,7 +380,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
         elif forme == "line":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #x1
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x1
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -390,7 +390,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #y1
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y1
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -400,7 +400,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #x2
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #x2
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -410,7 +410,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #y2
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #y2
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -420,7 +420,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
-            t = resolve_value_and_find_variable(ast, parametres[8], current_position) #width
+            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #width
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -431,7 +431,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
         elif forme == "polygon":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cx
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -441,7 +441,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #cy
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -451,7 +451,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -461,7 +461,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #sides
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -472,7 +472,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
         elif forme == "triangle":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cx
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -482,7 +482,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #cy
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -492,7 +492,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -503,7 +503,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
         elif forme == "rectangle":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #x
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -513,7 +513,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #y
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -523,7 +523,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #w
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #w
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -533,7 +533,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #h
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #h
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -544,7 +544,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
         elif forme == "square":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #x
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -554,7 +554,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #y
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -564,7 +564,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #c
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -575,7 +575,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
         elif forme == "arc":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cx
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -585,7 +585,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #cy
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -595,7 +595,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #r
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #r
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -605,7 +605,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #startangle
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #startangle
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -615,7 +615,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[8], current_position) #endangle
+            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #endangle
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -626,7 +626,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
 
         elif forme == "triangle":
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cx
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -636,7 +636,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #cy
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -646,7 +646,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -656,7 +656,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #sides
+            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -668,7 +668,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             
         elif forme == "square":
 
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #x
+            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -678,7 +678,17 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             else:
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #y
+            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
+            if t[0] == ("int" or "float"):
+                if "char" in t[0] and '"' not in t[1]:
+                    if t == None:
+                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
+                    elif t[0] != ("int" or "float"):
+                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            else:
+                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            
+            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:
@@ -689,16 +699,6 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #c
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            
-            t = resolve_value_and_find_variable(ast, parametres[7], current_position) #c
             if t[0] == ("int" or "float"):
                 if "char" in t[0] and '"' not in t[1]:
                     if t == None:

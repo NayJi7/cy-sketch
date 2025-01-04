@@ -37,7 +37,18 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
     }
 
     // Charger la police
-    TTF_Font *font = TTF_OpenFont("./SDL/fonts/DejaVuMathTeXGyre.ttf", 16);
+    const char* font_paths[] = {
+        "SDL/fonts/DejaVuMathTeXGyre.ttf",
+        "../SDL/fonts/DejaVuMathTeXGyre.ttf",
+        "../../SDL/fonts/DejaVuMathTeXGyre.ttf"
+    };
+    
+    TTF_Font *font = NULL;
+    for (int i = 0; i < 3; i++) {
+        font = TTF_OpenFont(font_paths[i], 16);
+        if (font) break;
+    }
+    
     if (!font) {
         printf("%sExecutionError: Failed to open font: %s%s\n", RED_COLOR, TTF_GetError(), RESET_COLOR);
         TTF_Quit();
@@ -52,186 +63,239 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                     running = 0; // Exit the loop on quit event.
                     break;
 
-                case SDL_KEYDOWN: {
+                
+                case SDL_TEXTINPUT: {
+                    printf("Key Pressed - %s\n", event.text.text);
                     int dx = 0, dy = 0; // Variables to track cursor movement.
 
-                    // Process key presses for cursor movement and actions.
-                    switch (event.key.keysym.sym) {
-                        case SDLK_UP:
-                            dy = -10; // Move cursor up.
-                            break;
-                        case SDLK_DOWN:
-                            dy = 10; // Move cursor down.
-                            break;
-                        case SDLK_LEFT:
-                            dx = -10; // Move cursor left.
-                            break;
-                        case SDLK_RIGHT:
-                            dx = 10; // Move cursor right.
-                            break;
-                        case SDLK_ESCAPE:
-                            exit(0);
-                            break;
-                            
-                        case SDLK_PLUS:
-                        case SDLK_KP_PLUS:
-                            // Zoom in on selected shapes.
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    zoomShape(&shapes[i], 1.0);
-                                }
-                            }
-                            break;
-
-                        case SDLK_MINUS:
-                        case SDLK_KP_MINUS:
-                            // Zoom out on selected shapes.
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    zoomShape(&shapes[i], -1.0);
-                                }
-                            }
-                            break;
-
-                        case SDLK_q:
-                            // Rotate selected shapes counterclockwise.
-                            for (int i = 0; i < shapeCount; i++) {
-                                rotateShape(&shapes[i], -5);
-                            }
-                            break;
-
-                        case SDLK_d:
-                            // Rotate selected shapes clockwise.
-                            for (int i = 0; i < shapeCount; i++) {
-                                rotateShape(&shapes[i], 5);
-                            }
-                            break;
-
-                        case SDLK_z:
-                            // Move selected shape up in z-order
-                            moveShapeUp();
-                            break;
-
-                        case SDLK_s:
-                            // Move selected shape down in z-order
-                            moveShapeDown();
-                            break;
-
-                        case SDLK_a:
-                            // Toggle animation for selected shape
-                            toggleAnimation();
-                            break;
-
-                        case SDLK_r:
-                            // Reset selected shape to initial state
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    resetShape(&shapes[i]);
-                                    break;
-                                }
-                            }
-                            break;
-
-                        case SDLK_RETURN:
-                        case SDLK_e: {
-                            int topmostShapeIndex = -1;
-                            // Check if cursor is over any shape, keeping track of the last (topmost) one
-                            for (int i = 0; i < shapeCount; i++) {
-                                bool isInside = false;
-                                switch (shapes[i].type) {
-                                    case SHAPE_RECTANGLE:
-                                        isInside = isPointInRectangle(cursor.x, cursor.y,
-                                            shapes[i].data.rectangle.x, shapes[i].data.rectangle.y,
-                                            shapes[i].data.rectangle.width, shapes[i].data.rectangle.height);
-                                        break;
-                                    case SHAPE_SQUARE:
-                                        isInside = isPointInSquare(cursor.x, cursor.y,
-                                            shapes[i].data.square.x, shapes[i].data.square.y,
-                                            shapes[i].data.square.c);
-                                        break;
-                                    case SHAPE_CIRCLE:
-                                        isInside = isPointInCircle(cursor.x, cursor.y,
-                                            shapes[i].data.circle.x, shapes[i].data.circle.y,
-                                            shapes[i].data.circle.radius);
-                                        break;
-                                    case SHAPE_ELLIPSE:
-                                        isInside = isPointInEllipse(cursor.x, cursor.y,
-                                            shapes[i].data.ellipse.x, shapes[i].data.ellipse.y,
-                                            shapes[i].data.ellipse.rx, shapes[i].data.ellipse.ry);
-                                        break;
-                                    case SHAPE_LINE:
-                                        isInside = isPointInLine(cursor.x, cursor.y,
-                                            shapes[i].data.line.x1, shapes[i].data.line.y1,
-                                            shapes[i].data.line.x2, shapes[i].data.line.y2,
-                                            shapes[i].data.line.thickness);
-                                        break;
-                                    case SHAPE_ROUNDED_RECTANGLE:
-                                        isInside = isPointInRoundedRectangle(cursor.x, cursor.y,
-                                            shapes[i].data.rounded_rectangle.x1, shapes[i].data.rounded_rectangle.y1,
-                                            shapes[i].data.rounded_rectangle.x2, shapes[i].data.rounded_rectangle.y2,
-                                            shapes[i].data.rounded_rectangle.radius);
-                                        break;
-                                    case SHAPE_POLYGON:
-                                        isInside = isPointInPolygon(cursor.x, cursor.y,
-                                            shapes[i].data.polygon.cx, shapes[i].data.polygon.cy,
-                                            shapes[i].data.polygon.radius, shapes[i].data.polygon.sides);
-                                        break;
-                                    case SHAPE_TRIANGLE:
-                                        isInside = isPointInTriangle(cursor.x, cursor.y,
-                                            shapes[i].data.triangle.cx, shapes[i].data.triangle.cy,
-                                            shapes[i].data.triangle.radius);
-                                        break;
-                                    case SHAPE_ARC:
-                                        isInside = isPointInArc(cursor.x, cursor.y,
-                                            shapes[i].data.arc.x, shapes[i].data.arc.y,
-                                            shapes[i].data.arc.radius,
-                                            shapes[i].data.arc.start_angle,
-                                            shapes[i].data.arc.end_angle);
-                                        break;
-                                }
-                                
-                                if (isInside) {
-                                    topmostShapeIndex = i;  // Keep track of the last (topmost) shape found
-                                }
-                            }
-                            
-                            // If we found a shape under the cursor
-                            if (topmostShapeIndex != -1) {
-                                if (shapes[topmostShapeIndex].selected) {
-                                    // If the topmost shape is already selected, just deselect it
-                                    shapes[topmostShapeIndex].selected = false;
-                                    shapes[topmostShapeIndex].isAnimating = false;
-                                } else {
-                                    // If the topmost shape is not selected, select it and deselect others
-                                    for (int i = 0; i < shapeCount; i++) {
-                                        shapes[i].selected = (i == topmostShapeIndex);
-                                        if (!shapes[i].selected) {
-                                            shapes[i].isAnimating = false;
-                                        }
+                    // Check for special characters
+                    if (strcmp(event.text.text, "z") == 0) {
+                        // Move selected shape up in z-order
+                        printf("Move selected shape up\n\n");
+                        moveShapeUp();
+                    }
+                    else if (strcmp(event.text.text, "s") == 0) {
+                        // Move selected shape down in z-order
+                        printf("Move selected shape down\n\n");
+                        moveShapeDown();
+                    }
+                    else if (strcmp(event.text.text, "a") == 0) {
+                        // Toggle animation for selected shape
+                        printf("Toggle animation for selected shape\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (shapes[i].selected) {
+                                shapes[i].isAnimating = !shapes[i].isAnimating;
+                                // Initialize animation parameters when starting
+                                if (shapes[i].isAnimating) {
+                                    switch (shapes[i].animation) {
+                                        case ANIM_BOUNCE:
+                                            shapes[i].bounce_velocity = 0;  // Will be initialized in animation_bounce
+                                            shapes[i].color_phase = 0;     // Will be initialized in animation_bounce
+                                            break;
+                                        case ANIM_ZOOM:
+                                            shapes[i].zoom = 1.0f;
+                                            shapes[i].zoom_direction = 1.0f;
+                                            break;
+                                        case ANIM_COLOR:
+                                            shapes[i].color_phase = 0.0f;
+                                            break;
+                                        case ANIM_ROTATE:
+                                            // No initialization needed
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
+                                break;  // Only toggle the first selected shape
+                            }
+                        }
+                    }
+                    else if (strcmp(event.text.text, "r") == 0) {
+                        // Reset selected shape to initial state
+                        printf("Reset selected shape to initial state\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (shapes[i].selected) {
+                                resetShape(&shapes[i]);
+                                break;
+                            }
+                        }
+                    }
+                    else if (strcmp(event.text.text, "e") == 0) {
+                        printf("Toggle selection of shape under cursor\n\n");
+                        int topmostShapeIndex = -1;
+                        // Check if cursor is over any shape, keeping track of the last (topmost) one
+                        for (int i = 0; i < shapeCount; i++) {
+                            bool isInside = false;
+                            switch (shapes[i].type) {
+                                case SHAPE_RECTANGLE:
+                                    isInside = isPointInRectangle(cursor.x, cursor.y,
+                                        shapes[i].data.rectangle.x, shapes[i].data.rectangle.y,
+                                        shapes[i].data.rectangle.width, shapes[i].data.rectangle.height);
+                                    break;
+                                case SHAPE_SQUARE:
+                                    isInside = isPointInSquare(cursor.x, cursor.y,
+                                        shapes[i].data.square.x, shapes[i].data.square.y,
+                                        shapes[i].data.square.c);
+                                    break;
+                                case SHAPE_CIRCLE:
+                                    isInside = isPointInCircle(cursor.x, cursor.y,
+                                        shapes[i].data.circle.x, shapes[i].data.circle.y,
+                                        shapes[i].data.circle.radius);
+                                    break;
+                                case SHAPE_ELLIPSE:
+                                    isInside = isPointInEllipse(cursor.x, cursor.y,
+                                        shapes[i].data.ellipse.x, shapes[i].data.ellipse.y,
+                                        shapes[i].data.ellipse.rx, shapes[i].data.ellipse.ry);
+                                    break;
+                                case SHAPE_LINE:
+                                    isInside = isPointInLine(cursor.x, cursor.y,
+                                        shapes[i].data.line.x1, shapes[i].data.line.y1,
+                                        shapes[i].data.line.x2, shapes[i].data.line.y2,
+                                        shapes[i].data.line.thickness);
+                                    break;
+                                case SHAPE_ROUNDED_RECTANGLE:
+                                    isInside = isPointInRoundedRectangle(cursor.x, cursor.y,
+                                        shapes[i].data.rounded_rectangle.x1, shapes[i].data.rounded_rectangle.y1,
+                                        shapes[i].data.rounded_rectangle.x2, shapes[i].data.rounded_rectangle.y2,
+                                        shapes[i].data.rounded_rectangle.radius);
+                                    break;
+                                case SHAPE_POLYGON:
+                                    isInside = isPointInPolygon(cursor.x, cursor.y,
+                                        shapes[i].data.polygon.cx, shapes[i].data.polygon.cy,
+                                        shapes[i].data.polygon.radius, shapes[i].data.polygon.sides);
+                                    break;
+                                case SHAPE_TRIANGLE:
+                                    isInside = isPointInTriangle(cursor.x, cursor.y,
+                                        shapes[i].data.triangle.cx, shapes[i].data.triangle.cy,
+                                        shapes[i].data.triangle.radius);
+                                    break;
+                                case SHAPE_ARC:
+                                    isInside = isPointInArc(cursor.x, cursor.y,
+                                        shapes[i].data.arc.x, shapes[i].data.arc.y,
+                                        shapes[i].data.arc.radius,
+                                        shapes[i].data.arc.start_angle,
+                                        shapes[i].data.arc.end_angle);
+                                    break;
+                            }
+                            
+                            if (isInside) {
+                                topmostShapeIndex = i;  // Keep track of the last (topmost) shape found
+                            }
+                        }
+                        
+                        // If we found a shape under the cursor
+                        if (topmostShapeIndex != -1) {
+                            if (shapes[topmostShapeIndex].selected) {
+                                // If the topmost shape is already selected, just deselect it
+                                shapes[topmostShapeIndex].selected = false;
+                                shapes[topmostShapeIndex].isAnimating = false;
                             } else {
-                                // If no shape under cursor, deselect all
+                                // If the topmost shape is not selected, select it and deselect others
                                 for (int i = 0; i < shapeCount; i++) {
-                                    shapes[i].selected = false;
+                                    shapes[i].selected = (i == topmostShapeIndex);
+                                    if (!shapes[i].selected) {
+                                        shapes[i].isAnimating = false;
+                                    }
+                                }
+                            }
+                        } else {
+                            // If no shape under cursor, deselect all
+                            for (int i = 0; i < shapeCount; i++) {
+                                shapes[i].selected = false;
+                                shapes[i].isAnimating = false;
+                            }
+                        }
+                    }
+                    else if (strcmp(event.text.text, "q") == 0) {
+                        // Rotate selected shapes counterclockwise
+                        printf("Rotate selected shapes by -5 degrees\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            rotateShape(&shapes[i], -5);
+                        }
+                    }
+                    else if (strcmp(event.text.text, "d") == 0) {
+                        // Rotate selected shapes clockwise
+                        printf("Rotate selected shapes by 5 degrees\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            rotateShape(&shapes[i], 5);
+                        }
+                    }
+                    else if (strcmp(event.text.text, "*") == 0) {
+                        // Zoom in on selected shapes
+                        printf("Zoom in on selected shapes\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (shapes[i].selected) {
+                                zoomShape(&shapes[i], 1.0);
+                            }
+                        }
+                    }
+                    else if (strcmp(event.text.text, "/") == 0) {
+                        // Zoom out on selected shapes
+                        printf("Zoom out on selected shapes\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (shapes[i].selected) {
+                                zoomShape(&shapes[i], -1.0);
+                            }
+                        }
+                    }
+
+                    else if (strcmp(event.text.text, "+") == 0) {
+                        // Cycle forward through animation modes for selected shapes
+                        printf("Cycle animation mode forward for selected shapes\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (shapes[i].selected) {
+                                // Cycle through animation modes (None -> Rotate -> Zoom -> Color -> Bounce)
+                                if (shapes[i].animation == ANIM_NONE) {
+                                    shapes[i].animation = ANIM_ROTATE;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_ROTATE) {
+                                    shapes[i].animation = ANIM_ZOOM;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_ZOOM) {
+                                    shapes[i].animation = ANIM_COLOR;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_COLOR) {
+                                    shapes[i].animation = ANIM_BOUNCE;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_BOUNCE) {
+                                    shapes[i].animation = ANIM_NONE;
+                                    shapes[i].isAnimating = false;
+                                    shapes[i].bounce_velocity = 0;  // Reset bounce velocity when starting
+                                } else {
+                                    shapes[i].animation = ANIM_NONE;
                                     shapes[i].isAnimating = false;
                                 }
                             }
-                            break;
                         }
-
-                        case SDLK_BACKSPACE:
-                            // Delete selected shape.
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    deleteShape(i);
-                                    break;
+                    }
+                    else if (strcmp(event.text.text, "-") == 0) {
+                        // Cycle backward through animation modes for selected shapes
+                        printf("Cycle animation mode backward for selected shapes\n\n");
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (shapes[i].selected) {
+                                // Cycle through animation modes (None <- Rotate <- Zoom <- Color <- Bounce)
+                                if (shapes[i].animation == ANIM_NONE) {
+                                    shapes[i].animation = ANIM_BOUNCE;
+                                    shapes[i].isAnimating = false;
+                                    shapes[i].bounce_velocity = 0;  // Reset bounce velocity when starting
+                                } else if (shapes[i].animation == ANIM_BOUNCE) {
+                                    shapes[i].animation = ANIM_COLOR;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_COLOR) {
+                                    shapes[i].animation = ANIM_ZOOM;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_ZOOM) {
+                                    shapes[i].animation = ANIM_ROTATE;
+                                    shapes[i].isAnimating = false;
+                                } else if (shapes[i].animation == ANIM_ROTATE) {
+                                    shapes[i].animation = ANIM_NONE;
+                                    shapes[i].isAnimating = false;
+                                } else {
+                                    shapes[i].animation = ANIM_NONE;
+                                    shapes[i].isAnimating = false;
                                 }
                             }
-                            break;
-
-                        default:
-                            break;
+                        }
                     }
 
                     // Move the cursor and selected shapes based on key input.
@@ -241,7 +305,65 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                 }
                 break;
 
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym) {
+                        case SDLK_ESCAPE:
+                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                            printf("Exit application\n\n");
+                            running = 0;
+                            break;
+                        case SDLK_RIGHT:
+                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                            printf("Move selected shapes by 10 pixels to the right\n\n");
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    moveShape(&shapes[i], 10, 0);
+                                }
+                            }
+                            break;
+                        case SDLK_LEFT:
+                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                            printf("Move selected shapes by 10 pixels to the left\n\n");
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    moveShape(&shapes[i], -10, 0);
+                                }
+                            }
+                            break;  
+                        case SDLK_UP:
+                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                            printf("Move selected shapes by 10 pixels up\n\n");
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    moveShape(&shapes[i], 0, -10);
+                                }
+                            }
+                            break;
+                        case SDLK_DOWN:
+                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                            printf("Move selected shapes by 10 pixels down\n\n");
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    moveShape(&shapes[i], 0, 10);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+
+                case SDL_MOUSEWHEEL:
+                    printf("Mouse Wheel Scrolled\n");
+                    printf("Zoom in on selected shapes\n\n");
+                    for (int i = 0; i < shapeCount; i++) {
+                        if (shapes[i].selected) {
+                            zoomShape(&shapes[i], event.wheel.y > 0 ? 1.0 : -1.0);
+                        }
+                    }
+                    break;
+
                 case SDL_MOUSEBUTTONDOWN:
+                    printf("Mouse Button Pressed\n");
+                    printf("Toggle selection of shape under cursor\n\n");
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         // Handle shape selection using the cursor.
                         handleCursorSelection(event.button.x, event.button.y);
@@ -249,11 +371,14 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                     break;
 
                 case SDL_MOUSEMOTION:
+                    printf("Mouse Motion\n");
+                    printf("Move cursor to (%d, %d)\n\n", event.motion.x, event.motion.y);
                     // Update cursor position and move selected shapes with the mouse.
                     cursor.x = event.motion.x;
                     cursor.y = event.motion.y;
                     moveShapesWithMouse(shapes, shapeCount, &event, &cursor);
                     break;
+                break;
             }
         }
 
@@ -560,6 +685,9 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
             break;
         case ANIM_COLOR:
             strcpy(animation, "Color");
+            break;
+        case ANIM_BOUNCE:
+            strcpy(animation, "Bounce");
             break;
         default:
             strcpy(animation, "None");

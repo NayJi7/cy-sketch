@@ -1125,7 +1125,7 @@ int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y
  * - "polygon" must have a minimum of 3 sides and a reasonable number of sides for proper rendering.
  * - Ensure that "type" is either "filled" or "empty".
  */
-int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *mode, char *type, char *animation, SDL_Color color, ...) {
+int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *mode, char *type, SDL_Color color, ...) {
     Shape newShape;
     newShape.selected = false;
     newShape.color = color;
@@ -1156,28 +1156,13 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
         newShape.type = SHAPE_ROUNDED_RECTANGLE;
     }
 
-    // Set animation type based on parameter
-    if (animation != NULL) {
-        if (strcmp(animation, "rotate") == 0) {
-            newShape.animation = ANIM_ROTATE;
-        } else if (strcmp(animation, "zoom") == 0 && strcmp(shape, "line") != 0) {
-            newShape.animation = ANIM_ZOOM;
-        } else if (strcmp(animation, "color") == 0) {
-            newShape.animation = ANIM_COLOR;
-            newShape.color_phase = 0.0f;  // Initialize color phase
-        } else {
-            newShape.animation = ANIM_NONE;
-        }
-    } else {
-        newShape.animation = ANIM_NONE;
-    }
+    newShape.animation = ANIM_NONE;
 
     va_list args;
     va_start(args, color);// Initialize the variable argument list with the last named parameter
     
     // Set the texture as the rendering target.
     SDL_SetRenderTarget(renderer, texture);
-
 
     // Determine if the shape should be drawn with animation.
     int isAnimated = (strcmp(mode, "animated") == 0);
