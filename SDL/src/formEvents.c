@@ -1437,36 +1437,9 @@ void deleteSelectedShape() {
 void toggleAnimation() {
     for (int i = 0; i < shapeCount; i++) {
         if (shapes[i].selected) {
+            shapes[i].selected = false;
             shapes[i].isAnimating = !shapes[i].isAnimating;
             break;
-        }
-    }
-}
-
-/**
- * @brief Updates animations for all shapes
- * 
- * @param renderer The SDL renderer to use for drawing
- */
-void updateAnimations(SDL_Renderer *renderer) {
-    for (int i = 0; i < shapeCount; i++) {
-        if (shapes[i].isAnimating) {
-            switch (shapes[i].animation) {
-                case ANIM_ROTATE:
-                    animation_rotate(&shapes[i]);
-                    break;
-                case ANIM_ZOOM:
-                    animation_zoom(&shapes[i]);
-                    break;
-                case ANIM_COLOR:
-                    animation_color(&shapes[i]);
-                    break;
-                case ANIM_BOUNCE:
-                    animation_bounce(&shapes[i]);
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

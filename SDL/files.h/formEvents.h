@@ -39,7 +39,6 @@ void moveShapeUp(void);
 void moveShapeDown(void);
 void deleteSelectedShape(void);
 void toggleAnimation(void);
-void updateAnimations(SDL_Renderer *renderer);
 void resetShape(Shape *shape);
 void moveShape(Shape *shape, int dx, int dy);
 

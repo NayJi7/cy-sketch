@@ -2,12 +2,14 @@
 #define ANIMATIONS_H
 
 #include "main.h"
+#include "formEvents.h"
 
 // Animation functions
-void animation_rotate(Shape *shape);
-void animation_zoom(Shape *shape);
-void animation_color(Shape *shape);
-void animation_bounce(Shape *shape);
-void apply_zoom_to_shape(Shape *shape, float zoom);
+void applyAnimation(Shape *shape);
+void animation_rotate(Shape *shape, AnimationType animation);
+void animation_zoom(Shape *shape, AnimationType animation);
+void animation_color(Shape *shape, AnimationType animation);
+void animation_bounce(Shape *shape, AnimationType animation);
+void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation);
 
 #endif // ANIMATIONS_H

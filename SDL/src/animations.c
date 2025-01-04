@@ -1,15 +1,68 @@
 #include "../files.h/animations.h"
 #include <math.h>
 
-void animation_bounce(Shape *shape) {
+void applyAnimation(Shape *shape){
+    int check = 0;
+    if (shape->animation_parser == ANIM_ROTATE) {
+        for (int i = 0; i < shape->num_animations; i++) {
+            if (shape->animations[i] == ANIM_ROTATE) {
+               shape->animations[i] = ANIM_NONE;
+               check = 1;
+               shape->num_animations--;
+            }
+        }
+        if (check == 0) {
+            shape->animations[shape->num_animations] = ANIM_ROTATE;
+            shape->num_animations++;
+        }
+    } else if (shape->animation_parser == ANIM_ZOOM) {
+        for (int i = 0; i < shape->num_animations; i++) {
+            if (shape->animations[i] == ANIM_ZOOM) {
+               shape->animations[i] = ANIM_NONE;
+               check = 1;
+               shape->num_animations--;
+            }
+        }
+        if (check == 0) {
+            shape->animations[shape->num_animations] = ANIM_ZOOM;
+            shape->num_animations++;
+        }
+    } else if (shape->animation_parser == ANIM_COLOR) {
+        for (int i = 0; i < shape->num_animations; i++) {
+            if (shape->animations[i] == ANIM_COLOR) {
+               shape->animations[i] = ANIM_NONE;
+               check = 1;
+               shape->num_animations--;
+            }
+        }
+        if (check == 0) {
+            shape->animations[shape->num_animations] = ANIM_COLOR;
+            shape->num_animations++;
+        }
+    } else if (shape->animation_parser == ANIM_BOUNCE) {
+        for (int i = 0; i < shape->num_animations; i++) {
+            if (shape->animations[i] == ANIM_BOUNCE) {
+               shape->animations[i] = ANIM_NONE;
+               check = 1;
+               shape->num_animations--;
+            }
+        }
+        if (check == 0) {
+            shape->animations[shape->num_animations] = ANIM_BOUNCE;
+            shape->num_animations++;
+        }
+    }
+}
+
+void animation_bounce(Shape *shape, AnimationType animation) {
     // DVD logo style bouncing - constant velocity with direction changes
     static const float velocity = 1.0f;  // Base velocity
     static int frameCounter = 0;  // Counter to slow down movement
     
     // Initialize velocities if not set
-    if (shape->bounce_velocity == 0 && shape->color_phase == 0) {
+    if (shape->bounce_velocity == 0 && shape->bounce_direction == 0) {
         shape->bounce_velocity = velocity;  // Initial x velocity
-        shape->color_phase = velocity;      // Initial y velocity
+        shape->bounce_direction = velocity;      // Initial y velocity
     }
 
     // Only move every 7 frames to slow down movement
@@ -17,7 +70,7 @@ void animation_bounce(Shape *shape) {
     if (frameCounter >= 7) {
         frameCounter = 0;
         // Move shape based on current velocities
-        moveShape(shape, (int)shape->bounce_velocity, (int)shape->color_phase);
+        moveShape(shape, (int)shape->bounce_velocity, (int)shape->bounce_direction);
     }
 
     // Bounce off window boundaries
@@ -29,7 +82,7 @@ void animation_bounce(Shape *shape) {
             }
             if (shape->data.circle.y - shape->data.circle.radius <= 0 || 
                 shape->data.circle.y + shape->data.circle.radius >= 600) {
-                shape->color_phase *= -1;  // Reverse y direction
+                shape->bounce_direction *= -1;  // Reverse y direction
             }
             break;
         }
@@ -40,7 +93,7 @@ void animation_bounce(Shape *shape) {
             }
             if (shape->data.rectangle.y <= 0 || 
                 shape->data.rectangle.y + shape->data.rectangle.height >= 600) {
-                shape->color_phase *= -1;
+                shape->bounce_direction *= -1;
             }
             break;
         }
@@ -51,7 +104,7 @@ void animation_bounce(Shape *shape) {
             }
             if (shape->data.square.y <= 0 || 
                 shape->data.square.y + shape->data.square.c >= 600) {
-                shape->color_phase *= -1;
+                shape->bounce_direction *= -1;
             }
             break;
         }
@@ -62,7 +115,7 @@ void animation_bounce(Shape *shape) {
             }
             if (shape->data.ellipse.y - shape->data.ellipse.ry <= 0 || 
                 shape->data.ellipse.y + shape->data.ellipse.ry >= 600) {
-                shape->color_phase *= -1;
+                shape->bounce_direction *= -1;
             }
             break;
         }
@@ -74,7 +127,7 @@ void animation_bounce(Shape *shape) {
             }
             if (shape->data.polygon.cy - shape->data.polygon.radius <= 0 || 
                 shape->data.polygon.cy + shape->data.polygon.radius >= 600) {
-                shape->color_phase *= -1;
+                shape->bounce_direction *= -1;
             }
             break;
         }
@@ -83,7 +136,7 @@ void animation_bounce(Shape *shape) {
     }
 }
 
-void animation_rotate(Shape *shape) {
+void animation_rotate(Shape *shape, AnimationType animation) {
     // Rotation animation (0.15 degrees per frame)
     shape->rotation += 0.15;
     if (shape->rotation >= 360.0f) {
@@ -91,7 +144,7 @@ void animation_rotate(Shape *shape) {
     }
 }
 
-void animation_zoom(Shape *shape) {
+void animation_zoom(Shape *shape, AnimationType animation) {
     // Update zoom value using shape's own direction (slower speed)
     shape->zoom += 0.0005f * shape->zoom_direction;
     
@@ -104,10 +157,10 @@ void animation_zoom(Shape *shape) {
         shape->zoom_direction = 1.0f;
     }
     
-    apply_zoom_to_shape(shape, shape->zoom);
+    apply_zoom_to_shape(shape, shape->zoom, animation);
 }
 
-void apply_zoom_to_shape(Shape *shape, float zoom) {
+void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
     // Apply zoom based on current zoom value
     switch (shape->type) {
         case SHAPE_RECTANGLE: {
@@ -145,7 +198,7 @@ void apply_zoom_to_shape(Shape *shape, float zoom) {
             break;
         }
         case SHAPE_LINE: {
-            shape->animation = ANIM_NONE; // disabling animation for line
+            animation = ANIM_NONE; // disabling animation for line
             break;
         }
         case SHAPE_ROUNDED_RECTANGLE: {
@@ -165,7 +218,7 @@ void apply_zoom_to_shape(Shape *shape, float zoom) {
     }
 }
 
-void animation_color(Shape *shape) {
+void animation_color(Shape *shape, AnimationType animation) {
     // Update the color phase (controls the position in the color cycle)
     shape->color_phase += 0.0004f;
     if (shape->color_phase >= 1.0f) {

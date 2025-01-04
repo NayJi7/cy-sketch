@@ -82,31 +82,14 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                     else if (strcmp(event.text.text, "a") == 0) {
                         // Toggle animation for selected shape
                         printf("Toggle animation for selected shape\n\n");
+                        toggleAnimation();
+                    }
+                    else if (strcmp(event.text.text, "n") == 0) {
+                        // Toggle animation for all shapes
+                        printf("Toggle animation for all shapes\n\n");
                         for (int i = 0; i < shapeCount; i++) {
-                            if (shapes[i].selected) {
-                                shapes[i].isAnimating = !shapes[i].isAnimating;
-                                // Initialize animation parameters when starting
-                                if (shapes[i].isAnimating) {
-                                    switch (shapes[i].animation) {
-                                        case ANIM_BOUNCE:
-                                            shapes[i].bounce_velocity = 0;  // Will be initialized in animation_bounce
-                                            shapes[i].color_phase = 0;     // Will be initialized in animation_bounce
-                                            break;
-                                        case ANIM_ZOOM:
-                                            shapes[i].zoom = 1.0f;
-                                            shapes[i].zoom_direction = 1.0f;
-                                            break;
-                                        case ANIM_COLOR:
-                                            shapes[i].color_phase = 0.0f;
-                                            break;
-                                        case ANIM_ROTATE:
-                                            // No initialization needed
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                                break;  // Only toggle the first selected shape
+                            if(shapes[i].isAnimating) {
+                                shapes[i].isAnimating = false;
                             }
                         }
                     }
@@ -244,55 +227,41 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                         printf("Cycle animation mode forward for selected shapes\n\n");
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
-                                // Cycle through animation modes (None -> Rotate -> Zoom -> Color -> Bounce)
-                                if (shapes[i].animation == ANIM_NONE) {
-                                    shapes[i].animation = ANIM_ROTATE;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_ROTATE) {
-                                    shapes[i].animation = ANIM_ZOOM;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_ZOOM) {
-                                    shapes[i].animation = ANIM_COLOR;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_COLOR) {
-                                    shapes[i].animation = ANIM_BOUNCE;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_BOUNCE) {
-                                    shapes[i].animation = ANIM_NONE;
-                                    shapes[i].isAnimating = false;
-                                    shapes[i].bounce_velocity = 0;  // Reset bounce velocity when starting
+                                if (shapes[i].animation_parser == ANIM_NONE) {
+                                    shapes[i].animation_parser = ANIM_ROTATE;
+                                } else if (shapes[i].animation_parser == ANIM_ROTATE) {
+                                    shapes[i].animation_parser = ANIM_ZOOM;
+                                } else if (shapes[i].animation_parser == ANIM_ZOOM) {
+                                    shapes[i].animation_parser = ANIM_COLOR;
+                                } else if (shapes[i].animation_parser == ANIM_COLOR) {
+                                    shapes[i].animation_parser = ANIM_BOUNCE;
+                                } else if (shapes[i].animation_parser == ANIM_BOUNCE) {
+                                    shapes[i].animation_parser = ANIM_NONE;
                                 } else {
-                                    shapes[i].animation = ANIM_NONE;
-                                    shapes[i].isAnimating = false;
+                                    shapes[i].animation_parser = ANIM_NONE;
                                 }
                             }
                         }
                     }
+                    
                     else if (strcmp(event.text.text, "-") == 0) {
-                        // Cycle backward through animation modes for selected shapes
+                        // Cycle through animation modes (None <- Rotate <- Zoom <- Color <- Bounce)
                         printf("Cycle animation mode backward for selected shapes\n\n");
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
-                                // Cycle through animation modes (None <- Rotate <- Zoom <- Color <- Bounce)
-                                if (shapes[i].animation == ANIM_NONE) {
-                                    shapes[i].animation = ANIM_BOUNCE;
-                                    shapes[i].isAnimating = false;
-                                    shapes[i].bounce_velocity = 0;  // Reset bounce velocity when starting
-                                } else if (shapes[i].animation == ANIM_BOUNCE) {
-                                    shapes[i].animation = ANIM_COLOR;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_COLOR) {
-                                    shapes[i].animation = ANIM_ZOOM;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_ZOOM) {
-                                    shapes[i].animation = ANIM_ROTATE;
-                                    shapes[i].isAnimating = false;
-                                } else if (shapes[i].animation == ANIM_ROTATE) {
-                                    shapes[i].animation = ANIM_NONE;
-                                    shapes[i].isAnimating = false;
+                                if (shapes[i].animation_parser == ANIM_NONE) {
+                                    shapes[i].animation_parser = ANIM_BOUNCE;
+                                } else if (shapes[i].animation_parser == ANIM_BOUNCE) {
+                                    shapes[i].animation_parser = ANIM_COLOR;
+                                } else if (shapes[i].animation_parser == ANIM_COLOR) {
+                                } else if (shapes[i].animation_parser == ANIM_COLOR) {
+                                    shapes[i].animation_parser = ANIM_ZOOM;
+                                } else if (shapes[i].animation_parser == ANIM_ZOOM) {
+                                    shapes[i].animation_parser = ANIM_ROTATE;
+                                } else if (shapes[i].animation_parser == ANIM_ROTATE) {
+                                    shapes[i].animation_parser = ANIM_NONE;
                                 } else {
-                                    shapes[i].animation = ANIM_NONE;
-                                    shapes[i].isAnimating = false;
+                                    shapes[i].animation_parser = ANIM_NONE;
                                 }
                             }
                         }
@@ -348,6 +317,19 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                                 }
                             }
                             break;
+                        case SDLK_KP_ENTER:
+                        case SDLK_RETURN:
+                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                            printf("Apply animation to selected shapes\n\n");
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    if(shapes[i].isAnimating) {
+                                        shapes[i].isAnimating = false;
+                                    }
+                                    applyAnimation(&shapes[i]);
+                                }
+                            }
+                            break;
                     }
                     break;
 
@@ -379,7 +361,7 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                     moveShapesWithMouse(shapes, shapeCount, &event, &cursor);
                     break;
                 break;
-            }
+            }   
         }
 
         // Clear the screen and set a background color.
@@ -387,7 +369,24 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
         SDL_RenderClear(renderer);
 
         // Update animations
-        updateAnimations(renderer);
+        for (int i = 0; i < shapeCount; i++) {
+            if (shapes[i].isAnimating) {
+                for (int j = 0; j < shapes[i].num_animations; j++) {
+                    if (shapes[i].animations[j] == ANIM_ROTATE) {
+                        animation_rotate(&shapes[i], shapes[i].animations[j]);
+                    }
+                    if (shapes[i].animations[j] == ANIM_ZOOM) {
+                        animation_zoom(&shapes[i], shapes[i].animations[j]);
+                    }
+                    if (shapes[i].animations[j] == ANIM_COLOR) {
+                        animation_color(&shapes[i], shapes[i].animations[j]);
+                    }
+                    if (shapes[i].animations[j] == ANIM_BOUNCE) {
+                        animation_bounce(&shapes[i], shapes[i].animations[j]);
+                    }
+                }
+            }
+        }
 
         // Render all shapes in z-order
         renderAllShapes(renderer);
@@ -407,7 +406,6 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
         // Present the updated frame.
         SDL_RenderPresent(renderer);
     }
-
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_ShowCursor(SDL_ENABLE); // Restore the default system cursor.
@@ -659,6 +657,21 @@ void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int 
     SDL_DestroyTexture(texture);
 }
 
+char* getAnimationName(AnimationType animation){
+    switch(animation){
+        case ANIM_ROTATE:
+            return "Rotate";
+        case ANIM_ZOOM:
+            return "Zoom";
+        case ANIM_COLOR:
+            return "Color";
+        case ANIM_BOUNCE:
+            return "Bounce";
+        default:
+            return "None";
+    }
+}
+
 /**
  * @brief Displays detailed information about the selected shape in the bottom-right corner.
  * Updates in real-time when shape properties change (rotation, position, size).
@@ -672,104 +685,100 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
 
     // Create text string with shape information
     char text[128];
+    char text2[128];
     // Determine if shape is empty or filled
     const char *formType = (strcmp(shape->typeForm, "empty") == 0) ? "(empty)" : "(filled)";
     
-    char animation[20];
-    switch(shape->animation) {
-        case ANIM_ROTATE:
-            strcpy(animation, "Rotate");
-            break;
-        case ANIM_ZOOM:
-            strcpy(animation, "Zoom"); 
-            break;
-        case ANIM_COLOR:
-            strcpy(animation, "Color");
-            break;
-        case ANIM_BOUNCE:
-            strcpy(animation, "Bounce");
-            break;
-        default:
-            strcpy(animation, "None");
-            break;
-    }
+    char animation_chose[20];
+    strcpy(animation_chose, getAnimationName(shape->animation_parser));
+    
     // Format text based on shape type
     switch (shape->type) {
         case SHAPE_CIRCLE: 
-            snprintf(text, sizeof(text), "Form: Circle %s\nRotation: %.1f deg\nRadius: %d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Circle %s\nRotation: %.1f deg\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.circle.radius,
                     shape->data.circle.x, shape->data.circle.y,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_RECTANGLE: 
-            snprintf(text, sizeof(text), "Form: Rectangle %s\nRotation: %.1f deg\nSize: %dx%d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Rectangle %s\nRotation: %.1f deg\nSize: %dx%d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.rectangle.width, shape->data.rectangle.height,
                     shape->data.rectangle.x, shape->data.rectangle.y,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_SQUARE:
-            snprintf(text, sizeof(text), "Form: Square %s\nRotation: %.1f deg\nSize: %dx%d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Square %s\nRotation: %.1f deg\nSize: %dx%d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.square.c, shape->data.square.c,
                     shape->data.square.x, shape->data.square.y,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_ELLIPSE: 
-            snprintf(text, sizeof(text), "Form: Ellipse %s\nRotation: %.1f deg\nRadius: %dx%d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Ellipse %s\nRotation: %.1f deg\nRadius: %dx%d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.ellipse.rx, shape->data.ellipse.ry,
                     shape->data.ellipse.x, shape->data.ellipse.y,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_LINE: 
-            snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s", 
                     shape->rotation,
                     (int)sqrt(pow(shape->data.line.x2 - shape->data.line.x1, 2) + 
                              pow(shape->data.line.y2 - shape->data.line.y1, 2)),
                     shape->data.line.thickness,
                     shape->data.line.x1, shape->data.line.y1,
                     shape->data.line.x2, shape->data.line.y2,
-                    animation);
-            break;
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
+            break;  
         case SHAPE_ROUNDED_RECTANGLE: 
-            snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1,
                     shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1,
                     shape->data.rounded_rectangle.radius,
                     shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_POLYGON: 
-            snprintf(text, sizeof(text), "Form: Polygon %s\nRotation: %.1f deg\nRadius: %d\nSides: %d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Polygon %s\nRotation: %.1f deg\nRadius: %d\nSides: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.polygon.radius,
                     shape->data.polygon.sides,
                     shape->data.polygon.cx, shape->data.polygon.cy,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_TRIANGLE:
-            snprintf(text, sizeof(text), "Form: Triangle %s\nRotation: %.1f deg\nRadius: %d\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Triangle %s\nRotation: %.1f deg\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.triangle.radius,
                     shape->data.triangle.cx, shape->data.triangle.cy,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_ARC: 
-            snprintf(text, sizeof(text), "Form: Arc %s\nRotation: %.1f deg\nRadius: %d\nAngles: %d deg to %d deg\nPosition: (%d,%d) \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Arc %s\nRotation: %.1f deg\nRadius: %d\nAngles: %d deg to %d deg\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 
                     shape->data.arc.radius,
                     shape->data.arc.start_angle,
                     shape->data.arc.end_angle,
                     shape->data.arc.x, shape->data.arc.y,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         default: 
-            snprintf(text, sizeof(text), "Form: Unknown %s\nRotation: %.1f deg \nAnimation: %s", 
+            snprintf(text, sizeof(text), "Form: Unknown %s\nRotation: %.1f deg \nAnimation Picking: %s", 
                     formType, shape->rotation,
-                    animation);
+                    animation_chose);
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
     }
 
@@ -777,12 +786,16 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
     SDL_Color textColor = {0, 0, 0, 255}; // Black color
     // Use blended rendering for smoother text with word wrap at 300 pixels
     SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, text, textColor, 300);
+    SDL_Surface *surface2 = TTF_RenderText_Blended_Wrapped(font, text2, textColor, 400);
     if (!surface) return;
-
+    if (!surface2) return;
     // Convert surface to texture for rendering
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Texture *texture2 = SDL_CreateTextureFromSurface(renderer, surface2);
     SDL_FreeSurface(surface);
+    SDL_FreeSurface(surface2);
     if (!texture) return;
+    if (!texture2) return;
 
     // Get window dimensions for positioning
     int windowWidth, windowHeight;
@@ -790,13 +803,19 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
 
     // Position the text in the bottom-right corner with margins
     SDL_Rect textRect;
+    SDL_Rect textRect2;
     SDL_QueryTexture(texture, NULL, NULL, &textRect.w, &textRect.h);
-    textRect.x = windowWidth - textRect.w + 80;  // Adjust position from right edge
+    SDL_QueryTexture(texture2, NULL, NULL, &textRect2.w, &textRect2.h);
+    textRect.x = windowWidth - textRect.w + 70;  // Adjust position from right edge
     textRect.y = windowHeight - textRect.h - 10; // 10 pixels margin from bottom
+    textRect2.x = 10;  // Adjust position from left edge
+    textRect2.y = windowHeight - textRect2.h - 10; // 10 pixels margin from bottom
 
     // Render the text and cleanup
     SDL_RenderCopy(renderer, texture, NULL, &textRect);
+    SDL_RenderCopy(renderer, texture2, NULL, &textRect2);
     SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(texture2);
 }
 
 

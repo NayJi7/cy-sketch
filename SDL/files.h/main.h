@@ -48,12 +48,15 @@ typedef struct {
     double initial_rotation;  // Initial rotation when created
     char* typeForm;
     int zIndex;          // Z-index for layer ordering
-    AnimationType animation;  // Type of animation
-    bool isAnimating;        // Whether animation is currently active
-    float zoom;          // Current zoom factor for zoom animation
-    float zoom_direction;    // Direction of zoom animation (1.0 = growing, -1.0 = shrinking)
+    AnimationType animations[3];  // List of 3 animations max
+    int num_animations;                       // Number of animations currently stored
+    AnimationType animation_parser;                  // Current animation
+    bool isAnimating;                         // Whether animations are currently active
+    float zoom;                              // Current zoom factor for zoom animation
+    float zoom_direction;                     // Direction of zoom animation (1.0 = growing, -1.0 = shrinking)
     float color_phase;    // Phase for color cycling animation (0.0 to 1.0)
     float bounce_velocity; // Velocity for bounce animation
+    float bounce_direction; // Direction for bounce animation
     union {
         struct { 
             int x, y, radius;

@@ -1134,6 +1134,14 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
     newShape.isAnimating = false;
     newShape.zoom = 1.0f;
     newShape.zoom_direction = 1.0f;
+    newShape.bounce_velocity = 0;
+    newShape.bounce_direction = 0;
+
+    newShape.animations[0] = ANIM_NONE;
+    newShape.animations[1] = ANIM_NONE;
+    newShape.animations[2] = ANIM_NONE;
+    newShape.num_animations = 0;
+    newShape.animation_parser = ANIM_NONE;
 
     // Set shape type based on parameter
     if (strcmp(shape, "circle") == 0) {
@@ -1155,8 +1163,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
     } else if (strcmp(shape, "rounded_rectangle") == 0) {
         newShape.type = SHAPE_ROUNDED_RECTANGLE;
     }
-
-    newShape.animation = ANIM_NONE;
 
     va_list args;
     va_start(args, color);// Initialize the variable argument list with the last named parameter
