@@ -127,7 +127,7 @@ int main() {
         return -1;
     }
     SDL_RenderPresent(renderer);
-    mainLoop(renderer, event, cursor, bgcolorR, bgcolorG, bgcolorB);
+    mainLoop(window, renderer, event, cursor, bgcolorR, bgcolorG, bgcolorB);
     cleanup(mainTexture, renderer, window);
 
 	return 0;

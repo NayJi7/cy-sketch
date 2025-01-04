@@ -3,8 +3,23 @@
 
 void applyAnimation(Shape *shape){
     int check = 0;
+    int idx = 100;
+    if (shape->animations[2] == ANIM_NONE) {idx = 2;}
+    if (shape->animations[1] == ANIM_NONE) {idx = 1;}
+    if (shape->animations[0] == ANIM_NONE) {idx = 0;}
+    if (idx == 0){
+        shape->animations[0] = shape->animations[1];
+        shape->animations[1] = shape->animations[2];
+        shape->animations[2] = ANIM_NONE;
+    }
+    else if (idx == 1){
+        shape->animations[1] = shape->animations[2];
+        shape->animations[2] = ANIM_NONE;
+    }
+
     if (shape->animation_parser == ANIM_ROTATE) {
-        for (int i = 0; i < shape->num_animations; i++) {
+
+        for (int i = 0; i < 3; i++) {
             if (shape->animations[i] == ANIM_ROTATE) {
                shape->animations[i] = ANIM_NONE;
                check = 1;
@@ -16,7 +31,7 @@ void applyAnimation(Shape *shape){
             shape->num_animations++;
         }
     } else if (shape->animation_parser == ANIM_ZOOM) {
-        for (int i = 0; i < shape->num_animations; i++) {
+        for (int i = 0; i < 3; i++) {
             if (shape->animations[i] == ANIM_ZOOM) {
                shape->animations[i] = ANIM_NONE;
                check = 1;
@@ -28,7 +43,7 @@ void applyAnimation(Shape *shape){
             shape->num_animations++;
         }
     } else if (shape->animation_parser == ANIM_COLOR) {
-        for (int i = 0; i < shape->num_animations; i++) {
+        for (int i = 0; i < 3; i++) {
             if (shape->animations[i] == ANIM_COLOR) {
                shape->animations[i] = ANIM_NONE;
                check = 1;
@@ -52,9 +67,22 @@ void applyAnimation(Shape *shape){
             shape->num_animations++;
         }
     }
+
+    if (shape->animations[2] == ANIM_NONE) {idx = 2;}
+    if (shape->animations[1] == ANIM_NONE) {idx = 1;}
+    if (shape->animations[0] == ANIM_NONE) {idx = 0;}
+    if (idx == 0){
+        shape->animations[0] = shape->animations[1];
+        shape->animations[1] = shape->animations[2];
+        shape->animations[2] = ANIM_NONE;
+    }
+    else if (idx == 1){
+        shape->animations[1] = shape->animations[2];
+        shape->animations[2] = ANIM_NONE;
+    }
 }
 
-void animation_bounce(Shape *shape, AnimationType animation) {
+void animation_bounce(Shape *shape, AnimationType animation, int width, int height) {
     // DVD logo style bouncing - constant velocity with direction changes
     static const float velocity = 1.0f;  // Base velocity
     static int frameCounter = 0;  // Counter to slow down movement
@@ -77,44 +105,44 @@ void animation_bounce(Shape *shape, AnimationType animation) {
     switch (shape->type) {
         case SHAPE_CIRCLE: {
             if (shape->data.circle.x - shape->data.circle.radius <= 0 || 
-                shape->data.circle.x + shape->data.circle.radius >= 800) {
+                shape->data.circle.x + shape->data.circle.radius >= width) {
                 shape->bounce_velocity *= -1;  // Reverse x direction
             }
             if (shape->data.circle.y - shape->data.circle.radius <= 0 || 
-                shape->data.circle.y + shape->data.circle.radius >= 600) {
+                shape->data.circle.y + shape->data.circle.radius >= height) {
                 shape->bounce_direction *= -1;  // Reverse y direction
             }
             break;
         }
         case SHAPE_RECTANGLE: {
             if (shape->data.rectangle.x <= 0 || 
-                shape->data.rectangle.x + shape->data.rectangle.width >= 800) {
+                shape->data.rectangle.x + shape->data.rectangle.width >= width) {
                 shape->bounce_velocity *= -1;
             }
             if (shape->data.rectangle.y <= 0 || 
-                shape->data.rectangle.y + shape->data.rectangle.height >= 600) {
+                shape->data.rectangle.y + shape->data.rectangle.height >= height) {
                 shape->bounce_direction *= -1;
             }
             break;
         }
         case SHAPE_SQUARE: {
             if (shape->data.square.x <= 0 || 
-                shape->data.square.x + shape->data.square.c >= 800) {
+                shape->data.square.x + shape->data.square.c >= width) {
                 shape->bounce_velocity *= -1;
             }
             if (shape->data.square.y <= 0 || 
-                shape->data.square.y + shape->data.square.c >= 600) {
+                shape->data.square.y + shape->data.square.c >= height) {
                 shape->bounce_direction *= -1;
             }
             break;
         }
         case SHAPE_ELLIPSE: {
             if (shape->data.ellipse.x - shape->data.ellipse.rx <= 0 || 
-                shape->data.ellipse.x + shape->data.ellipse.rx >= 800) {
+                shape->data.ellipse.x + shape->data.ellipse.rx >= width) {
                 shape->bounce_velocity *= -1;
             }
             if (shape->data.ellipse.y - shape->data.ellipse.ry <= 0 || 
-                shape->data.ellipse.y + shape->data.ellipse.ry >= 600) {
+                shape->data.ellipse.y + shape->data.ellipse.ry >= height) {
                 shape->bounce_direction *= -1;
             }
             break;
@@ -122,11 +150,11 @@ void animation_bounce(Shape *shape, AnimationType animation) {
         case SHAPE_POLYGON:
         case SHAPE_TRIANGLE: {
             if (shape->data.polygon.cx - shape->data.polygon.radius <= 0 || 
-                shape->data.polygon.cx + shape->data.polygon.radius >= 800) {
+                shape->data.polygon.cx + shape->data.polygon.radius >= width) {
                 shape->bounce_velocity *= -1;
             }
             if (shape->data.polygon.cy - shape->data.polygon.radius <= 0 || 
-                shape->data.polygon.cy + shape->data.polygon.radius >= 600) {
+                shape->data.polygon.cy + shape->data.polygon.radius >= height) {
                 shape->bounce_direction *= -1;
             }
             break;

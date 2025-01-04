@@ -28,7 +28,7 @@ void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* windo
  * @param event SDL_Event structure to capture and handle user inputs.
  * @param cursor Custom cursor structure used to represent and track the cursor's position.
  */
-void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB) {
+void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB) {
     SDL_ShowCursor(SDL_DISABLE);
     /// Ensuite initialiser SDL_ttf
     if (TTF_Init() < 0) {
@@ -254,7 +254,6 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                                 } else if (shapes[i].animation_parser == ANIM_BOUNCE) {
                                     shapes[i].animation_parser = ANIM_COLOR;
                                 } else if (shapes[i].animation_parser == ANIM_COLOR) {
-                                } else if (shapes[i].animation_parser == ANIM_COLOR) {
                                     shapes[i].animation_parser = ANIM_ZOOM;
                                 } else if (shapes[i].animation_parser == ANIM_ZOOM) {
                                     shapes[i].animation_parser = ANIM_ROTATE;
@@ -382,7 +381,9 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolo
                         animation_color(&shapes[i], shapes[i].animations[j]);
                     }
                     if (shapes[i].animations[j] == ANIM_BOUNCE) {
-                        animation_bounce(&shapes[i], shapes[i].animations[j]);
+                        int width, height;
+                        SDL_GetWindowSize(window, &width, &height);
+                        animation_bounce(&shapes[i], shapes[i].animations[j], width, height);
                     }
                 }
             }
@@ -603,20 +604,15 @@ void handleCursorSelection(int cursorX, int cursorY) {
         for (int i = 0; i < shapeCount; i++) {
             if (i != index) {
                 shapes[i].selected = false; // Ensure only one shape is selected.
-                shapes[i].isAnimating = false; // Stop animation when deselected
             }
         }
         // Toggle selection for the clicked shape.
         shapes[index].selected = !shapes[index].selected;
-        // If deselected, stop animation
-        if (!shapes[index].selected) {
-            shapes[index].isAnimating = false;
-        }
+        shapes[index].isAnimating = false;
     } else {
         // Deselect all shapes if no shape is clicked.
         for (int i = 0; i < shapeCount; i++) {
             shapes[i].selected = false;
-            shapes[i].isAnimating = false; // Stop animation when deselected
         }
     }
 }

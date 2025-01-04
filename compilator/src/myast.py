@@ -1264,7 +1264,7 @@ def translate_ast_to_c(ast, filename):
     c_code += f'        return -1;\n'
     c_code += f'    }}\n'
     c_code += f'    SDL_RenderPresent(renderer);\n'
-    c_code += f'    mainLoop(renderer, event, cursor, bgcolorR, bgcolorG, bgcolorB);\n'
+    c_code += f'    mainLoop(window, renderer, event, cursor, bgcolorR, bgcolorG, bgcolorB);\n'
     c_code += f'    cleanup(mainTexture, renderer, window);\n'
 
     c_code += f"\n\treturn 0;\n"
