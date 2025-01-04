@@ -15,7 +15,7 @@ OBJ = $(addprefix $(OBJ_DIR_O)/, $(notdir $(SRC:.c=.o)))
 CC = gcc
 
 # Compilation options
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g -DDEBUG=$(DEBUG)
 
 # Linker flags (SDL2 and SDL2_gfx libraries included)
 LDFLAGS = -lSDL2 -lSDL2_gfx -lSDL2_ttf -lm
@@ -66,25 +66,26 @@ clean_log:
 	$(SILENT)echo -n > $(SDL_ERROR_LOG)
 	$(SILENT)echo -n > $(COMPILATOR_ERROR_LOG)
 
+# Create necessary directories
+create_dirs:
+	$(SILENT)mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
+
 # Link object files to create the executable
-$(EXEC): $(OBJ)
+$(EXEC): create_dirs $(OBJ)
 	$(LOG) "\n=== Linking Phase ==="
 	$(LOG) "→ Linking object files into executable..."
-	$(SILENT)mkdir -p $(OBJ_DIR_EXE)
 	$(SILENT)$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS) 2>> $(SDL_ERROR_LOG)
 
 # Rule to generate object files from source files in src directory
 $(OBJ_DIR_O)/%.o: SDL/src/%.c
 	$(LOG) "\n=== Compilation Phase ==="
 	$(LOG) "→ Compiling $<..."
-	$(SILENT)mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
 	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@ 2>> $(SDL_ERROR_LOG)
 
 # Rule to generate object files from root directory source files
 $(OBJ_DIR_O)/%.o: %.c
 	$(LOG) "\n=== Compilation Phase ==="
 	$(LOG) "→ Compiling $<..."
-	$(SILENT)mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
 	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@ 2>> $(SDL_ERROR_LOG)
 
 # Run the program and overwrite the run log
@@ -101,4 +102,4 @@ clean:
 	$(SILENT)rm -rf $(OBJ_DIR_O) $(OBJ_DIR_EXE) 2>/dev/null || true  
 
 # Indicate that clean, run, and debug are not files
-.PHONY: all clean run clean_log debug compil compil_run
+.PHONY: all clean run clean_log debug compil compil_run create_dirs

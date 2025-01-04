@@ -3,12 +3,17 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <math.h>
 #include "../files.h/main.h"
+
 #include "../files.h/formEvents.h"
 #include "../files.h/cursorEvents.h"
 
 // ANSI escape codes for colors
 #define RED_COLOR "\033[1;31m"
 #define RESET_COLOR "\033[0m"
+
+#ifndef DEBUG   // DEBUG is defined in the compilation command (makefile DEBUG=1)
+#define DEBUG 1 
+#endif
 
 void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* window){
     if (mainTexture) SDL_DestroyTexture(mainTexture);
@@ -29,6 +34,10 @@ void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* windo
  * @param cursor Custom cursor structure used to represent and track the cursor's position.
  */
 void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB) {
+    #if DEBUG
+        printf("Debug: Starting main loop\n");
+    #endif
+
     SDL_ShowCursor(SDL_DISABLE);
     /// Ensuite initialiser SDL_ttf
     if (TTF_Init() < 0) {
@@ -71,22 +80,30 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     // Check for special characters
                     if (strcmp(event.text.text, "z") == 0) {
                         // Move selected shape up in z-order
-                        printf("Move selected shape up\n\n");
+                        if (DEBUG) {
+                            printf("Move selected shape up\n\n");
+                        }
                         moveShapeUp();
                     }
                     else if (strcmp(event.text.text, "s") == 0) {
                         // Move selected shape down in z-order
-                        printf("Move selected shape down\n\n");
+                        if (DEBUG) {
+                            printf("Move selected shape down\n\n");
+                        }
                         moveShapeDown();
                     }
                     else if (strcmp(event.text.text, "a") == 0) {
                         // Toggle animation for selected shape
-                        printf("Toggle animation for selected shape\n\n");
+                        if (DEBUG) {
+                            printf("Toggle animation for selected shape\n\n");
+                        }
                         toggleAnimation();
                     }
                     else if (strcmp(event.text.text, "n") == 0) {
                         // Toggle animation for all shapes
-                        printf("Toggle animation for all shapes\n\n");
+                        if (DEBUG) {
+                            printf("Toggle animation for all shapes\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             if(shapes[i].isAnimating) {
                                 shapes[i].isAnimating = false;
@@ -95,7 +112,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     }
                     else if (strcmp(event.text.text, "r") == 0) {
                         // Reset selected shape to initial state
-                        printf("Reset selected shape to initial state\n\n");
+                        if (DEBUG) {
+                            printf("Reset selected shape to initial state\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 resetShape(&shapes[i]);
@@ -104,7 +123,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         }
                     }
                     else if (strcmp(event.text.text, "e") == 0) {
-                        printf("Toggle selection of shape under cursor\n\n");
+                        if (DEBUG) {
+                            printf("Toggle selection of shape under cursor\n\n");
+                        }
                         int topmostShapeIndex = -1;
                         // Check if cursor is over any shape, keeping track of the last (topmost) one
                         for (int i = 0; i < shapeCount; i++) {
@@ -191,21 +212,27 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     }
                     else if (strcmp(event.text.text, "q") == 0) {
                         // Rotate selected shapes counterclockwise
-                        printf("Rotate selected shapes by -5 degrees\n\n");
+                        if (DEBUG) {
+                            printf("Rotate selected shapes by -5 degrees\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             rotateShape(&shapes[i], -5);
                         }
                     }
                     else if (strcmp(event.text.text, "d") == 0) {
                         // Rotate selected shapes clockwise
-                        printf("Rotate selected shapes by 5 degrees\n\n");
+                        if (DEBUG) {
+                            printf("Rotate selected shapes by 5 degrees\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             rotateShape(&shapes[i], 5);
                         }
                     }
                     else if (strcmp(event.text.text, "*") == 0) {
                         // Zoom in on selected shapes
-                        printf("Zoom in on selected shapes\n\n");
+                        if (DEBUG) {
+                            printf("Zoom in on selected shapes\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 zoomShape(&shapes[i], 1.0);
@@ -214,7 +241,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     }
                     else if (strcmp(event.text.text, "/") == 0) {
                         // Zoom out on selected shapes
-                        printf("Zoom out on selected shapes\n\n");
+                        if (DEBUG) {
+                            printf("Zoom out on selected shapes\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 zoomShape(&shapes[i], -1.0);
@@ -224,7 +253,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
 
                     else if (strcmp(event.text.text, "+") == 0) {
                         // Cycle forward through animation modes for selected shapes
-                        printf("Cycle animation mode forward for selected shapes\n\n");
+                        if (DEBUG) {
+                            printf("Cycle animation mode forward for selected shapes\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 if (shapes[i].animation_parser == ANIM_NONE) {
@@ -246,7 +277,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     
                     else if (strcmp(event.text.text, "-") == 0) {
                         // Cycle through animation modes (None <- Rotate <- Zoom <- Color <- Bounce)
-                        printf("Cycle animation mode backward for selected shapes\n\n");
+                        if (DEBUG) {
+                            printf("Cycle animation mode backward for selected shapes\n\n");
+                        }
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 if (shapes[i].animation_parser == ANIM_NONE) {
@@ -276,13 +309,17 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
                         case SDLK_ESCAPE:
-                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                            printf("Exit application\n\n");
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Exit application\n\n");
+                            }
                             running = 0;
                             break;
                         case SDLK_RIGHT:
-                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                            printf("Move selected shapes by 10 pixels to the right\n\n");
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Move selected shapes by 10 pixels to the right\n\n");
+                            }
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], 10, 0);
@@ -290,8 +327,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             }
                             break;
                         case SDLK_LEFT:
-                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                            printf("Move selected shapes by 10 pixels to the left\n\n");
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Move selected shapes by 10 pixels to the left\n\n");
+                            }
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], -10, 0);
@@ -299,8 +338,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             }
                             break;  
                         case SDLK_UP:
-                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                            printf("Move selected shapes by 10 pixels up\n\n");
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Move selected shapes by 10 pixels up\n\n");
+                            }
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], 0, -10);
@@ -308,8 +349,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             }
                             break;
                         case SDLK_DOWN:
-                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                            printf("Move selected shapes by 10 pixels down\n\n");
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Move selected shapes by 10 pixels down\n\n");
+                            }
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], 0, 10);
@@ -318,8 +361,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;
                         case SDLK_KP_ENTER:
                         case SDLK_RETURN:
-                            printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                            printf("Apply animation to selected shapes\n\n");
+                            if (DEBUG) {
+                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Apply animation to selected shapes\n\n");
+                            }
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     if(shapes[i].isAnimating) {
@@ -333,8 +378,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     break;
 
                 case SDL_MOUSEWHEEL:
-                    printf("Mouse Wheel Scrolled\n");
-                    printf("Zoom in on selected shapes\n\n");
+                    if (DEBUG) {
+                        printf("Mouse Wheel Scrolled\n");
+                        printf("Zoom in on selected shapes\n\n");
+                    }
                     for (int i = 0; i < shapeCount; i++) {
                         if (shapes[i].selected) {
                             zoomShape(&shapes[i], event.wheel.y > 0 ? 1.0 : -1.0);
@@ -343,8 +390,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    printf("Mouse Button Pressed\n");
-                    printf("Toggle selection of shape under cursor\n\n");
+                    if (DEBUG) {
+                        printf("Mouse Button Pressed\n");
+                        printf("Toggle selection of shape under cursor\n\n");
+                    }
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         // Handle shape selection using the cursor.
                         handleCursorSelection(event.button.x, event.button.y);
@@ -352,8 +401,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     break;
 
                 case SDL_MOUSEMOTION:
-                    printf("Mouse Motion\n");
-                    printf("Move cursor to (%d, %d)\n\n", event.motion.x, event.motion.y);
+                    if (DEBUG) {
+                        printf("Mouse Motion\n");
+                        printf("Move cursor to (%d, %d)\n\n", event.motion.x, event.motion.y);
+                    }
                     // Update cursor position and move selected shapes with the mouse.
                     cursor.x = event.motion.x;
                     cursor.y = event.motion.y;

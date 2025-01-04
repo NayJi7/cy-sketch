@@ -3,74 +3,74 @@ SDL/src/form.c:1368:13: warning: unused variable ‘sides’ [-Wunused-variable]
  1368 |         int sides = 3;
       |             ^~~~~
 SDL/src/cursorEvents.c: In function ‘mainLoop’:
-SDL/src/cursorEvents.c:119:48: warning: implicit declaration of function ‘isPointInSquare’; did you mean ‘isPointInArc’? [-Wimplicit-function-declaration]
-  119 |                                     isInside = isPointInSquare(cursor.x, cursor.y,
+SDL/src/cursorEvents.c:140:48: warning: implicit declaration of function ‘isPointInSquare’; did you mean ‘isPointInArc’? [-Wimplicit-function-declaration]
+  140 |                                     isInside = isPointInSquare(cursor.x, cursor.y,
       |                                                ^~~~~~~~~~~~~~~
       |                                                isPointInArc
-SDL/src/cursorEvents.c:151:48: warning: implicit declaration of function ‘isPointInTriangle’; did you mean ‘isPointInRectangle’? [-Wimplicit-function-declaration]
-  151 |                                     isInside = isPointInTriangle(cursor.x, cursor.y,
+SDL/src/cursorEvents.c:172:48: warning: implicit declaration of function ‘isPointInTriangle’; did you mean ‘isPointInRectangle’? [-Wimplicit-function-declaration]
+  172 |                                     isInside = isPointInTriangle(cursor.x, cursor.y,
       |                                                ^~~~~~~~~~~~~~~~~
       |                                                isPointInRectangle
-SDL/src/cursorEvents.c:328:37: warning: implicit declaration of function ‘applyAnimation’; did you mean ‘toggleAnimation’? [-Wimplicit-function-declaration]
-  328 |                                     applyAnimation(&shapes[i]);
+SDL/src/cursorEvents.c:373:37: warning: implicit declaration of function ‘applyAnimation’; did you mean ‘toggleAnimation’? [-Wimplicit-function-declaration]
+  373 |                                     applyAnimation(&shapes[i]);
       |                                     ^~~~~~~~~~~~~~
       |                                     toggleAnimation
-SDL/src/cursorEvents.c:375:25: warning: implicit declaration of function ‘animation_rotate’ [-Wimplicit-function-declaration]
-  375 |                         animation_rotate(&shapes[i], shapes[i].animations[j]);
+SDL/src/cursorEvents.c:426:25: warning: implicit declaration of function ‘animation_rotate’ [-Wimplicit-function-declaration]
+  426 |                         animation_rotate(&shapes[i], shapes[i].animations[j]);
       |                         ^~~~~~~~~~~~~~~~
-SDL/src/cursorEvents.c:378:25: warning: implicit declaration of function ‘animation_zoom’ [-Wimplicit-function-declaration]
-  378 |                         animation_zoom(&shapes[i], shapes[i].animations[j]);
+SDL/src/cursorEvents.c:429:25: warning: implicit declaration of function ‘animation_zoom’ [-Wimplicit-function-declaration]
+  429 |                         animation_zoom(&shapes[i], shapes[i].animations[j]);
       |                         ^~~~~~~~~~~~~~
-SDL/src/cursorEvents.c:381:25: warning: implicit declaration of function ‘animation_color’ [-Wimplicit-function-declaration]
-  381 |                         animation_color(&shapes[i], shapes[i].animations[j]);
+SDL/src/cursorEvents.c:432:25: warning: implicit declaration of function ‘animation_color’ [-Wimplicit-function-declaration]
+  432 |                         animation_color(&shapes[i], shapes[i].animations[j]);
       |                         ^~~~~~~~~~~~~~~
-SDL/src/cursorEvents.c:386:25: warning: implicit declaration of function ‘animation_bounce’ [-Wimplicit-function-declaration]
-  386 |                         animation_bounce(&shapes[i], shapes[i].animations[j], width, height);
+SDL/src/cursorEvents.c:437:25: warning: implicit declaration of function ‘animation_bounce’ [-Wimplicit-function-declaration]
+  437 |                         animation_bounce(&shapes[i], shapes[i].animations[j], width, height);
       |                         ^~~~~~~~~~~~~~~~
 SDL/src/cursorEvents.c: In function ‘renderShapeInfo’:
-SDL/src/cursorEvents.c:726:153: warning: ‘%s’ directive output may be truncated writing up to 19 bytes into a region of size between 0 and 31 [-Wformat-truncation=]
-  726 |             snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s",
+SDL/src/cursorEvents.c:777:153: warning: ‘%s’ directive output may be truncated writing up to 19 bytes into a region of size between 0 and 31 [-Wformat-truncation=]
+  777 |             snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s",
       |                                                                                                                                                         ^~
 ......
-  733 |                     animation_chose);
+  784 |                     animation_chose);
       |                     ~~~~~~~~~~~~~~~                                                                                                                      
-SDL/src/cursorEvents.c:726:13: note: ‘snprintf’ output between 98 and 458 bytes into a destination of size 128
-  726 |             snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s",
+SDL/src/cursorEvents.c:777:13: note: ‘snprintf’ output between 98 and 458 bytes into a destination of size 128
+  777 |             snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s",
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  727 |                     shape->rotation,
+  778 |                     shape->rotation,
       |                     ~~~~~~~~~~~~~~~~
-  728 |                     (int)sqrt(pow(shape->data.line.x2 - shape->data.line.x1, 2) +
+  779 |                     (int)sqrt(pow(shape->data.line.x2 - shape->data.line.x1, 2) +
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  729 |                              pow(shape->data.line.y2 - shape->data.line.y1, 2)),
+  780 |                              pow(shape->data.line.y2 - shape->data.line.y1, 2)),
       |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  730 |                     shape->data.line.thickness,
+  781 |                     shape->data.line.thickness,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  731 |                     shape->data.line.x1, shape->data.line.y1,
+  782 |                     shape->data.line.x1, shape->data.line.y1,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  732 |                     shape->data.line.x2, shape->data.line.y2,
+  783 |                     shape->data.line.x2, shape->data.line.y2,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  733 |                     animation_chose);
+  784 |                     animation_chose);
       |                     ~~~~~~~~~~~~~~~~
-SDL/src/cursorEvents.c:737:150: warning: ‘%s’ directive output may be truncated writing up to 19 bytes into a region of size between 0 and 27 [-Wformat-truncation=]
-  737 |             snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s",
+SDL/src/cursorEvents.c:788:150: warning: ‘%s’ directive output may be truncated writing up to 19 bytes into a region of size between 0 and 27 [-Wformat-truncation=]
+  788 |             snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s",
       |                                                                                                                                                      ^~
 ......
-  743 |                     animation_chose);
+  794 |                     animation_chose);
       |                     ~~~~~~~~~~~~~~~                                                                                                                   
-SDL/src/cursorEvents.c:737:13: note: ‘snprintf’ output between 102 and 456 bytes into a destination of size 128
-  737 |             snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s",
+SDL/src/cursorEvents.c:788:13: note: ‘snprintf’ output between 102 and 456 bytes into a destination of size 128
+  788 |             snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s",
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  738 |                     formType, shape->rotation,
+  789 |                     formType, shape->rotation,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~
-  739 |                     shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1,
+  790 |                     shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  740 |                     shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1,
+  791 |                     shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  741 |                     shape->data.rounded_rectangle.radius,
+  792 |                     shape->data.rounded_rectangle.radius,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  742 |                     shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
+  793 |                     shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
       |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  743 |                     animation_chose);
+  794 |                     animation_chose);
       |                     ~~~~~~~~~~~~~~~~
 SDL/src/animations.c: In function ‘animation_bounce’:
 SDL/src/animations.c:85:51: warning: unused parameter ‘animation’ [-Wunused-parameter]
