@@ -10,6 +10,13 @@
 #define RED_COLOR "\033[1;31m"
 #define RESET_COLOR "\033[0m"
 
+void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* window){
+    if (mainTexture) SDL_DestroyTexture(mainTexture);
+    if (renderer) SDL_DestroyRenderer(renderer);
+    if (window) SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
 /**
  * @brief Main loop of the application to handle user interactions and render shapes.
  * 

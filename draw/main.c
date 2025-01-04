@@ -121,10 +121,3 @@ int main(){
 
     return 0;
 }
-
-void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* window){
-    if (mainTexture) SDL_DestroyTexture(mainTexture);
-    if (renderer) SDL_DestroyRenderer(renderer);
-    if (window) SDL_DestroyWindow(window);
-    SDL_Quit();
-}
