@@ -115,6 +115,16 @@ void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor) {
                             toggleAnimation();
                             break;
 
+                        case SDLK_r:
+                            // Reset selected shape to initial state
+                            for (int i = 0; i < shapeCount; i++) {
+                                if (shapes[i].selected) {
+                                    resetShape(&shapes[i]);
+                                    break;
+                                }
+                            }
+                            break;
+
                         case SDLK_RETURN:
                         case SDLK_e: {
                             int topmostShapeIndex = -1;
@@ -524,6 +534,9 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
             break;
         case ANIM_ZOOM:
             strcpy(animation, "Zoom"); 
+            break;
+        case ANIM_COLOR:
+            strcpy(animation, "Color");
             break;
         default:
             strcpy(animation, "None");

@@ -934,6 +934,9 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
             newShape.animation = ANIM_ROTATE;
         } else if (strcmp(animation, "zoom") == 0 && strcmp(shape, "line") != 0) {
             newShape.animation = ANIM_ZOOM;
+        } else if (strcmp(animation, "color") == 0) {
+            newShape.animation = ANIM_COLOR;
+            newShape.color_phase = 0.0f;  // Initialize color phase
         } else {
             newShape.animation = ANIM_NONE;
         }

@@ -1,5 +1,5 @@
-#ifndef STRUCTFORMS_H
-#define STRUCTFORMS_H
+#ifndef CURSOREVENTS_H
+#define CURSOREVENTS_H
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -23,4 +23,4 @@ void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int 
 void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape);
 void handleShapeDeletion(int cursorX, int cursorY);
 
-#endif // STRUCTFORMS_H
+#endif // CURSOREVENTS_H

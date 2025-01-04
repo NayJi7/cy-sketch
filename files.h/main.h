@@ -32,29 +32,57 @@ typedef enum
 {
     ANIM_NONE,
     ANIM_ROTATE,
-    ANIM_ZOOM
+    ANIM_ZOOM,
+    ANIM_COLOR
 } AnimationType;
 
 typedef struct {
     ShapeType type;       // Type of shape
     bool selected;        // Indicates whether the shape is selected
     SDL_Color color;         // Shape colour
+    SDL_Color initial_color;  // Initial color when created
     double rotation;      // Rotation in degrees
+    double initial_rotation;  // Initial rotation when created
     char* typeForm;
     int zIndex;          // Z-index for layer ordering
     AnimationType animation;  // Type of animation
     bool isAnimating;        // Whether animation is currently active
     float zoom;          // Current zoom factor for zoom animation
     float zoom_direction;    // Direction of zoom animation (1.0 = growing, -1.0 = shrinking)
+    float color_phase;    // Phase for color cycling animation (0.0 to 1.0)
     union {
-        struct { int x, y, radius; } circle;           // Data for a circle
-        struct { int x, y, rx, ry; } ellipse;          // Data for an ellipse
-        struct { int x, y, radius, start_angle, end_angle; } arc; // Data for an arc
-        struct { int x, y, width, height;} rectangle; // Data for a rectangle
-        struct { Sint16 x1, y1, x2, y2, radius; int x, y, w, h, rad ;} rounded_rectangle; // Data for a rounded Rectangle
-        struct { int cx, cy, radius, sides; } polygon; // Data for a polygon
-        struct { Sint16 x1, y1, x2, y2; Uint8 thickness; } line; // Data for a line
-    } data; //  Union containing data specific to each form
+        struct { 
+            int x, y, radius;
+            int initial_radius;  // Initial values
+        } circle;
+        struct { 
+            int x, y, rx, ry;
+            int initial_rx, initial_ry;  // Initial values
+        } ellipse;
+        struct { 
+            int x, y, radius, start_angle, end_angle;
+            int initial_radius, initial_start_angle, initial_end_angle;  // Initial values
+        } arc;
+        struct { 
+            int x, y, width, height;
+            int initial_width, initial_height;  // Initial values
+        } rectangle;
+        struct { 
+            Sint16 x1, y1, x2, y2, radius;
+            int x, y, w, h, rad;
+            Sint16 initial_radius;
+            int initial_w, initial_h, initial_rad;  // Initial values
+        } rounded_rectangle;
+        struct { 
+            int cx, cy, radius, sides;
+            int initial_radius, initial_sides;  // Initial values
+        } polygon;
+        struct { 
+            Sint16 x1, y1, x2, y2;
+            Uint8 thickness;
+            Uint8 initial_thickness;  // Initial values
+        } line;
+    } data;
 } Shape;
 
 void mainLoop(SDL_Renderer *renderer, SDL_Event event, Cursor cursor);

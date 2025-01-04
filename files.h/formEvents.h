@@ -14,7 +14,6 @@ extern Shape shapes[MAX_SHAPES];
 extern int shapeCount;
 
 void setRenderColor(SDL_Renderer* renderer, SDL_Color color);
-SDL_Color adjustBrightness(SDL_Color color, float factor);
 SDL_Color selectColor(SDL_Color color);
 
 int renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time);
@@ -36,12 +35,11 @@ int isPointInRoundedRectangle(Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Sint16 w
 int isPointInPolygon(int x, int y, int cx, int cy, int radius, int sides);
 int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance);
 
-void handleKeyboardEvent(SDL_Event event);
 void moveShapeUp(void);
 void moveShapeDown(void);
 void deleteSelectedShape(void);
 void toggleAnimation(void);
 void updateAnimations(SDL_Renderer *renderer);
-void animation_zoom(Shape *shape);
+void resetShape(Shape *shape);
 
 #endif

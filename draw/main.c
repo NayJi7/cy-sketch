@@ -67,7 +67,7 @@ int main(){
     }
 
     // Draw shapes
-    if(drawShape(renderer, mainTexture, "circle", "instant", "filled", "zoom", green, 400, 170, 60) == -1) {
+    if(drawShape(renderer, mainTexture, "circle", "instant", "filled", "color", green, 400, 170, 60) == -1) {
         cleanup(mainTexture, renderer, window);
         return -1;
     }
@@ -92,7 +92,7 @@ int main(){
         return -1;
     }
 
-    if(drawShape(renderer, mainTexture, "ar", "instant", "filled", "zoom", silver, 400, 200, 100, 90, 180) == -1) {
+    if(drawShape(renderer, mainTexture, "arc", "instant", "filled", "zoom", silver, 400, 200, 100, 90, 180) == -1) {
         cleanup(mainTexture, renderer, window);
         return -1;
     }

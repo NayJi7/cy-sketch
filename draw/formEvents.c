@@ -516,6 +516,43 @@ void addShape(Shape shape) {
     shape.zoom = 1.0f;  // Initialize zoom to 1.0 (normal size)
     shape.zoom_direction = 1.0f;  // Start with growing direction
 
+    // Store initial values
+    shape.initial_color = shape.color;
+    shape.initial_rotation = shape.rotation;
+
+    // Store initial values based on shape type (excluding position)
+    switch (shape.type) {
+        case SHAPE_CIRCLE:
+            shape.data.circle.initial_radius = shape.data.circle.radius;
+            break;
+        case SHAPE_RECTANGLE:
+            shape.data.rectangle.initial_width = shape.data.rectangle.width;
+            shape.data.rectangle.initial_height = shape.data.rectangle.height;
+            break;
+        case SHAPE_ELLIPSE:
+            shape.data.ellipse.initial_rx = shape.data.ellipse.rx;
+            shape.data.ellipse.initial_ry = shape.data.ellipse.ry;
+            break;
+        case SHAPE_LINE:
+            shape.data.line.initial_thickness = shape.data.line.thickness;
+            break;
+        case SHAPE_ROUNDED_RECTANGLE:
+            shape.data.rounded_rectangle.initial_radius = shape.data.rounded_rectangle.radius;
+            shape.data.rounded_rectangle.initial_w = shape.data.rounded_rectangle.w;
+            shape.data.rounded_rectangle.initial_h = shape.data.rounded_rectangle.h;
+            shape.data.rounded_rectangle.initial_rad = shape.data.rounded_rectangle.rad;
+            break;
+        case SHAPE_POLYGON:
+            shape.data.polygon.initial_radius = shape.data.polygon.radius;
+            shape.data.polygon.initial_sides = shape.data.polygon.sides;
+            break;
+        case SHAPE_ARC:
+            shape.data.arc.initial_radius = shape.data.arc.radius;
+            shape.data.arc.initial_start_angle = shape.data.arc.start_angle;
+            shape.data.arc.initial_end_angle = shape.data.arc.end_angle;
+            break;
+    }
+
     // Add the new shape to the array and increment the shape count
     shapes[shapeCount++] = shape;
 }
@@ -1184,10 +1221,13 @@ void updateAnimations(SDL_Renderer *renderer) {
         if (shapes[i].isAnimating) {
             switch (shapes[i].animation) {
                 case ANIM_ROTATE:
-                    rotateShape(&shapes[i], 0.15);
+                    animation_rotate(&shapes[i]);
                     break;
                 case ANIM_ZOOM:
                     animation_zoom(&shapes[i]);
+                    break;
+                case ANIM_COLOR:
+                    animation_color(&shapes[i]);
                     break;
                 default:
                     break;
@@ -1196,62 +1236,50 @@ void updateAnimations(SDL_Renderer *renderer) {
     }
 }
 
-void animation_zoom(Shape *shape) {
-    // Update zoom value using shape's own direction (slower speed)
-    shape->zoom += 0.0005f * shape->zoom_direction;
-    
-    // Check bounds and reverse direction if needed
-    if (shape->zoom >= 1.5f) {
-        shape->zoom = 1.5f;
-        shape->zoom_direction = -1.0f;
-    } else if (shape->zoom <= 0.5f) {
-        shape->zoom = 0.5f;
-        shape->zoom_direction = 1.0f;
-    }
-    
-    // Apply zoom based on current zoom value
+/**
+ * @brief Resets a shape to its initial state
+ * 
+ * @param shape Pointer to the shape to reset
+ */
+void resetShape(Shape *shape) {
+    // Reset common properties
+    shape->color = shape->initial_color;
+    shape->rotation = shape->initial_rotation;
+    shape->isAnimating = false;
+    shape->zoom = 1.0f;
+    shape->zoom_direction = 1.0f;
+    shape->color_phase = 0.0f;
+
+    // Reset shape-specific properties (excluding position)
     switch (shape->type) {
-        case SHAPE_RECTANGLE: {
-            int originalWidth = 200;  // Base width
-            int originalHeight = 50;  // Base height
-            shape->data.rectangle.width = (int)(originalWidth * shape->zoom);
-            shape->data.rectangle.height = (int)(originalHeight * shape->zoom);
+        case SHAPE_CIRCLE:
+            shape->data.circle.radius = shape->data.circle.initial_radius;
             break;
-        }
-        case SHAPE_CIRCLE: {
-            shape->data.circle.radius = (int)(60 * shape->zoom);  // Base radius 60
+        case SHAPE_RECTANGLE:
+            shape->data.rectangle.width = shape->data.rectangle.initial_width;
+            shape->data.rectangle.height = shape->data.rectangle.initial_height;
             break;
-        }
-        case SHAPE_ELLIPSE: {
-            shape->data.ellipse.rx = (int)(70 * shape->zoom);  // Base rx 70
-            shape->data.ellipse.ry = (int)(50 * shape->zoom);  // Base ry 50
+        case SHAPE_ELLIPSE:
+            shape->data.ellipse.rx = shape->data.ellipse.initial_rx;
+            shape->data.ellipse.ry = shape->data.ellipse.initial_ry;
             break;
-        }
-        case SHAPE_POLYGON: {
-            shape->data.polygon.radius = (int)(100 * shape->zoom);  // Base radius 100
+        case SHAPE_LINE:
+            shape->data.line.thickness = shape->data.line.initial_thickness;
             break;
-        }
-        case SHAPE_ARC: {
-            shape->data.arc.radius = (int)(100 * shape->zoom);  // Base radius 100
+        case SHAPE_ROUNDED_RECTANGLE:
+            shape->data.rounded_rectangle.radius = shape->data.rounded_rectangle.initial_radius;
+            shape->data.rounded_rectangle.w = shape->data.rounded_rectangle.initial_w;
+            shape->data.rounded_rectangle.h = shape->data.rounded_rectangle.initial_h;
+            shape->data.rounded_rectangle.rad = shape->data.rounded_rectangle.initial_rad;
             break;
-        }
-        case SHAPE_LINE: {
-            shape->animation = ANIM_NONE; // disabling animation for line
+        case SHAPE_POLYGON:
+            shape->data.polygon.radius = shape->data.polygon.initial_radius;
+            shape->data.polygon.sides = shape->data.polygon.initial_sides;
             break;
-        }
-        case SHAPE_ROUNDED_RECTANGLE: {
-            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
-            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
-            int originalWidth = 200;  // Base width
-            int originalHeight = 100;  // Base height
-            int newWidth = (int)(originalWidth * shape->zoom);
-            int newHeight = (int)(originalHeight * shape->zoom);
-            shape->data.rounded_rectangle.x1 = centerX - newWidth/2;
-            shape->data.rounded_rectangle.y1 = centerY - newHeight/2;
-            shape->data.rounded_rectangle.x2 = centerX + newWidth/2;
-            shape->data.rounded_rectangle.y2 = centerY + newHeight/2;
-            shape->data.rounded_rectangle.radius = (int)(20 * shape->zoom);  // Base radius 20
+        case SHAPE_ARC:
+            shape->data.arc.radius = shape->data.arc.initial_radius;
+            shape->data.arc.start_angle = shape->data.arc.initial_start_angle;
+            shape->data.arc.end_angle = shape->data.arc.initial_end_angle;
             break;
-        }
     }
 }
