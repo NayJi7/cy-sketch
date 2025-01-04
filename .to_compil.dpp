@@ -1,7 +1,0 @@
-draw circle(instant, filled, rotate, green, 400, 170, 60)
-
-draw square(instant, empty, color, blue, 400, 170, 60)
-
-draw rectangle(instant, filled, color, yellow, 400, 170, 60, 30)
-
-draw triangle(instant, empty, rotate, red, 400, 170, 60)
