@@ -55,7 +55,9 @@ colors = {
     "orange": "orange",
     "purple": "purple",
     "brown": "brown",
-    "pink": "pink"
+    "pink": "pink",
+    "gold": "gold",
+    "silver": "silver"
 }
 
 # @{
@@ -79,6 +81,8 @@ keywords = {
     'set': 'SET',
     'animated': 'ANIMATED',
     'instant': 'INSTANT',
+    'zoom': 'ZOOM',
+    'rotate': 'ROTATE',
     'empty': 'EMPTY',
     'filled': 'FILLED',
     'var': 'VARIABLE',
