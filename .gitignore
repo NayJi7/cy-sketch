@@ -2,7 +2,7 @@
 .vscode
 files.exe/
 files.o/
-error.log
+.error.log
 __pycache__/
 doc/html/
 doc/latex/
