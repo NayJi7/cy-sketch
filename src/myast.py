@@ -1052,11 +1052,14 @@ def translate_ast_to_c(ast, filename):
     c_code += "//////////////////////////\n\n"
 
     # Includes
-    c_code += "#include <stdio.h>\n"
-    c_code += "#include <stdlib.h>\n"
-    c_code += "#include <string.h>\n"
-    c_code += "#include <math.h>\n"
-    c_code += '#include "../files.h/main.h"\n\n'
+    c_code += '#include "../files.h/main.h"\n'
+    c_code += '#include "../files.h/colors.h"\n'
+    c_code += '#include "../files.h/cursorEvents.h"\n'
+    c_code += '#include "../files.h/form.h"\n\n'
+
+    c_code += "// ANSI escape codes for colors\n"
+    c_code += '#define RED_COLOR "\033[1;31m"\n'
+    c_code += '#define RESET_COLOR "\033[0m"\n\n'
 
     c_code += "#define TRUE 1\n"
     c_code += "#define FALSE 0\n\n"
@@ -1134,22 +1137,34 @@ def translate_ast_to_c(ast, filename):
     c_code += f'    SDL_Window *window = NULL;\n'
     c_code += f'    SDL_Renderer *renderer = NULL;\n'
     c_code += f'    SDL_Event event;\n'
-    c_code += f'    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {{\n'
-    c_code += f'        printf("Erreur SDL : %s\\n", SDL_GetError());\n'
+    c_code += f'    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {{\n' 
+    c_code += f'        printf("%sExecutionError: Failed to initialize SDL: %s%s\n",RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
     c_code += f'        return -1;\n'
     c_code += f'    }}\n'
     c_code += f'    if (SDL_CreateWindowAndRenderer(windowW, windowH, SDL_WINDOW_RESIZABLE, &window, &renderer) != 0) {{\n'
-    c_code += f'        printf("Erreur SDL_CreateWindowAndRenderer : %s\\n", SDL_GetError());\n'
+    c_code += f'        printf("%sExecutionError: Failed to create window and renderer: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
     c_code += f'        SDL_Quit();\n'
     c_code += f'        return -1;\n'
     c_code += f'    }}\n'
     c_code += f'    SDL_SetWindowTitle(window, windowTitle);\n'
     c_code += f'    SDL_Color cursorColor = {{cursorcolorR, cursorcolorG, cursorcolorB, cursorcolorA}};\n'
     c_code += f'    Cursor cursor = createCursor(windowW/2, windowH/2, cursorColor, cursorSize, true);\n'
-    c_code += f'    SDL_Texture* mainTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);\n'
-    c_code += f'    SDL_SetRenderTarget(renderer, mainTexture);\n'
+    c_code += f'    if (SDL_Texture* mainTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, windowW, windowH)) {{\n'
+    c_code += f'        printf("%sExecutionError: Failed to create main texture: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
+    c_code += f'        cleanup(mainTexture, renderer, window);\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
+    c_code += f'    if (SDL_SetRenderTarget(renderer, mainTexture) != 0) {{\n'
+    c_code += f'        printf("%sExecutionError: Failed to set render target: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
+    c_code += f'        cleanup(mainTexture, renderer, window);\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
     c_code += f'    SDL_SetRenderDrawColor(renderer, bgcolorR, bgcolorG, bgcolorB, 255);\n'
-    c_code += f'    SDL_RenderClear(renderer);\n\n\n'
+    c_code += f'    if (SDL_RenderClear(renderer) != 0) {{\n'
+    c_code += f'        printf("%sExecutionError: Failed to clear renderer: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
+    c_code += f'        cleanup(mainTexture, renderer, window);\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
 
     c_code += "    /////////////////////////////\n"
     c_code += "    // User Instructions Start //\n"
@@ -1167,12 +1182,22 @@ def translate_ast_to_c(ast, filename):
     c_code += "    // User Instructions End //\n"
     c_code += "    ///////////////////////////\n\n"
     
-    c_code += f'    mainLoop(renderer, event, cursor);\n\n'
-    c_code += f'    SDL_DestroyTexture(mainTexture);\n'
-    c_code += f'    SDL_DestroyRenderer(renderer);\n'
-    c_code += f'    SDL_DestroyWindow(window);\n'
-    c_code += f'    SDL_Quit();\n'
-
+    c_code += f'    // Reset render target and display content\n'
+    c_code += f'    if (SDL_SetRenderTarget(renderer, NULL) != 0) {{\n'
+    c_code += f'        printf("%sExecutionError: Failed to reset render target: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
+    c_code += f'        cleanup(mainTexture, renderer, window);\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
+    
+    c_code += f'    if (SDL_RenderCopy(renderer, mainTexture, NULL, NULL) != 0) {{\n'
+    c_code += f'        printf("%sExecutionError: Failed to copy texture to renderer: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
+    c_code += f'        cleanup(mainTexture, renderer, window);\n'
+    c_code += f'        return -1;\n'
+    c_code += f'    }}\n'
+    c_code += f'    SDL_RenderPresent(renderer);\n'
+    c_code += f'    mainLoop(renderer, event, cursor);\n'
+    c_code += f'    cleanup(mainTexture, renderer, window);\n'
+    
     c_code += f"\n\treturn 0;\n"
     c_code += f"}}\n"
 
