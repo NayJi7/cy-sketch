@@ -1,0 +1,16 @@
+# Python dependencies
+# Required for the interpreter and compiler
+ply==3.11  # Required for lexer and parser
+pyreadline3; sys_platform == 'win32'  # Only install on Windows
+readline; sys_platform == 'linux'  # Only install on Linux/Ubuntu
+PySDL2==0.9.16  # SDL2 Python bindings
+PySDL2-dll==2.28.5  # SDL2 DLL files for Windows
+
+# Note: Python 3.6 or higher is required but should be installed separately
+# Standard library modules (no need to install):
+# - difflib
+# - argparse
+# - os
+# - sys
+# - re
+# - copy
