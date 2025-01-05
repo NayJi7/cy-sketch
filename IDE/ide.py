@@ -151,6 +151,9 @@ class MyDrawppIDE(QMainWindow):
 
     def init_ui(self):
         # Configuration de la fenêtre principale
+
+       
+
         global ongletCount
         self.setWindowTitle(f'Onglet actif : Onglet {ongletCount}')
         self.setGeometry(100, 100, 1000, 700)
@@ -160,6 +163,29 @@ class MyDrawppIDE(QMainWindow):
         # Widget principal avec onglets
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
+
+        self.tab_widget.setStyleSheet("""
+        QTabWidget::pane {
+            border: 1px solid #444444;
+            background: #1E1E1E;
+        }
+        QTabBar::tab {
+            background: #333333;
+            color: white;
+            padding: 10px;
+            border: 1px solid #444444;
+            border-radius: 4px;
+        }
+        QTabBar::tab:selected {
+            background: #555555;
+            color: #FFFFFF;
+            font-weight: bold;
+        }
+        QTabBar::tab:hover {
+            background: #444444;
+            color: #DDDDDD;
+        }
+    """)
 
         # Boutons pour la barre d'outils
         self.toolbar = QToolBar("Main Toolbar", self)
@@ -188,7 +214,8 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addAction(new_window_action)
 
 
-        run_icon = QIcon("green-play-button-png.ico")
+        #run_icon = QIcon("green-play-button-png.ico")
+        run_icon = QIcon.fromTheme("document-open")
         run_action = QAction(run_icon, "Run", self)
         run_action.triggered.connect(self.run_code)
         self.toolbar.addAction(run_action)
