@@ -13,8 +13,8 @@ global ongletCount
 ongletCount = 0
 
 
-# Ces 3 classes sont utiles pour : avoir les n
-
+# Ces 2 classes sont là pour mettre les numéros de ligne, pas important et juste 
+# esthétique, rien à modifier dedans
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         super().__init__(editor)
@@ -27,43 +27,6 @@ class LineNumberArea(QWidget):
     def paintEvent(self, event):
         """Dessine les numéros de ligne."""
         self.editor.line_number_area_paint_event(event)
-
-
-
-class SyntaxHighlighter(QSyntaxHighlighter):
-    def __init__(self, document):
-        super().__init__(document)
-        self.rules = []
-
-        # Définir les formats
-        self.keyword_format = QTextCharFormat()
-        self.keyword_format.setForeground(QColor("#ff5733"))  # Violet
-        self.keyword_format.setFontWeight(QFont.Bold)
-
-        # Ajouter des règles
-        self.add_rules(["import", "from", "def", "class", "self"], self.keyword_format)
-
-    def add_rules(self, patterns, text_format):
-        """Ajoute des règles de surlignage."""
-        for pattern in patterns:
-            # Utilisation des expressions régulières avec \b pour les mots entiers
-            regex = QRegExp(rf"\b{pattern}\b")
-            self.rules.append((regex, text_format))
-
-    def highlightBlock(self, text):
-        """Applique les règles de surlignage au bloc de texte donné."""
-
-        print("HighlightBlock called")
-
-
-        for regex, text_format in self.rules:
-            index = regex.indexIn(text)
-            while index >= 0:  # Tant qu'il y a des correspondances
-                length = regex.matchedLength()
-                self.setFormat(index, length, text_format)
-                index = regex.indexIn(text, index + length)
-
-
 
 class CodeEditor(QPlainTextEdit):
 
@@ -139,6 +102,44 @@ class CodeEditor(QPlainTextEdit):
             extra_selections.append(selection)
 
         self.setExtraSelections(extra_selections)
+
+
+
+# classe pour surligner les mots terminaux dans le langage (return, from , if, cursor...)
+#  TBD <à mettre à jour avec tous les mots car modifié car ajout d'onglets à fait tout crash>
+class SyntaxHighlighter(QSyntaxHighlighter):
+    def __init__(self, document):
+        super().__init__(document)
+        self.rules = []
+
+        # Définir les formats
+        self.keyword_format = QTextCharFormat()
+        self.keyword_format.setForeground(QColor("#ff5733"))  # Violet
+        self.keyword_format.setFontWeight(QFont.Bold)
+
+        # Ajouter des règles
+        self.add_rules(["import", "from", "def", "class", "self"], self.keyword_format)
+
+    def add_rules(self, patterns, text_format):
+        """Ajoute des règles de surlignage."""
+        for pattern in patterns:
+            # Utilisation des expressions régulières avec \b pour les mots entiers
+            regex = QRegExp(rf"\b{pattern}\b")
+            self.rules.append((regex, text_format))
+
+    def highlightBlock(self, text):
+        """Applique les règles de surlignage au bloc de texte donné."""
+
+        print("HighlightBlock called")
+
+
+        for regex, text_format in self.rules:
+            index = regex.indexIn(text)
+            while index >= 0:  # Tant qu'il y a des correspondances
+                length = regex.matchedLength()
+                self.setFormat(index, length, text_format)
+                index = regex.indexIn(text, index + length)
+
 
 class MyDrawppIDE(QMainWindow):
     '''Classe principale de l'IDE'''
@@ -227,11 +228,17 @@ class MyDrawppIDE(QMainWindow):
 
         new_tab.setLayout(layout)
 
-        # Stocker les références dans un dictionnaire, car sinon on a que un terminal qui fonctionne
+        # Stocker les références dans un dictionnaire, car je dois faire un self pour que le highlight marche
 
-            # partie chat gpt, à comprendre
+        #   Chaque fois qu'un nouvel onglet est créé :
+
+        # Un nouvel éditeur est créé.
+        # Un nouveau surligneur (SyntaxHighlighter) est attaché à cet éditeur.
+        # Les références sont stockées dans le dictionnaire pour garantir que chaque éditeur et chaque surligneur restent en vie.
+        
         if not hasattr(self, 'tabs_data'):
             self.tabs_data = {}
+        #comme ca, chacun a son terminal, son editeur, et son hightlighter
         self.tabs_data[new_tab] = {'editor': editor, 'terminal': terminal, 'highlighter': highlighter}
 
         # Ajouter l'onglet 
