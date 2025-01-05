@@ -1,0 +1,42 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE settings
+.vscode/
+.idea/
+*.code-workspace
+
+# Build and compilation files
+files.exe/
+files.o/
+build/
+dist/
+*.spec
+*.exe
+
+# Generated files
+.error.log
+.parser_generated/
+.to_run.c
+.to_compile.dpp
+.to_compil.dpp
+.history
+
+# Documentation
+doc/html/
+doc/latex/
+
+# dpp files
+*.dpp
+
+# SDL2 DLLs
+SDL2*.dll
+*.dll
+
+# Environment
+.env
+venv/
+env/
