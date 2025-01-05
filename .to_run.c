@@ -28,7 +28,7 @@
 #define cursorSize 5
 #define windowW 800
 #define windowH 600
-#define windowTitle "Draw ++"
+#define windowTitle "test"
 
 ///////////////////////////
 // Function's prototypes //
@@ -88,40 +88,7 @@ int main(int argc, char *argv[]) {
     // User Instructions Start //
     /////////////////////////////
 
-	if(drawShape(renderer, mainTexture, "circle", "instant", "filled", green, 400.5, 170, 60) == -1) {
-		cleanup(mainTexture, renderer, window);
-		printf("%sExecutionError: Failed to draw circle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
-		return -1;
-	};
-
-	if(drawShape(renderer, mainTexture, "square", "instant", "empty", blue, 400, 170, 60) == -1) {
-		cleanup(mainTexture, renderer, window);
-		printf("%sExecutionError: Failed to draw square: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
-		return -1;
-	};
-
-	if(drawShape(renderer, mainTexture, "rectangle", "instant", "filled", yellow, 400, 170, 60, 30) == -1) {
-		cleanup(mainTexture, renderer, window);
-		printf("%sExecutionError: Failed to draw rectangle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
-		return -1;
-	};
-
-	if(drawShape(renderer, mainTexture, "triangle", "instant", "empty", red, 400, 170, 60) == -1) {
-		cleanup(mainTexture, renderer, window);
-		printf("%sExecutionError: Failed to draw triangle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
-		return -1;
-	};
-
-	if (TRUE) {
-		if(drawShape(renderer, mainTexture, "circle", "instant", "filled", green, 400, 170, 60) == -1) {
-			cleanup(mainTexture, renderer, window);
-			printf("%sExecutionError: Failed to draw circle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
-			return -1;
-		};
-
-	}
-
-
+	int a = 10;
 
     ///////////////////////////
     // User Instructions End //

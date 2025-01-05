@@ -318,12 +318,7 @@ class MyDrawppIDE(QMainWindow):
         editor = tab_data['editor']
         terminal = tab_data['terminal']
 
-        # Préparation du fichier temporaire
-        dir_path = ".to_run"
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-
-        file_path = os.path.join(dir_path, "to_execute.dpp")
+        file_path = ".to_compil.dpp"
         with open(file_path, "w") as file:
             file.write(editor.toPlainText())
 
@@ -354,12 +349,18 @@ class MyDrawppIDE(QMainWindow):
         output = process.readAllStandardOutput().data().decode('utf-8', errors='ignore')
 
         for line in output.splitlines():  # Découpe en lignes
+            # Nettoyer toutes les séquences ANSI et caractères spéciaux
+            line = line.replace("[0m", "").replace("", "").strip()
+            
             if "31m" in line:  # Si "31m" est détecté -> Rouge
-                line = line.replace("[31m", "").replace("[0m", "")
-                self.append_colored_text(terminal, line + "\n", QColor("#cf4016"))
+                line = line.replace("[31m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#ff0000"))
             elif "34m" in line:  # Si "34m" est détecté -> Bleu
-                line = line.replace("[34m", "").replace("[0m", "")
-                self.append_colored_text(terminal, line + "\n", QColor("#555df5"))
+                line = line.replace("[34m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#0000ff"))
+            elif "32m" in line:  # Si "32m" est détecté -> Vert
+                line = line.replace("[32m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#00ff00"))
             else:  # Texte sans séquence ANSI, affiché normalement
                 terminal.appendPlainText(line)
 
@@ -372,6 +373,23 @@ class MyDrawppIDE(QMainWindow):
         cursor.insertText(text, text_format)  # Insère le texte coloré
         terminal.setTextCursor(cursor)
         terminal.ensureCursorVisible()  # S'assure que le texte reste visible
+
+    def display_error(self, process, terminal):
+        """Affiche les erreurs dans le terminal spécifié."""
+        error_output = process.readAllStandardError().data().decode('utf-8', errors='ignore')
+
+        for line in error_output.splitlines():  # Découpe en lignes
+            # Nettoyer toutes les séquences ANSI et caractères spéciaux
+            line = line.replace("[0m", "").replace("", "").strip()
+            
+            if "31m" in line:  # Si "31m" est détecté -> Rouge (erreur)
+                line = line.replace("[31m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#ff0000"))
+            elif "33m" in line:  # Si "33m" est détecté -> Orange (warning)
+                line = line.replace("[33m", "")
+                self.append_colored_text(terminal, line + "\n", QColor("#ffa500"))
+            else:  # Texte d'erreur sans séquence ANSI
+                self.append_colored_text(terminal, line + "\n", QColor("#ff0000"))  # Rouge par défaut pour les erreurs
 
     def show_new_window(self):
         self.w = AnotherWindow()

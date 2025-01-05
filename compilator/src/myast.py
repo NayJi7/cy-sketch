@@ -1,7 +1,7 @@
 import os
 import sys
 import copy
-from compilator.src.lexer import suggest_keyword, colors
+from COMPILATOR.src.lexer import suggest_keyword, colors
 
 # === 1. Error Handling ===
 

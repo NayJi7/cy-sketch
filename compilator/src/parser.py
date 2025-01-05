@@ -1,7 +1,7 @@
 import os
 import sys
 import ply.yacc as yacc
-from compilator.src.lexer import tokens, find_column, suggest_keyword
+from COMPILATOR.src.lexer import tokens, find_column, suggest_keyword
 
 # === 1. Parser Rules ===
 

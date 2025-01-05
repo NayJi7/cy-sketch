@@ -13,9 +13,9 @@ except ImportError:
     except ImportError:
         readline = None
 
-from compilator.src.lexer import init_lexer
-from compilator.src.parser import init_parser
-from compilator.src.myast import *
+from COMPILATOR.src.lexer import init_lexer
+from COMPILATOR.src.parser import init_parser
+from COMPILATOR.src.myast import *
 
 DEBUG = False  # Debug mode is off by default
 
