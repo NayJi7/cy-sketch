@@ -1,7 +1,11 @@
-draw circle(instant, filled, green, 400, 170, 60)
+draw circle(instant, filled, green, 400.5, 170, 60)
 
 draw square(instant, empty, blue, 400, 170, 60)
 
 draw rectangle(instant, filled, yellow, 400, 170, 60, 30)
 
 draw triangle(instant, empty, red, 400, 170, 60)
+
+if (true) {
+    draw circle(instant, filled, green, 400, 170, 60)
+}

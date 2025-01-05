@@ -2,7 +2,17 @@ import os
 import sys
 import argparse
 import atexit
-import readline
+
+# Handle readline import for different platforms
+try:
+    import readline
+except ImportError:
+    # On Windows, use pyreadline3 if available, otherwise skip readline functionality
+    try:
+        import pyreadline3 as readline
+    except ImportError:
+        readline = None
+
 from compilator.src.lexer import init_lexer
 from compilator.src.parser import init_parser
 from compilator.src.myast import *

@@ -1,5 +1,19 @@
 # Name of the final executable
-EXEC = SDL/files.exe/main.exe
+ifeq ($(OS),Windows_NT)
+    EXEC = SDL/files.exe/main.exe
+    PYTHON = python
+    RM = rm -f
+    RMDIR = rm -rf
+    MKDIR = mkdir -p
+    ECHO = echo -n
+else
+    EXEC = SDL/files.exe/main
+    PYTHON = python3
+    RM = rm -f
+    RMDIR = rm -rf
+    MKDIR = mkdir -p
+    ECHO = echo -n
+endif
 
 # Directory for object files and executable
 OBJ_DIR_O = SDL/files.o
@@ -18,7 +32,11 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g -DDEBUG=$(DEBUG)
 
 # Linker flags (SDL2 and SDL2_gfx libraries included)
-LDFLAGS = -lSDL2 -lSDL2_gfx -lSDL2_ttf -lm
+ifeq ($(OS),Windows_NT)
+    LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_gfx -lSDL2_ttf -lm
+else
+    LDFLAGS = -lSDL2 -lSDL2_gfx -lSDL2_ttf -lm
+endif
 
 # Files for logs
 SDL_ERROR_LOG = SDL/.error.log
@@ -53,7 +71,7 @@ all: clean_log $(EXEC)
 compil: clean_log
 	$(LOG) "\n=== Running Interpreter ==="
 	$(LOG) "→ Processing .to_compil.dpp..."
-	$(SILENT)python3 interpreter.py .to_compil.dpp $(INTERPRETER_FLAGS) -n $(NAME) 2>> $(COMPILATOR_ERROR_LOG)
+	$(SILENT)$(PYTHON) interpreter.py .to_compil.dpp $(INTERPRETER_FLAGS) -n $(NAME) 2>> $(COMPILATOR_ERROR_LOG)
 
 # Debug target (automatically sets DEBUG=1)
 debug: export DEBUG=1
@@ -63,12 +81,12 @@ debug: compil_run
 clean_log:
 	$(LOG) "\n=== Initializing Build Environment ==="
 	$(LOG) "→ Cleaning error log..."
-	$(SILENT)echo -n > $(SDL_ERROR_LOG)
-	$(SILENT)echo -n > $(COMPILATOR_ERROR_LOG)
+	$(SILENT)$(ECHO) > $(SDL_ERROR_LOG)
+	$(SILENT)$(ECHO) > $(COMPILATOR_ERROR_LOG)
 
 # Create necessary directories
 create_dirs:
-	$(SILENT)mkdir -p $(OBJ_DIR_O) $(OBJ_DIR_EXE)
+	$(SILENT)$(MKDIR) $(OBJ_DIR_O) $(OBJ_DIR_EXE)
 
 # Link object files to create the executable
 $(EXEC): create_dirs $(OBJ)
@@ -92,14 +110,18 @@ $(OBJ_DIR_O)/%.o: %.c
 run: clean clean_log all
 	$(LOG) "\033[32m\n=== Launching Application ==="
 	$(LOG) "→ Starting the program...\033[0m"
+ifeq ($(OS),Windows_NT)
 	$(SILENT)./$(EXEC) || true
+else
+	$(SILENT)./$(EXEC) || true
+endif
 
 # Rule to clean up object files, the executable, and the logs
 clean:
 	$(LOG) "\n=== Cleanup Phase ==="
 	$(LOG) "→ Removing build artifacts..."
-	$(SILENT)rm -f $(OBJ) $(EXEC) $(SDL_ERROR_LOG) $(COMPILATOR_ERROR_LOG)
-	$(SILENT)rm -rf $(OBJ_DIR_O) $(OBJ_DIR_EXE) 2>/dev/null || true  
+	$(SILENT)$(RM) $(OBJ) $(EXEC) $(SDL_ERROR_LOG) $(COMPILATOR_ERROR_LOG)
+	$(SILENT)$(RMDIR) $(OBJ_DIR_O) $(OBJ_DIR_EXE) 2>/dev/null || true  
 
 # Indicate that clean, run, and debug are not files
 .PHONY: all clean run clean_log debug compil compil_run create_dirs

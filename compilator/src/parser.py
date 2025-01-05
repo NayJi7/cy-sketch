@@ -267,14 +267,6 @@ def p_operateur_comparaison(p):
 # @}
 
 # @{
-# @brief Defines supported logical operators.
-def p_operateur_logique(p):
-    '''operateur_logique : AND
-                         | OR'''
-    p[0] = p[1]
-# @}
-
-# @{
 # @brief Handles loop instructions (while and for loops).
 def p_boucle(p):
     '''boucle : WHILE LPAREN expression_logique RPAREN bloc

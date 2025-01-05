@@ -6,6 +6,8 @@
 
 #include "../files.h/formEvents.h"
 #include "../files.h/cursorEvents.h"
+#include "../files.h/animations.h"
+#include "../files.h/colors.h"
 
 // ANSI escape codes for colors
 #define RED_COLOR "\033[1;31m"

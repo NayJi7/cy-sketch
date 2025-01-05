@@ -101,7 +101,8 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
     if isinstance(value, (int, float)):  # Literal Numbers
         return type(value).__name__, value
     elif isinstance(value, str) and '"' in value:  # Literal String
-        return f"char[{len(value.strip('"'))}]", value
+        stripped_value = value.strip('"')
+        return f"char[{len(stripped_value)}]", value
     elif isinstance(value, str):  # Variable name
         # Search the AST for the variable assignment, or modification
         colors = ['red', 'green', 'blue', 'white', 'black', 'yellow', 'cyan', 'magenta', 'gray', 'light_gray', 'dark_gray', 'orange', 'purple', 'brown', 'pink']
@@ -299,10 +300,10 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                     c_code += ', '
 
             c_code += ') == -1) {\n'
-            c_code += f'{'\t' * (tabulation+1)}cleanup(mainTexture, renderer, window);\n'
-            c_code += f'{'\t' * (tabulation+1)}printf("%sExecutionError: Failed to draw {forme}: %s%s\\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
-            c_code += f'{'\t' * (tabulation+1)}return -1;\n'
-            c_code += f'{'\t' * tabulation}}}'
+            c_code += '\t' * (tabulation+1) + 'cleanup(mainTexture, renderer, window);\n'
+            c_code += '\t' * (tabulation+1) + f'printf("%sExecutionError: Failed to draw {forme}: %s%s\\n", RED_COLOR, SDL_GetError(), RESET_COLOR);\n'
+            c_code += '\t' * (tabulation+1) + 'return -1;\n'
+            c_code += '\t' * tabulation + '}'
 
         elif expected_args != len(parametres):
             raise IndexError(f"IndexError : draw {forme} function requires {expected_args} arguments, but you gave {len(parametres)}")
@@ -773,21 +774,28 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             elif "float" in prot_arg:
                 prot_args[i] = "float"
             elif "char" in prot_arg:
-                prot_args[i] = f"char [{prot_arg.split("[")[1].split("]")[0]}]"
+                size = prot_arg.split("[")[1].split("]")[0]
+                prot_args[i] = "char[" + size + "]"
 
         for i, arg in enumerate(params):
             arg_type, arg_val = resolve_value_and_find_variable(ast, arg, current_position)
             
             if "char" in arg_type and "char" in prot_args[i]:
                 if int(arg_type.split("[")[1].split("]")[0]) > int(prot_args[i].split("[")[1].split("]")[0]):
+                    arg_len = int(arg_type.split("[")[1].split("]")[0])
+                    prot_len = int(prot_args[i].split("[")[1].split("]")[0])
                     if i == 0:
-                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}st argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        msg = f"IndexError : '{arg_val}' is {arg_len} long and {name} function's {i+1}st argument is not long enough ({prot_len})"
+                        raise IndexError(msg)
                     elif i == 1:
-                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}nd argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        msg = f"IndexError : '{arg_val}' is {arg_len} long and {name} function's {i+1}nd argument is not long enough ({prot_len})"
+                        raise IndexError(msg)
                     elif i == 2:
-                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}rd argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
-                    else :
-                        raise IndexError(f"IndexError : '{arg_val}' is {int(arg_type.split("[")[1].split("]")[0])} long and {name} function's {i+1}th argument is not long enough ({prot_args[i].split("[")[1].split("]")[0]})")
+                        msg = f"IndexError : '{arg_val}' is {arg_len} long and {name} function's {i+1}rd argument is not long enough ({prot_len})"
+                        raise IndexError(msg)
+                    else:
+                        msg = f"IndexError : '{arg_val}' is {arg_len} long and {name} function's {i+1}th argument is not long enough ({prot_len})"
+                        raise IndexError(msg)
             elif arg_type not in prot_args[i]:
                 if i == 0:
                     raise TypeError(f"TypeError : '{name}' function's {i+1}st argument is not {arg_type}. Expected : {prot_args[i].split()[0]}")
@@ -856,7 +864,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if isinstance(value, str) and '"' in value:  # String case
             if "char" not in var_type : raise TypeError(f"TypeError : '{var_name}' is {var_type} and your trying to assign a char* value") # Wrong type error
             # Allocate memory for the string in `a` (previously declared as void*)
-            c_code += f'strcpy({var_name}, "{value.strip("\"")}")'  # Copy the string value
+            stripped_val = value.strip('"')
+            c_code += f'strcpy({var_name}, "{stripped_val}")'  # Copy the string value
         elif isinstance(value, int):  # Integer case
             if var_type != "int" : raise TypeError(f"TypeError : '{var_name}' is {var_type} and your trying to assign a int value") # Wrong type error
             c_code += f'{var_name} = {value}'
@@ -901,7 +910,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if isinstance(value, str) and '"' in value:  # String case
             size = len(value) - 2
             c_code += f'char {var_name}[{size}];\n'
-            c_code += f'{"\t" * tabulation}strcpy({var_name}, "{value.strip("\"")}")'
+            stripped_val = value.strip('"')
+            c_code += "\t" * tabulation + f'strcpy({var_name}, "{stripped_val}")'
         elif isinstance(value, (int, float)):  # Number case
             c_code += f"{type(value).__name__} {var_name} = {value}"
         elif isinstance(value, str):  # Identifier
@@ -1196,7 +1206,9 @@ def translate_ast_to_c(ast, filename):
     c_code += "// Main function //\n"
     c_code += "///////////////////\n\n"
 
-    c_code += f"int main() {{\n\n"
+    c_code += f"int main(int argc, char *argv[]) {{\n"
+    c_code += "    (void)argc;\n"    # Suppress unused parameter warning
+    c_code += "    (void)argv;\n\n"  # Suppress unused parameter warning
 
     c_code += "    /////////////////////////\n"
     c_code += "    // Configuration Start //\n"

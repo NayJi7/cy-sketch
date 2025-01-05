@@ -43,7 +43,9 @@
 // Main function //
 ///////////////////
 
-int main() {
+int main(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
 
     /////////////////////////
     // Configuration Start //
@@ -86,7 +88,7 @@ int main() {
     // User Instructions Start //
     /////////////////////////////
 
-	if(drawShape(renderer, mainTexture, "circle", "instant", "filled", green, 400, 170, 60) == -1) {
+	if(drawShape(renderer, mainTexture, "circle", "instant", "filled", green, 400.5, 170, 60) == -1) {
 		cleanup(mainTexture, renderer, window);
 		printf("%sExecutionError: Failed to draw circle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
 		return -1;
@@ -109,6 +111,16 @@ int main() {
 		printf("%sExecutionError: Failed to draw triangle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
 		return -1;
 	};
+
+	if (TRUE) {
+		if(drawShape(renderer, mainTexture, "circle", "instant", "filled", green, 400, 170, 60) == -1) {
+			cleanup(mainTexture, renderer, window);
+			printf("%sExecutionError: Failed to draw circle: %s%s\n", RED_COLOR, SDL_GetError(), RESET_COLOR);
+			return -1;
+		};
+
+	}
+
 
 
     ///////////////////////////

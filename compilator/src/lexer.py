@@ -94,7 +94,11 @@ keywords = {
     'arc': 'ARC',
     'or': 'OR',
     'and': 'AND', 
-} | colors # add the colors to the keylist
+}
+
+# Add colors to keywords
+keywords.update(colors)  # Use update instead of | operator for Python 3.6 compatibility
+
 # @}
 
 # @{
@@ -160,10 +164,6 @@ def t_IDENTIFIER(t):
     elif t.value in known_identifiers:
         t.type = 'IDENTIFIER'
     else:
-        # Check for similarity with keywords
-        suggestion = suggest_keyword(t.value)
-        if suggestion:
-            raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
         raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
     return t
 
