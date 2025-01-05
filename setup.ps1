@@ -9,13 +9,41 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     exit 1
 }
 
-Write-Host "Have you already installed SDL2 and MSYS2? (Y/N)" -ForegroundColor Yellow
-$response = Read-Host
-if ($response -eq "Y" -or $response -eq "y") {
-    Write-Host "Skipping SDL2 and MSYS2 installation..." -ForegroundColor Green
+Write-Host "Choose an option:" -ForegroundColor Yellow
+Write-Host "1. Fresh installation of SDL2 and MSYS2" -ForegroundColor Cyan
+Write-Host "2. Check for updates and update existing installation" -ForegroundColor Cyan
+Write-Host "3. Skip SDL2/MSYS2 setup" -ForegroundColor Cyan
+$choice = Read-Host "Enter your choice (1-3)"
+
+if ($choice -eq "3") {
+    Write-Host "Skipping SDL2 and MSYS2 setup..." -ForegroundColor Green
     exit 0
 }
 
+if ($choice -eq "2") {
+    if (-not (Test-Path "$msys2Path\usr\bin\bash.exe")) {
+        Write-Host "MSYS2 is not installed. Please choose option 1 for fresh installation." -ForegroundColor Red
+        pause
+        exit 1
+    }
+    
+    Write-Host "`nChecking for updates..." -ForegroundColor Yellow
+    Write-Host "When the terminal opens, please run these commands:" -ForegroundColor Cyan
+    Write-Host "1. pacman -Syu --noconfirm" -ForegroundColor Green
+    Write-Host "2. pacman -Su --noconfirm" -ForegroundColor Green
+    Write-Host "3. pacman -S --needed --overwrite '*' mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_gfx mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-python mingw-w64-x86_64-make --noconfirm" -ForegroundColor Green
+    Write-Host "4. Type 'exit' when done" -ForegroundColor Green
+    pause
+
+    # Open MSYS2 terminal for updates
+    $env:MSYSTEM = "MINGW64"
+    Start-Process -FilePath "$msys2Path\usr\bin\bash.exe" -ArgumentList '--login' -Wait
+    
+    Write-Host "`nUpdate complete!" -ForegroundColor Green
+    exit 0
+}
+
+# Fresh Installation (Option 1)
 # Install MSYS2 if not present
 if (-not (Test-Path "$msys2Path\usr\bin\bash.exe")) {
     Write-Host "Installing MSYS2..." -ForegroundColor Yellow
