@@ -2,6 +2,24 @@
 $ErrorActionPreference = "Stop"
 $msys2Path = "C:\msys64"
 
+# Function to check MSYS2 and SDL2 installation
+function Test-MSYS2Installation {
+    # Check for critical MSYS2 components
+    $requiredPaths = @(
+        "$msys2Path\usr\bin\bash.exe",
+        "$msys2Path\mingw64\bin\gcc.exe",
+        "$msys2Path\mingw64\bin\SDL2.dll",
+        "$msys2Path\mingw64\bin\mingw32-make.exe"
+    )
+    
+    foreach ($path in $requiredPaths) {
+        if (-not (Test-Path $path)) {
+            return $false
+        }
+    }
+    return $true
+}
+
 # Check if running as Administrator
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "Please run this script as Administrator" -ForegroundColor Red
@@ -21,8 +39,9 @@ if ($choice -eq "3") {
 }
 
 if ($choice -eq "2") {
-    if (-not (Test-Path "$msys2Path\usr\bin\bash.exe")) {
-        Write-Host "MSYS2 is not installed. Please choose option 1 for fresh installation." -ForegroundColor Red
+    if (-not (Test-MSYS2Installation)) {
+        Write-Host "`nMSYS2 or SDL2 components are missing or not properly installed." -ForegroundColor Red
+        Write-Host "Please choose option 1 for a fresh installation to ensure all components are properly set up." -ForegroundColor Yellow
         pause
         exit 1
     }
