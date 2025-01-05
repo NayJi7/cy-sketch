@@ -311,7 +311,7 @@ class MyDrawppIDE(QMainWindow):
 
         # Connecter les sorties au terminal actif
         process.readyReadStandardOutput.connect(lambda: self.display_output(process, terminal))
-        process.readyReadStandardError.connect(lambda: self.display_error(process, terminal))
+        #process.readyReadStandardError.connect(lambda: self.display_error(process, terminal))
 
         # Configurer la commande pour l'exécution
         if platform.system() == "Windows":
@@ -321,8 +321,6 @@ class MyDrawppIDE(QMainWindow):
 
         # Démarrer le processus
         process.start(command[0], command[1:])
-
-
 
     def display_output(self, process, terminal):
         """Affiche les sorties dans le terminal spécifié avec des couleurs simples pour certaines séquences."""
