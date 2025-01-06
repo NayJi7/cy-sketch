@@ -4,10 +4,8 @@ from PyQt5.QtCore import Qt, QProcess,QRect, QSize,QRegExp
 import os
 import platform
 import subprocess
-import re
 import sys
-import signal
-from time import sleep
+import psutil
 from PyQt5.QtCore import QTimer
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
@@ -330,13 +328,7 @@ class MyDrawppIDE(QMainWindow):
         self.addToolBar(self.toolbar)
 
         # Boutons de gauche (fichiers)
-        open_icon = QIcon.fromTheme("document-open")
-        save_icon = QIcon.fromTheme("document-save")
-        save_as_icon = QIcon.fromTheme("document-save-as")
-        new_tab_icon = QIcon.fromTheme("new-tab")
-        new_window_icon = QIcon.fromTheme("new-window")
-
-        open_action = QAction(open_icon, "Open", self)
+        open_action = QAction("Open", self)
         open_action.setShortcut("Ctrl+O")
         open_action.setToolTip("Open (Ctrl+O)")
         open_action.triggered.connect(self.open_file)
@@ -349,7 +341,7 @@ class MyDrawppIDE(QMainWindow):
         separator1.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator1)
 
-        save_action = QAction(save_icon, "Save", self)
+        save_action = QAction("Save", self)
         save_action.setShortcut("Ctrl+S")
         save_action.setToolTip("Save (Ctrl+S)")
         save_action.triggered.connect(self.save_file)
@@ -362,7 +354,7 @@ class MyDrawppIDE(QMainWindow):
         separator2.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator2)
 
-        save_as_action = QAction(save_as_icon, "Save As", self)
+        save_as_action = QAction("Save As", self)
         save_as_action.setShortcut("Ctrl+Tab+S")
         save_as_action.setToolTip("Save As (Ctrl+Tab+S)")
         save_as_action.triggered.connect(self.save_as_file)
@@ -375,7 +367,7 @@ class MyDrawppIDE(QMainWindow):
         separator3.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator3)
 
-        new_tab_action = QAction(new_tab_icon, "New Tab", self)
+        new_tab_action = QAction("New Tab", self)
         new_tab_action.setShortcut("Ctrl+T")
         new_tab_action.setToolTip("New Tab (Ctrl+T)")
         new_tab_action.triggered.connect(self.open_new_tab)
@@ -388,7 +380,7 @@ class MyDrawppIDE(QMainWindow):
         separator4.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator4)
 
-        new_window_action = QAction(new_window_icon, "New Window", self)
+        new_window_action = QAction("New Window", self)
         new_window_action.setShortcut("Ctrl+N")
         new_window_action.setToolTip("New Window (Ctrl+N)")
         new_window_action.triggered.connect(self.show_new_window)
@@ -402,8 +394,7 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator5)
 
         # Terminal toggle button
-        terminal_icon = QIcon.fromTheme("utilities-terminal")
-        terminal_action = QAction(terminal_icon, "Terminal", self)
+        terminal_action = QAction("Terminal", self)
         terminal_action.setShortcut("Ctrl+Alt+T")  # Common shortcut for terminal
         terminal_action.setToolTip("Terminal (Ctrl+Alt+T)")
         terminal_action.setCheckable(True)  # Make it checkable
@@ -420,8 +411,7 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(spacer)
 
         # Boutons de droite (exécution)
-        run_icon = QIcon.fromTheme("document-open")
-        run_action = QAction(run_icon, "Run", self)
+        run_action = QAction("Run", self)
         run_action.setShortcut("F5")
         run_action.setToolTip("Run (F5)")
         run_action.triggered.connect(self.run_code)
@@ -438,8 +428,7 @@ class MyDrawppIDE(QMainWindow):
         separator6.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator6)
 
-        debug_icon = QIcon.fromTheme("document-open")
-        debug_action = QAction(debug_icon, "Debug", self)
+        debug_action = QAction("Debug", self)
         debug_action.setShortcut("F6")
         debug_action.setToolTip("Debug (F6)")
         debug_action.triggered.connect(self.debug_code)
@@ -452,8 +441,7 @@ class MyDrawppIDE(QMainWindow):
         separator7.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator7)
 
-        compile_icon = QIcon.fromTheme("document-open")
-        compile_action = QAction(compile_icon, "Compile", self)
+        compile_action = QAction("Compile", self)
         compile_action.setShortcut("F7")
         compile_action.setToolTip("Compile (F7)")
         compile_action.triggered.connect(self.compile_code)
@@ -872,7 +860,8 @@ class MyDrawppIDE(QMainWindow):
         process = QProcess(self)
         if platform.system() != "Windows":
             # On Unix systems, make the process a group leader
-            process.setProcessGroup(QProcess.MergeProcessGroup)
+            if hasattr(process, 'setProcessGroup'):
+                process.setProcessGroup(QProcess.MergeProcessGroup)
         tab_data['process'] = process  # Stocker le processus dans le dictionnaire
 
         # Définir le répertoire de travail sur le dossier Draw++
@@ -927,27 +916,37 @@ class MyDrawppIDE(QMainWindow):
         process.start(command, arguments)
 
     def stop_process(self, tab):
-        """Stops the running process for the given tab"""
+        """Stops the running process for the given tab, including any child processes."""
         if tab in self.tabs_data:
             process = self.tabs_data[tab].get('process')
             if process and process.state() == QProcess.Running:
-                if platform.system() == "Windows":
-                    # On Windows, we need to kill the process tree
-                    subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.processId())], capture_output=True)
-                else:
-                    # On Unix systems
-                    try:
-                        os.killpg(os.getpgid(process.processId()), signal.SIGTERM)
-                    except:
-                        process.kill()
+                pid = process.processId()
+                print(f"Stopping process for tab {tab}, PID: {pid}")
                 
-                # Wait for the process to actually terminate
-                process.waitForFinished(1000)  # Wait up to 1 second
+                try:
+                    if platform.system() == "Windows":
+                        # Use taskkill to terminate the process and its children on Windows
+                        subprocess.run(
+                            ['taskkill', '/F', '/T', '/PID', str(pid)],
+                            capture_output=True,
+                            check=True
+                        )
+                    else:
+                        # On Unix-like systems, terminate the process tree
+                        kill_process_tree(pid)
+                    
+                    # Check if the process is still running
+                    if is_process_running(pid):
+                        print(f"Process {pid} did not terminate. Manual intervention may be required.")
+                    else:
+                        print(f"Process {pid} has been successfully stopped.")
                 
-                # If process is still running, force kill it
-                if process.state() == QProcess.Running:
-                    process.kill()
-                    process.waitForFinished(1000)
+                except Exception as e:
+                    print(f"Error while stopping process {pid}: {e}")
+                finally:
+                    print(f"Process handling for tab {tab} completed.")
+            else:
+                print(f"No running process found for tab: {tab}")
                 
         # Reset the run button
         run_button = self.toolbar.widgetForAction(self.run_action)
@@ -1240,6 +1239,36 @@ class MyDrawppIDE(QMainWindow):
 
         # Update button state
         self.terminal_action.setChecked(terminal_container.isVisible())
+
+def is_process_running(pid):
+    """Check if a process is still running."""
+    try:
+        process = psutil.Process(pid)
+        return process.is_running()
+    except psutil.NoSuchProcess:
+        return False
+
+def kill_process_tree(pid):
+    """Kill a process and its entire tree (children and grandchildren)."""
+    try:
+        parent = psutil.Process(pid)
+        # Terminate child processes first
+        for child in parent.children(recursive=True):
+            print(f"Terminating child process PID: {child.pid}")
+            child.terminate()
+        parent.terminate()  # Terminate the parent process
+        
+        # Wait for all processes to exit
+        gone, alive = psutil.wait_procs([parent] + parent.children(), timeout=3)
+        if alive:
+            print(f"Forcing kill for remaining processes: {[p.pid for p in alive]}")
+            for proc in alive:
+                proc.kill()
+        print(f"Successfully terminated process tree for PID {pid}")
+    except psutil.NoSuchProcess:
+        print(f"Process {pid} no longer exists.")
+    except Exception as e:
+        print(f"Error while killing process tree for PID {pid}: {e}")
 
 class AnotherWindow(MyDrawppIDE):
     def __init__(self):
