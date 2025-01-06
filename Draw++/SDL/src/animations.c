@@ -319,3 +319,39 @@ void animation_color(Shape *shape, AnimationType animation) {
     shape->color.g = (Uint8)((g + m) * 255);
     shape->color.b = (Uint8)((b + m) * 255);
 }
+
+/**
+ * @brief Updates all active animations for all shapes
+ * 
+ * This function handles the animation updates for all shapes that have active animations.
+ * It processes each animation type (rotate, zoom, color, bounce) for each shape.
+ * 
+ * @param shapes Array of shapes to animate
+ * @param shapeCount Number of shapes in the array
+ * @param windowWidth Width of the window for bounce animation boundaries
+ * @param windowHeight Height of the window for bounce animation boundaries
+ */
+void updateAnimations(Shape *shapes, int shapeCount, int windowWidth, int windowHeight) {
+    for (int i = 0; i < shapeCount; i++) {
+        if (shapes[i].isAnimating) {
+            for (int j = 0; j < shapes[i].num_animations; j++) {
+                switch (shapes[i].animations[j]) {
+                    case ANIM_ROTATE:
+                        animation_rotate(&shapes[i], shapes[i].animations[j]);
+                        break;
+                    case ANIM_ZOOM:
+                        animation_zoom(&shapes[i], shapes[i].animations[j]);
+                        break;
+                    case ANIM_COLOR:
+                        animation_color(&shapes[i], shapes[i].animations[j]);
+                        break;
+                    case ANIM_BOUNCE:
+                        animation_bounce(&shapes[i], shapes[i].animations[j], windowWidth, windowHeight);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+}
