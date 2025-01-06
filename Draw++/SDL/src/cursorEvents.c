@@ -64,7 +64,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
     }
     
     if (!font) {
-        printf("%sExecutionError: Failed to open font: %s\n", RED_COLOR, TTF_GetError);
+        printf("%sExecutionError: Failed to open font: %s\n", RED_COLOR, TTF_GetError());
         TTF_Quit();
         return;
     }
@@ -367,7 +367,9 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             if (gameState.isGameMode) {
                                 gameState.isGameMode = false;
                                 gameState.isPlaying = false;
-                                restoreShapes(&gameState);  // Restaurer les formes
+                                for (int i = 0; i < shapeCount; i++) {
+                                    addShape(gameState.savedShapes[i]);
+                                }
                                 if (DEBUG) printf("Game mode exited!\n");
                             }
                             break;
@@ -377,7 +379,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;
                         case SDLK_RIGHT:
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - RIGHT\n");
                                 printf("Move selected shapes by 10 pixels to the right\n\n");
                             }
                             for (int i = 0; i < shapeCount; i++) {
@@ -388,7 +390,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;
                         case SDLK_LEFT:
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - LEFT\n");
                                 printf("Move selected shapes by 10 pixels to the left\n\n");
                             }
                             for (int i = 0; i < shapeCount; i++) {
@@ -399,7 +401,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;  
                         case SDLK_UP:
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - UP\n");
                                 printf("Move selected shapes by 10 pixels up\n\n");
                             }
                             for (int i = 0; i < shapeCount; i++) {
@@ -410,7 +412,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;
                         case SDLK_DOWN:
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - DOWN\n");
                                 printf("Move selected shapes by 10 pixels down\n\n");
                             }
                             for (int i = 0; i < shapeCount; i++) {
@@ -574,7 +576,7 @@ int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture) {
             SDL_Quit();
 
             // Return -1 to indicate a quit event was handled.
-            printf("%sExecutionError: Application terminated by user. Cleaning up resources...%s\n", 
+            printf("%sExecutionError: Application terminated by user. Cleaning up resources...\n", 
                    RED_COLOR);
             return -1;
         }

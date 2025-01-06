@@ -63,7 +63,7 @@ SDL_Color selectColor(SDL_Color color) {
 int renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time) {
     // Validate parameters
     if (!renderer || !texture) {
-        printf("%sExecutionError: Invalid renderer or texture provided%s\n", 
+        printf("%sExecutionError: Invalid renderer or texture provided\n", 
                RED_COLOR);
         return -1;
     }
@@ -607,7 +607,7 @@ void renderAllShapes(SDL_Renderer *renderer) {
     // Create a temporary array for sorting
     Shape** sortedShapes = malloc(shapeCount * sizeof(Shape*));
     if (!sortedShapes) {
-        printf("%sExecutionError: Failed to allocate memory for sorted shapes%s\n", RED_COLOR);
+        printf("%sExecutionError: Failed to allocate memory for sorted shapes\n", RED_COLOR);
         return;
     }
 
@@ -644,7 +644,7 @@ void renderAllShapes(SDL_Renderer *renderer) {
 void addShape(Shape shape) {
     // Check if the maximum number of shapes has been reached
     if (shapeCount >= MAX_SHAPES) {
-        printf("%sExecutionError: Cannot add more shapes. Maximum limit of %d shapes reached.%s\n", 
+        printf("%sExecutionError: Cannot add more shapes. Maximum limit of %d shapes reached.\n", 
                RED_COLOR, MAX_SHAPES);
         return;
     }

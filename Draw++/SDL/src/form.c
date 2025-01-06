@@ -232,7 +232,7 @@ int drawSquare(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int c
 int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("%sExecutionError: Invalid type for rounded rectangle '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for rounded rectangle '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
@@ -295,7 +295,7 @@ int drawTriangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16
 int drawPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 *vx, Sint16 *vy, int n, SDL_Color color, char *type)
 {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("%sExecutionError: Invalid type for polygon '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for polygon '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
@@ -338,7 +338,7 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
 {
     // Validate the number of sides
     if (sides < 3 || sides > 12) {
-        printf("%sExecutionError: Invalid number of polygon sides %d. Must be between 3 and 12.%s\n", 
+        printf("%sExecutionError: Invalid number of polygon sides %d. Must be between 3 and 12.\n", 
                RED_COLOR, sides);
         return -1;
     }
@@ -375,7 +375,7 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
  */
 int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, SDL_Color color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
@@ -410,7 +410,7 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
  */
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture* texture, int x, int y, int radius, SDL_Color color, char *type) { 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("%sExecutionError: Invalid type for animated circle '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for animated circle '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
@@ -780,7 +780,7 @@ int drawAnimatedEllipse(SDL_Renderer* renderer, SDL_Texture *texture, int x, int
 int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int radius, int start_angle, int end_angle, SDL_Color color, char *type) {
     
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("%sExecutionError: Invalid type for animated arc '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for animated arc '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
@@ -823,7 +823,7 @@ int drawAnimatedTriangle(SDL_Renderer *renderer, SDL_Texture *texture, int cx, i
 {
     
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("%sExecutionError: Invalid type for animated polygon '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for animated polygon '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     } 
@@ -933,12 +933,12 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
 {
     
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("%sExecutionError: Invalid type for animated polygon '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for animated polygon '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     } 
     else if (sides < 3 || sides > 12) {
-        printf("%sExecutionError: Invalid number of polygon sides %d. Must be between 3 and 12.%s\n", 
+        printf("%sExecutionError: Invalid number of polygon sides %d. Must be between 3 and 12.\n", 
                RED_COLOR, sides);
         return -1;
     }
@@ -1047,7 +1047,7 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
 int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, int thickness, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.%s\n", 
+        printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
@@ -1364,7 +1364,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
         int cx = va_arg(args, int);
         int cy = va_arg(args, int);
         int radius = va_arg(args, int);
-        int sides = 3;
 
         if (isAnimated) {
             if(drawAnimatedTriangle(renderer, texture, cx, cy, radius, color, type) == -1) return -1;

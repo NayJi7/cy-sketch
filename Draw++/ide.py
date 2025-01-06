@@ -129,7 +129,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
 
         # Ajouter des règles
         self.add_rules(["var","func", "return"], self.keyword_format)
-        self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle"], self.drawing_format)
+        self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon"], self.drawing_format)
         self.add_rules(["for", "while", "if", "else", "elif"], self.control_format)
 
     def add_rules(self, patterns, text_format):
@@ -866,7 +866,6 @@ class MyDrawppIDE(QMainWindow):
                     border: none;
                     border-radius: 2px;
                     padding: 5px;
-                    transition: background-color 0.2s;
                 }
                 QToolButton:hover {
                     background-color: #D32F2F !important;
