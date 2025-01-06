@@ -330,13 +330,7 @@ class MyDrawppIDE(QMainWindow):
         self.addToolBar(self.toolbar)
 
         # Boutons de gauche (fichiers)
-        open_icon = QIcon.fromTheme("document-open")
-        save_icon = QIcon.fromTheme("document-save")
-        save_as_icon = QIcon.fromTheme("document-save-as")
-        new_tab_icon = QIcon.fromTheme("new-tab")
-        new_window_icon = QIcon.fromTheme("new-window")
-
-        open_action = QAction(open_icon, "Open", self)
+        open_action = QAction("Open", self)
         open_action.setShortcut("Ctrl+O")
         open_action.setToolTip("Open (Ctrl+O)")
         open_action.triggered.connect(self.open_file)
@@ -349,7 +343,7 @@ class MyDrawppIDE(QMainWindow):
         separator1.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator1)
 
-        save_action = QAction(save_icon, "Save", self)
+        save_action = QAction("Save", self)
         save_action.setShortcut("Ctrl+S")
         save_action.setToolTip("Save (Ctrl+S)")
         save_action.triggered.connect(self.save_file)
@@ -362,7 +356,7 @@ class MyDrawppIDE(QMainWindow):
         separator2.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator2)
 
-        save_as_action = QAction(save_as_icon, "Save As", self)
+        save_as_action = QAction("Save As", self)
         save_as_action.setShortcut("Ctrl+Tab+S")
         save_as_action.setToolTip("Save As (Ctrl+Tab+S)")
         save_as_action.triggered.connect(self.save_as_file)
@@ -375,7 +369,7 @@ class MyDrawppIDE(QMainWindow):
         separator3.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator3)
 
-        new_tab_action = QAction(new_tab_icon, "New Tab", self)
+        new_tab_action = QAction("New Tab", self)
         new_tab_action.setShortcut("Ctrl+T")
         new_tab_action.setToolTip("New Tab (Ctrl+T)")
         new_tab_action.triggered.connect(self.open_new_tab)
@@ -388,7 +382,7 @@ class MyDrawppIDE(QMainWindow):
         separator4.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator4)
 
-        new_window_action = QAction(new_window_icon, "New Window", self)
+        new_window_action = QAction("New Window", self)
         new_window_action.setShortcut("Ctrl+N")
         new_window_action.setToolTip("New Window (Ctrl+N)")
         new_window_action.triggered.connect(self.show_new_window)
@@ -402,8 +396,7 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator5)
 
         # Terminal toggle button
-        terminal_icon = QIcon.fromTheme("utilities-terminal")
-        terminal_action = QAction(terminal_icon, "Terminal", self)
+        terminal_action = QAction("Terminal", self)
         terminal_action.setShortcut("Ctrl+Alt+T")  # Common shortcut for terminal
         terminal_action.setToolTip("Terminal (Ctrl+Alt+T)")
         terminal_action.setCheckable(True)  # Make it checkable
@@ -420,8 +413,7 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(spacer)
 
         # Boutons de droite (exécution)
-        run_icon = QIcon.fromTheme("document-open")
-        run_action = QAction(run_icon, "Run", self)
+        run_action = QAction("Run", self)
         run_action.setShortcut("F5")
         run_action.setToolTip("Run (F5)")
         run_action.triggered.connect(self.run_code)
@@ -438,8 +430,7 @@ class MyDrawppIDE(QMainWindow):
         separator6.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator6)
 
-        debug_icon = QIcon.fromTheme("document-open")
-        debug_action = QAction(debug_icon, "Debug", self)
+        debug_action = QAction("Debug", self)
         debug_action.setShortcut("F6")
         debug_action.setToolTip("Debug (F6)")
         debug_action.triggered.connect(self.debug_code)
@@ -452,8 +443,7 @@ class MyDrawppIDE(QMainWindow):
         separator7.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator7)
 
-        compile_icon = QIcon.fromTheme("document-open")
-        compile_action = QAction(compile_icon, "Compile", self)
+        compile_action = QAction("Compile", self)
         compile_action.setShortcut("F7")
         compile_action.setToolTip("Compile (F7)")
         compile_action.triggered.connect(self.compile_code)
