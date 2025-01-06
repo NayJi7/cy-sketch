@@ -872,7 +872,8 @@ class MyDrawppIDE(QMainWindow):
         process = QProcess(self)
         if platform.system() != "Windows":
             # On Unix systems, make the process a group leader
-            process.setProcessGroup(QProcess.MergeProcessGroup)
+            if hasattr(process, 'setProcessGroup'):
+                process.setProcessGroup(QProcess.MergeProcessGroup)
         tab_data['process'] = process  # Stocker le processus dans le dictionnaire
 
         # Définir le répertoire de travail sur le dossier Draw++
