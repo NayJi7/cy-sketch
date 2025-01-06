@@ -4,10 +4,8 @@ from PyQt5.QtCore import Qt, QProcess,QRect, QSize,QRegExp
 import os
 import platform
 import subprocess
-import re
 import sys
-import signal
-from time import sleep
+import psutil
 from PyQt5.QtCore import QTimer
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
@@ -918,27 +916,37 @@ class MyDrawppIDE(QMainWindow):
         process.start(command, arguments)
 
     def stop_process(self, tab):
-        """Stops the running process for the given tab"""
+        """Stops the running process for the given tab, including any child processes."""
         if tab in self.tabs_data:
             process = self.tabs_data[tab].get('process')
             if process and process.state() == QProcess.Running:
-                if platform.system() == "Windows":
-                    # On Windows, we need to kill the process tree
-                    subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.processId())], capture_output=True)
-                else:
-                    # On Unix systems
-                    try:
-                        os.killpg(os.getpgid(process.processId()), signal.SIGTERM)
-                    except:
-                        process.kill()
+                pid = process.processId()
+                print(f"Stopping process for tab {tab}, PID: {pid}")
                 
-                # Wait for the process to actually terminate
-                process.waitForFinished(1000)  # Wait up to 1 second
+                try:
+                    if platform.system() == "Windows":
+                        # Use taskkill to terminate the process and its children on Windows
+                        subprocess.run(
+                            ['taskkill', '/F', '/T', '/PID', str(pid)],
+                            capture_output=True,
+                            check=True
+                        )
+                    else:
+                        # On Unix-like systems, terminate the process tree
+                        kill_process_tree(pid)
+                    
+                    # Check if the process is still running
+                    if is_process_running(pid):
+                        print(f"Process {pid} did not terminate. Manual intervention may be required.")
+                    else:
+                        print(f"Process {pid} has been successfully stopped.")
                 
-                # If process is still running, force kill it
-                if process.state() == QProcess.Running:
-                    process.kill()
-                    process.waitForFinished(1000)
+                except Exception as e:
+                    print(f"Error while stopping process {pid}: {e}")
+                finally:
+                    print(f"Process handling for tab {tab} completed.")
+            else:
+                print(f"No running process found for tab: {tab}")
                 
         # Reset the run button
         run_button = self.toolbar.widgetForAction(self.run_action)
@@ -1231,6 +1239,36 @@ class MyDrawppIDE(QMainWindow):
 
         # Update button state
         self.terminal_action.setChecked(terminal_container.isVisible())
+
+def is_process_running(pid):
+    """Check if a process is still running."""
+    try:
+        process = psutil.Process(pid)
+        return process.is_running()
+    except psutil.NoSuchProcess:
+        return False
+
+def kill_process_tree(pid):
+    """Kill a process and its entire tree (children and grandchildren)."""
+    try:
+        parent = psutil.Process(pid)
+        # Terminate child processes first
+        for child in parent.children(recursive=True):
+            print(f"Terminating child process PID: {child.pid}")
+            child.terminate()
+        parent.terminate()  # Terminate the parent process
+        
+        # Wait for all processes to exit
+        gone, alive = psutil.wait_procs([parent] + parent.children(), timeout=3)
+        if alive:
+            print(f"Forcing kill for remaining processes: {[p.pid for p in alive]}")
+            for proc in alive:
+                proc.kill()
+        print(f"Successfully terminated process tree for PID {pid}")
+    except psutil.NoSuchProcess:
+        print(f"Process {pid} no longer exists.")
+    except Exception as e:
+        print(f"Error while killing process tree for PID {pid}: {e}")
 
 class AnotherWindow(MyDrawppIDE):
     def __init__(self):

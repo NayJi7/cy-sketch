@@ -76,7 +76,7 @@ setup_desktop_integration() {
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Draw++
+Name=DrawStudioCode
 Comment=Draw++ Studio Code
 Exec=$(pwd)/DrawStudioCode
 Icon=~/.local/share/icons/Dpp_circle.ico
@@ -135,6 +135,9 @@ build_executable() {
   # Rendre l'historique accessible en écriture
   rm -rf Draw++/IDE/.history
   touch Draw++/IDE/.history
+
+  # Exporter la variable d'environnement pour Qt
+  export QT_QPA_PLATFORM=xcb
 }
 
 # Lancement des fonctions

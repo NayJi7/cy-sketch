@@ -46,4 +46,3 @@ SDL2*.dll
 .env
 venv/
 env/
-Draw++/SDL/fonts/Consolas.ttf
