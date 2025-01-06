@@ -40,6 +40,35 @@ class CodeEditor(QPlainTextEdit):
         self.update_line_number_area_width(0)
         self.highlight_current_line()
 
+    def keyPressEvent(self, event):
+        # Handle Ctrl+C and Ctrl+X to copy/cut whole line if no text is selected
+        if event.modifiers() == Qt.ControlModifier and event.key() in (Qt.Key_C, Qt.Key_X):
+            cursor = self.textCursor()
+            if not cursor.hasSelection():
+                # Store original position
+                original_position = cursor.position()
+                # Select the current line without the newline character
+                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+                selected_text = cursor.selectedText()
+                
+                # Add the line to clipboard without newline
+                QApplication.clipboard().setText(selected_text)
+                
+                # For Ctrl+X, remove the entire line including newline
+                if event.key() == Qt.Key_X:
+                    cursor.movePosition(QTextCursor.StartOfLine)
+                    cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor)
+                    if cursor.atEnd():
+                        cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+                    cursor.removeSelectedText()
+                else:
+                    # For Ctrl+C, restore cursor position
+                    cursor.setPosition(original_position)
+                    self.setTextCursor(cursor)
+                return
+        super().keyPressEvent(event)
+
     def line_number_area_width(self):
         """Calcule la largeur de la marge pour les numéros de ligne."""
         digits = len(str(self.blockCount()))
@@ -289,6 +318,7 @@ class MyDrawppIDE(QMainWindow):
             }
             QToolBar QToolButton#runButton {
                 background-color: #2E7D32;
+                border-radius: 2px;
             }
             QToolBar QToolButton#runButton:hover {
                 background-color: #388E3C;
@@ -392,8 +422,8 @@ class MyDrawppIDE(QMainWindow):
         # Boutons de droite (exécution)
         run_icon = QIcon.fromTheme("document-open")
         run_action = QAction(run_icon, "Run", self)
-        run_action.setShortcut("Ctrl+Return")
-        run_action.setToolTip("Run (Ctrl+Enter)")
+        run_action.setShortcut("F5")
+        run_action.setToolTip("Run (F5)")
         run_action.triggered.connect(self.run_code)
         run_action.triggered.connect(lambda: self.simulate_button_click(run_action))
         self.toolbar.addAction(run_action)
@@ -408,13 +438,13 @@ class MyDrawppIDE(QMainWindow):
         separator6.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator6)
 
-        compile_icon = QIcon.fromTheme("document-open")
-        compile_action = QAction(compile_icon, "Compile", self)
-        compile_action.setShortcut("F11")
-        compile_action.setToolTip("Compile (F11)")
-        compile_action.triggered.connect(self.compile_code)
-        compile_action.triggered.connect(lambda: self.simulate_button_click(compile_action))
-        self.toolbar.addAction(compile_action)
+        debug_icon = QIcon.fromTheme("document-open")
+        debug_action = QAction(debug_icon, "Debug", self)
+        debug_action.setShortcut("F6")
+        debug_action.setToolTip("Debug (F6)")
+        debug_action.triggered.connect(self.debug_code)
+        debug_action.triggered.connect(lambda: self.simulate_button_click(debug_action))
+        self.toolbar.addAction(debug_action)
 
         # Séparateur
         separator7 = QWidget()
@@ -422,13 +452,13 @@ class MyDrawppIDE(QMainWindow):
         separator7.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator7)
 
-        debug_icon = QIcon.fromTheme("document-open")
-        debug_action = QAction(debug_icon, "Debug", self)
-        debug_action.setShortcut("F12")
-        debug_action.setToolTip("Debug (F12)")
-        debug_action.triggered.connect(self.debug_code)
-        debug_action.triggered.connect(lambda: self.simulate_button_click(debug_action))
-        self.toolbar.addAction(debug_action)
+        compile_icon = QIcon.fromTheme("document-open")
+        compile_action = QAction(compile_icon, "Compile", self)
+        compile_action.setShortcut("F7")
+        compile_action.setToolTip("Compile (F7)")
+        compile_action.triggered.connect(self.compile_code)
+        compile_action.triggered.connect(lambda: self.simulate_button_click(compile_action))
+        self.toolbar.addAction(compile_action)
 
         # Connecter le changement d'onglet pour mettre à jour le titre
         self.tab_widget.currentChanged.connect(self.update_window_title)

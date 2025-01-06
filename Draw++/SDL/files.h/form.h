@@ -22,6 +22,9 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
 
 int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, SDL_Color color, char *type);
 
+int drawTriangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, SDL_Color color, char *type);
+
+int drawAnimatedTriangle(SDL_Renderer *renderer, SDL_Texture *texture, int cx, int cy, int radius, SDL_Color color, char *type);
 
 int drawAnimatedCircle(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int radius, SDL_Color color, char *type);
 
