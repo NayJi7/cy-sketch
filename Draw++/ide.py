@@ -128,9 +128,9 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.control_format.setFontWeight(QFont.Bold)
 
         # Ajouter des règles
-        self.add_rules(["import", "from", "def", "class", "self"], self.keyword_format)
+        self.add_rules(["var","func", "return"], self.keyword_format)
         self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle"], self.drawing_format)
-        self.add_rules(["var", "for", "while"], self.control_format)
+        self.add_rules(["for", "while", "if", "else", "elif"], self.control_format)
 
     def add_rules(self, patterns, text_format):
         """Ajoute des règles de surlignage."""
