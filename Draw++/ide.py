@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QTabWidget,QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit, QSizePolicy)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QTabWidget,QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit, QSizePolicy, QSplitter, QTabBar)
 from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor, QFont, QIcon,QPainter,QTextFormat
 from PyQt5.QtCore import Qt, QProcess,QRect, QSize,QRegExp
 import os
@@ -6,7 +6,9 @@ import platform
 import subprocess
 import re
 import sys
+import signal
 from time import sleep
+from PyQt5.QtCore import QTimer
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
 
@@ -40,8 +42,9 @@ class CodeEditor(QPlainTextEdit):
 
     def line_number_area_width(self):
         """Calcule la largeur de la marge pour les numéros de ligne."""
-        digits = len(str(self.blockCount())) + 1
-        return 10 + self.fontMetrics().horizontalAdvance('9') * digits
+        digits = len(str(self.blockCount()))
+        space = 6 + self.fontMetrics().horizontalAdvance('9') * digits
+        return space
 
     def update_line_number_area_width(self, _):
         """Met à jour la largeur de la marge pour les numéros de ligne."""
@@ -77,8 +80,8 @@ class CodeEditor(QPlainTextEdit):
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(block_number + 1)
                 painter.setPen(QColor("gray"))
-                painter.drawText(0, int(top), self.lineNumberArea.width(), self.fontMetrics().height(),
-                                 Qt.AlignRight, number)
+                painter.drawText(0, int(top), self.lineNumberArea.width() - 3, self.fontMetrics().height() - 2,
+                               Qt.AlignRight | Qt.AlignVCenter, number)
 
             block = block.next()
             top = bottom
@@ -166,7 +169,28 @@ class MyDrawppIDE(QMainWindow):
     def init_ui(self):
         # Configuration de la fenêtre principale
         self.setGeometry(100, 100, 1000, 700)
-        self.setStyleSheet("background-color: #1E1E1E; color: white;")
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #333333;
+                color: white;
+                font-family: Consolas;
+            }
+            QMessageBox {
+                font-family: Consolas;
+            }
+            QMessageBox QPushButton {
+                font-family: Consolas;
+            }
+            QFileDialog {
+                font-family: Consolas;
+            }
+            QLabel {
+                font-family: Consolas;
+            }
+            QPushButton {
+                font-family: Consolas;
+            }
+        """)
         
         # Get the absolute path to the images directory
         ide_dir = os.path.join(self.draw_folder, "IDE")
@@ -182,17 +206,17 @@ class MyDrawppIDE(QMainWindow):
 
         self.tab_widget.setStyleSheet(f"""
             QTabWidget::pane {{
-                border: 1px solid #444444;
-                background: #1E1E1E;
                 top: -1px;
+                border-top: none;
             }}
             QTabBar::tab {{
-                background: #333333;
+                background: #2A2A2A;
                 color: white;
                 padding: 8px 15px;
                 padding-right: 0px;
                 padding-bottom: 12px;
                 border: 1px solid #444444;
+                border-bottom: none;
                 margin-right: 2px;
                 margin-bottom: -1px;
                 min-width: 80px;
@@ -236,12 +260,14 @@ class MyDrawppIDE(QMainWindow):
                 background-color: #1E1E1E;
                 border: none;
                 padding: 0px;
+                font-family: Consolas;
             }
             QToolBar QToolButton {
-                background-color: #333333;
+                background-color: #1E1E1E;
                 border: none;
                 padding: 5px;
                 color: white;
+                font-family: Consolas;
             }
             QToolBar QToolButton:hover {
                 background-color: #555555;
@@ -269,7 +295,10 @@ class MyDrawppIDE(QMainWindow):
         new_window_icon = QIcon.fromTheme("new-window")
 
         open_action = QAction(open_icon, "Open", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.setToolTip("Open (Ctrl+O)")
         open_action.triggered.connect(self.open_file)
+        open_action.triggered.connect(lambda: self.simulate_button_click(open_action))
         self.toolbar.addAction(open_action)
 
         # Séparateur
@@ -279,7 +308,10 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator1)
 
         save_action = QAction(save_icon, "Save", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.setToolTip("Save (Ctrl+S)")
         save_action.triggered.connect(self.save_file)
+        save_action.triggered.connect(lambda: self.simulate_button_click(save_action))
         self.toolbar.addAction(save_action)
 
         # Séparateur
@@ -289,7 +321,10 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator2)
 
         save_as_action = QAction(save_as_icon, "Save As", self)
+        save_as_action.setShortcut("Ctrl+Tab+S")
+        save_as_action.setToolTip("Save As (Ctrl+Tab+S)")
         save_as_action.triggered.connect(self.save_as_file)
+        save_as_action.triggered.connect(lambda: self.simulate_button_click(save_as_action))
         self.toolbar.addAction(save_as_action)
 
         # Séparateur
@@ -299,7 +334,10 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator3)
 
         new_tab_action = QAction(new_tab_icon, "New Tab", self)
+        new_tab_action.setShortcut("Ctrl+T")
+        new_tab_action.setToolTip("New Tab (Ctrl+T)")
         new_tab_action.triggered.connect(self.open_new_tab)
+        new_tab_action.triggered.connect(lambda: self.simulate_button_click(new_tab_action))
         self.toolbar.addAction(new_tab_action)
 
         # Séparateur
@@ -309,8 +347,30 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator4)
 
         new_window_action = QAction(new_window_icon, "New Window", self)
+        new_window_action.setShortcut("Ctrl+N")
+        new_window_action.setToolTip("New Window (Ctrl+N)")
         new_window_action.triggered.connect(self.show_new_window)
+        new_window_action.triggered.connect(lambda: self.simulate_button_click(new_window_action))
         self.toolbar.addAction(new_window_action)
+
+        # Séparateur
+        separator5 = QWidget()
+        separator5.setFixedWidth(1)
+        separator5.setStyleSheet("background-color: #1E1E1E;")
+        self.toolbar.addWidget(separator5)
+
+        # Terminal toggle button
+        terminal_icon = QIcon.fromTheme("utilities-terminal")
+        terminal_action = QAction(terminal_icon, "Terminal", self)
+        terminal_action.setShortcut("Ctrl+Alt+T")  # Common shortcut for terminal
+        terminal_action.setToolTip("Terminal (Ctrl+Alt+T)")
+        terminal_action.setCheckable(True)  # Make it checkable
+        terminal_action.setChecked(False)  # Terminal is hidden by default
+        terminal_action.triggered.connect(self.toggle_terminal)
+        terminal_action.triggered.connect(lambda: self.simulate_button_click(terminal_action))
+        self.toolbar.addAction(terminal_action)
+        # Store reference to terminal action
+        self.terminal_action = terminal_action
 
         # Ajouter un widget extensible pour pousser les boutons suivants à droite
         spacer = QWidget()
@@ -320,7 +380,10 @@ class MyDrawppIDE(QMainWindow):
         # Boutons de droite (exécution)
         run_icon = QIcon.fromTheme("document-open")
         run_action = QAction(run_icon, "Run", self)
+        run_action.setShortcut("Ctrl+Return")
+        run_action.setToolTip("Run (Ctrl+Enter)")
         run_action.triggered.connect(self.run_code)
+        run_action.triggered.connect(lambda: self.simulate_button_click(run_action))
         self.toolbar.addAction(run_action)
         # Définir l'ID pour le style du bouton Run
         run_button = self.toolbar.widgetForAction(run_action)
@@ -328,31 +391,48 @@ class MyDrawppIDE(QMainWindow):
             run_button.setObjectName("runButton")
 
         # Séparateur
-        separator5 = QWidget()
-        separator5.setFixedWidth(1)
-        separator5.setStyleSheet("background-color: #1E1E1E;")
-        self.toolbar.addWidget(separator5)
-
-        compile_icon = QIcon.fromTheme("document-open")
-        compile_action = QAction(compile_icon, "Compile", self)
-        compile_action.triggered.connect(self.compile_code)
-        self.toolbar.addAction(compile_action)
-
-        # Séparateur
         separator6 = QWidget()
         separator6.setFixedWidth(1)
         separator6.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator6)
 
+        compile_icon = QIcon.fromTheme("document-open")
+        compile_action = QAction(compile_icon, "Compile", self)
+        compile_action.setShortcut("F11")
+        compile_action.setToolTip("Compile (F11)")
+        compile_action.triggered.connect(self.compile_code)
+        compile_action.triggered.connect(lambda: self.simulate_button_click(compile_action))
+        self.toolbar.addAction(compile_action)
+
+        # Séparateur
+        separator7 = QWidget()
+        separator7.setFixedWidth(1)
+        separator7.setStyleSheet("background-color: #1E1E1E;")
+        self.toolbar.addWidget(separator7)
+
         debug_icon = QIcon.fromTheme("document-open")
         debug_action = QAction(debug_icon, "Debug", self)
+        debug_action.setShortcut("F12")
+        debug_action.setToolTip("Debug (F12)")
         debug_action.triggered.connect(self.debug_code)
+        debug_action.triggered.connect(lambda: self.simulate_button_click(debug_action))
         self.toolbar.addAction(debug_action)
 
         # Connecter le changement d'onglet pour mettre à jour le titre
         self.tab_widget.currentChanged.connect(self.update_window_title)
         # Ajoute un premier onglet par défaut
         self.open_new_tab()
+
+        # Store references to actions
+        self.run_action = run_action
+        self.compile_action = compile_action 
+        self.debug_action = debug_action
+
+        # Add close tab shortcut
+        close_tab_action = QAction("Close Tab", self)
+        close_tab_action.setShortcut("Ctrl+W")
+        close_tab_action.triggered.connect(lambda: self.close_tab(self.tab_widget.currentIndex()))
+        self.addAction(close_tab_action)
 
     def open_new_tab(self):
         """Créer un nouvel onglet avec un éditeur et un terminal."""
@@ -361,24 +441,208 @@ class MyDrawppIDE(QMainWindow):
         # Crée un nouvel onglet et son layout
         new_tab = QWidget()
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
+        layout.setSpacing(0)  # Remove spacing between widgets
+
+        # Create a splitter
+        splitter = QSplitter(Qt.Vertical)
+        splitter.setChildrenCollapsible(False)  # Prevent widgets from being collapsed to 0
+        splitter.setStyleSheet("""
+            QSplitter {
+                background-color: #333333;
+            }
+            QSplitter::handle {
+                background-color: #444444;
+                height: 2px;
+            }
+            QSplitter::handle:hover {
+                background-color: #666666;
+            }
+        """)
 
         # Création de l'éditeur
         editor = CodeEditor(self)
-        editor.setStyleSheet("background-color: #1E1E1E; color: #D4D4D4; font-family: Consolas; font-size: 18px;")
+        editor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        editor.setStyleSheet("""
+            QPlainTextEdit {
+                background-color: #1E1E1E;
+                color: #D4D4D4;
+                font-family: Consolas;
+                font-size: 18px;
+                border: none;
+                border-top: 1px solid #444444;
+                padding: 5px;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #2E2E2E;
+                width: 10px;
+                margin: 2px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555555;
+                min-height: 20px;
+                border-radius: 5px;
+                margin: 2px;
+                width: 6px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #666666;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar:horizontal {
+                border: none;
+                background: #2E2E2E;
+                height: 10px;
+                margin: 2px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #555555;
+                min-width: 20px;
+                border-radius: 5px;
+                margin: 2px;
+                height: 6px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #666666;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }
+        """)
         editor.setTabStopDistance(4 * editor.fontMetrics().horizontalAdvance(' '))
-        editor.document().setModified(False)  # Initialiser l'état de modification
+        editor.document().setModified(False)
 
         # Ajouter le surlignage syntaxique
         highlighter = SyntaxHighlighter(editor.document())
 
-        # Création du terminal
-        terminal = QPlainTextEdit(self)
-        terminal.setReadOnly(True)
-        terminal.setStyleSheet("background-color: #000000; color: white; font-family: Consolas; font-size: 14px;")
+        # Création du terminal avec bouton Clear intégré
+        terminal_container = QWidget()
+        terminal_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        terminal_layout = QVBoxLayout(terminal_container)
+        terminal_layout.setContentsMargins(0, 0, 0, 0)
+        terminal_layout.setSpacing(0)
 
-        # Ajouter les widgets au layout
-        layout.addWidget(editor)
-        layout.addWidget(terminal)
+        terminal = QPlainTextEdit(self)
+        terminal.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        terminal.setReadOnly(True)
+        terminal.setStyleSheet("""
+            QPlainTextEdit {
+                background-color: #000000;
+                color: white;
+                font-family: Consolas;
+                font-size: 14px;
+                border: none;
+                border-top: 1px solid #444444;
+                padding: 5px;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #2E2E2E;
+                width: 10px;
+                margin: 2px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:vertical {
+                background: #555555;
+                min-height: 20px;
+                border-radius: 5px;
+                margin: 2px;
+                width: 6px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #666666;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            QScrollBar:horizontal {
+                border: none;
+                background: #2E2E2E;
+                height: 10px;
+                margin: 2px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #555555;
+                min-width: 20px;
+                border-radius: 5px;
+                margin: 2px;
+                height: 6px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #666666;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }
+        """)
+
+        # Création du bouton Clear flottant
+        clear_button = QPushButton("Clear", terminal)
+        clear_button.setStyleSheet("""
+            QPushButton {
+                background-color: #333333;
+                color: white;
+                border: 1px solid #444444;
+                padding: 5px 10px;
+                border-radius: 2px;
+                font-family: Consolas;
+                position: absolute;
+                right: 10px;
+                top: 10px;
+            }
+            QPushButton:hover {
+                background-color: #444444;
+            }
+            QPushButton:pressed {
+                background-color: #555555;
+            }
+        """)
+        clear_button.setFixedWidth(80)
+        clear_button.setToolTip("Clear Terminal (Ctrl+Alt+C)")
+        clear_button.clicked.connect(terminal.clear)
+
+        # Add global shortcut for clear
+        clear_action = QAction("Clear Terminal", self)
+        clear_action.setShortcut("Ctrl+Alt+C")
+        clear_action.setToolTip("Clear Terminal (Ctrl+Alt+C)")
+        clear_action.triggered.connect(terminal.clear)
+        self.addAction(clear_action)
+
+        # Positionner le bouton dans le coin supérieur droit du terminal
+        terminal.resizeEvent = lambda e: clear_button.move(
+            terminal.width() - clear_button.width() - 25,
+            10
+        )
+
+        terminal_layout.addWidget(terminal)
+
+        # Add widgets to splitter
+        splitter.addWidget(editor)
+        splitter.addWidget(terminal_container)
+        
+        # Set initial sizes to 50-50
+        splitter.setSizes([500, 500])
+
+        # Add splitter to layout
+        layout.addWidget(splitter)
 
         new_tab.setLayout(layout)
 
@@ -388,16 +652,36 @@ class MyDrawppIDE(QMainWindow):
 
         # Ajouter l'onglet 
         tabName = f'New Tab'
-        self.tab_widget.addTab(new_tab, tabName)
+        index = self.tab_widget.addTab(new_tab, tabName)
         self.tab_widget.setCurrentWidget(new_tab)
+        
+        # Set tooltip for the close button
+        close_button = self.tab_widget.tabBar().tabButton(index, QTabBar.RightSide)
+        if close_button:
+            close_button.setToolTip("Close Tab (Ctrl+W)")
+            close_button.setStyleSheet("""
+                QPushButton {
+                    margin: 2px;
+                }
+                QPushButton:hover {
+                    background: #666666;
+                    border-radius: 2px;
+                }
+            """)
+
+        # After creating the terminal, set its visibility based on terminal action state
+        if hasattr(self, 'terminal_action'):
+            terminal_container.setVisible(self.terminal_action.isChecked())
+            if not self.terminal_action.isChecked():
+                splitter.setSizes([1, 0])
 
     def update_window_title(self, index):
         """Met à jour le titre de la fenêtre selon l'onglet actif."""
         if index == -1:
-            self.setWindowTitle("Visouale Stoudio Coude")  # Aucun onglet actif
+            self.setWindowTitle("DrawStudioCode")  # Aucun onglet actif
         else:
             current_tab_title = self.tab_widget.tabText(index)
-            self.setWindowTitle(f"Visouale Stoudio Coude - {current_tab_title}")
+            self.setWindowTitle(f"DrawStudioCode - {current_tab_title}")
 
 
     def open_file(self):
@@ -418,12 +702,14 @@ class MyDrawppIDE(QMainWindow):
             if current_index != -1 and self.tab_widget.tabText(current_index).startswith('New Tab'):
                 # Use current tab instead of creating a new one
                 current_tab = self.tab_widget.currentWidget()
-                editor = current_tab.layout().itemAt(0).widget()
+                splitter = current_tab.layout().itemAt(0).widget()
+                editor = splitter.widget(0)  # First widget in splitter is the editor
             else:
                 # Create new tab
                 self.open_new_tab()
                 current_tab = self.tab_widget.currentWidget()
-                editor = current_tab.layout().itemAt(0).widget()
+                splitter = current_tab.layout().itemAt(0).widget()
+                editor = splitter.widget(0)  # First widget in splitter is the editor
             
             with open(file_path, "r") as file:
                 editor.setPlainText(file.read())
@@ -442,8 +728,9 @@ class MyDrawppIDE(QMainWindow):
         if current_file_name.startswith('New Tab'):  # C'est un nouveau fichier
             self.save_as_file()  # Demander où sauvegarder
         else:
-            # Sauvegarder dans le fichier existant
-            editor = current_tab.layout().itemAt(0).widget()
+            # Get editor from splitter's first widget
+            splitter = current_tab.layout().itemAt(0).widget()
+            editor = splitter.widget(0)  # First widget in splitter is the editor
             try:
                 with open(current_file_name, "w") as file:
                     file.write(editor.toPlainText())
@@ -469,7 +756,9 @@ class MyDrawppIDE(QMainWindow):
         
         if file_path:
             current_tab = self.tab_widget.currentWidget()
-            editor = current_tab.layout().itemAt(0).widget()
+            # Get editor from splitter's first widget
+            splitter = current_tab.layout().itemAt(0).widget()
+            editor = splitter.widget(0)  # First widget in splitter is the editor
             try:
                 with open(file_path, "w") as file:
                     file.write(editor.toPlainText())
@@ -490,7 +779,8 @@ class MyDrawppIDE(QMainWindow):
         if not tab_data:
             return
 
-        editor = tab_data['editor']
+        splitter = current_tab.layout().itemAt(0).widget()
+        editor = splitter.widget(0)  # First widget in splitter is the editor
         terminal = tab_data['terminal']
 
         # Vérifier si le fichier doit être sauvegardé
@@ -538,6 +828,9 @@ class MyDrawppIDE(QMainWindow):
 
         # Créer un nouveau processus pour cet onglet
         process = QProcess(self)
+        if platform.system() != "Windows":
+            # On Unix systems, make the process a group leader
+            process.setProcessGroup(QProcess.MergeProcessGroup)
         tab_data['process'] = process  # Stocker le processus dans le dictionnaire
 
         # Définir le répertoire de travail sur le dossier Draw++
@@ -545,7 +838,40 @@ class MyDrawppIDE(QMainWindow):
 
         # Connecter les sorties au terminal actif
         process.readyReadStandardOutput.connect(lambda: self.display_output(process, terminal))
-        # process.readyReadStandardError.connect(lambda: self.display_error(process, terminal))
+        process.finished.connect(lambda: self.on_process_finished(current_tab))
+
+        # Disable run buttons and change appearance
+        self.disable_run_buttons()
+        run_button = self.toolbar.widgetForAction(self.run_action)
+        if run_button:
+            self.run_action.setText("Stop")  # Update action text
+            run_button.setText("Stop")       # Update button text
+            run_button.setToolTip("Stop")
+            run_button.setStyleSheet("""
+                QToolButton {
+                    background-color: #B71C1C !important;
+                    color: white;
+                    border: none;
+                    border-radius: 2px;
+                    padding: 5px;
+                    transition: background-color 0.2s;
+                }
+                QToolButton:hover {
+                    background-color: #D32F2F !important;
+                }
+                QToolButton:pressed {
+                    background-color: #C62828 !important;
+                }
+            """)
+            # Enable the run button to act as a stop button
+            self.run_action.setEnabled(True)
+            # Disconnect any existing connections
+            try:
+                self.run_action.triggered.disconnect()
+            except:
+                pass
+            # Connect to the stop function
+            self.run_action.triggered.connect(lambda: self.stop_process(current_tab))
 
         # Configurer la commande et les arguments selon le mode
         command = make_command
@@ -559,6 +885,74 @@ class MyDrawppIDE(QMainWindow):
         # Démarrer le processus avec la commande et les arguments
         process.start(command, arguments)
 
+    def stop_process(self, tab):
+        """Stops the running process for the given tab"""
+        if tab in self.tabs_data:
+            process = self.tabs_data[tab].get('process')
+            if process and process.state() == QProcess.Running:
+                if platform.system() == "Windows":
+                    # On Windows, we need to kill the process tree
+                    subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.processId())], capture_output=True)
+                else:
+                    # On Unix systems
+                    try:
+                        os.killpg(os.getpgid(process.processId()), signal.SIGTERM)
+                    except:
+                        process.kill()
+                
+                # Wait for the process to actually terminate
+                process.waitForFinished(1000)  # Wait up to 1 second
+                
+                # If process is still running, force kill it
+                if process.state() == QProcess.Running:
+                    process.kill()
+                    process.waitForFinished(1000)
+                
+        # Reset the run button
+        run_button = self.toolbar.widgetForAction(self.run_action)
+        if run_button:
+            self.run_action.setText("Run")   # Update action text
+            run_button.setText("Run")        # Update button text
+            run_button.setStyleSheet("")
+            # Reconnect the run action to run_code
+            try:
+                self.run_action.triggered.disconnect()
+            except:
+                pass
+            self.run_action.triggered.connect(self.run_code)
+        
+        # Re-enable all buttons
+        self.enable_run_buttons()
+
+    def on_process_finished(self, tab):
+        """Called when a process finishes running"""
+        # Re-enable run buttons and restore appearance
+        run_button = self.toolbar.widgetForAction(self.run_action)
+        if run_button:
+            self.run_action.setText("Run")   # Update action text
+            run_button.setText("Run")        # Update button text
+            run_button.setStyleSheet("")
+            # Reconnect the run action to run_code
+            try:
+                self.run_action.triggered.disconnect()
+            except:
+                pass
+            self.run_action.triggered.connect(self.run_code)
+        
+        self.enable_run_buttons()
+
+    def disable_run_buttons(self):
+        """Disable all run-related buttons"""
+        self.run_action.setEnabled(False)
+        self.compile_action.setEnabled(False)
+        self.debug_action.setEnabled(False)
+
+    def enable_run_buttons(self):
+        """Enable all run-related buttons"""
+        self.run_action.setEnabled(True)
+        self.compile_action.setEnabled(True)
+        self.debug_action.setEnabled(True)
+
     def run_code(self):
         """Exécute le code en mode normal."""
         self.execute_code("run")
@@ -569,6 +963,15 @@ class MyDrawppIDE(QMainWindow):
 
     def debug_code(self):
         """Exécute le code en mode debug."""
+        # Show terminal if it's hidden
+        current_tab = self.tab_widget.currentWidget()
+        if current_tab:
+            splitter = current_tab.layout().itemAt(0).widget()
+            terminal_container = splitter.widget(1)
+            if not terminal_container.isVisible():
+                self.terminal_action.setChecked(True)
+                self.toggle_terminal()
+        
         self.execute_code("debug")
 
     def display_output(self, process, terminal):
@@ -621,7 +1024,10 @@ class MyDrawppIDE(QMainWindow):
         if not tab:
             return
 
-        editor = tab.layout().itemAt(0).widget()
+        # Get editor from splitter's first widget
+        splitter = tab.layout().itemAt(0).widget()
+        editor = splitter.widget(0)  # First widget in splitter is the editor
+        
         if editor.document().isModified():  # Si le document a été modifié
             reply = QMessageBox.question(
                 self,
@@ -633,7 +1039,7 @@ class MyDrawppIDE(QMainWindow):
             if reply == QMessageBox.Save:
                 # Si l'utilisateur veut sauvegarder
                 current_file_name = self.tab_widget.tabText(index)
-                if current_file_name.startswith('Tab '):
+                if current_file_name.startswith('New Tab'):
                     # C'est un nouveau fichier, on utilise Save As
                     self.tab_widget.setCurrentIndex(index)  # Switch to the tab being closed
                     self.save_as_file()
@@ -662,7 +1068,8 @@ class MyDrawppIDE(QMainWindow):
         unsaved_tabs = []
         for i in range(self.tab_widget.count()):
             tab = self.tab_widget.widget(i)
-            editor = tab.layout().itemAt(0).widget()
+            splitter = tab.layout().itemAt(0).widget()
+            editor = splitter.widget(0)  # First widget in splitter is the editor
             if editor.document().isModified():
                 unsaved_tabs.append((i, self.tab_widget.tabText(i)))
 
@@ -692,7 +1099,10 @@ class MyDrawppIDE(QMainWindow):
                     else:
                         self.save_file()
                     # Vérifier si la sauvegarde a été annulée
-                    if self.tab_widget.widget(tab_index).layout().itemAt(0).widget().document().isModified():
+                    tab = self.tab_widget.widget(tab_index)
+                    splitter = tab.layout().itemAt(0).widget()
+                    editor = splitter.widget(0)  # First widget in splitter is the editor
+                    if editor.document().isModified():
                         event.ignore()
                         return
                 event.accept()
@@ -701,7 +1111,14 @@ class MyDrawppIDE(QMainWindow):
             else:  # Cancel
                 event.ignore()
         else:
-            self.save_file_history(os.path.abspath(self.tab_widget.tabText(self.tab_widget.currentIndex())))
+            # Try to get the full path from the history
+            try:
+                with open(self.history_file, "r") as f:
+                    last_file = f.read().strip()
+                if last_file and os.path.exists(last_file):
+                    self.save_file_history(last_file)
+            except:
+                pass
             event.accept()
 
     def load_last_file(self):
@@ -710,25 +1127,78 @@ class MyDrawppIDE(QMainWindow):
             if os.path.exists(self.history_file):
                 with open(self.history_file, "r") as f:
                     last_file = f.read().strip()
-                    if last_file and os.path.exists(last_file):
-                        with open(last_file, "r") as file:
-                            current_tab = self.tab_widget.currentWidget()
-                            editor = current_tab.layout().itemAt(0).widget()
-                            editor.setPlainText(file.read())
-                            self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(last_file))
-                            editor.document().setModified(False)
-                            self.update_window_title(self.tab_widget.currentIndex())
+                    if last_file and os.path.exists(last_file) and not last_file.startswith('New Tab'):
+                        try:
+                            with open(last_file, "r") as file:
+                                current_tab = self.tab_widget.currentWidget()
+                                # Get editor from splitter's first widget
+                                splitter = current_tab.layout().itemAt(0).widget()
+                                editor = splitter.widget(0)  # First widget in splitter is the editor
+                                editor.setPlainText(file.read())
+                                self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(last_file))
+                                editor.document().setModified(False)
+                                self.update_window_title(self.tab_widget.currentIndex())
+                        except Exception as e:
+                            print(f"Error reading last file {last_file}: {e}")
+                            # If we can't read the last file, just start with a new tab
+                            pass
         except Exception as e:
-            print(f"Error loading last file: {e}")
+            print(f"Error loading history file: {e}")
 
     def save_file_history(self, file_path):
         """Sauvegarde le chemin du fichier dans l'historique."""
         try:
-            os.makedirs(os.path.dirname(self.history_file), exist_ok=True)
-            with open(self.history_file, "w") as f:
-                f.write(file_path)
+            # Only save if it's a real file path and not a new tab
+            if file_path and os.path.exists(file_path) and not file_path.endswith('New Tab'):
+                os.makedirs(os.path.dirname(self.history_file), exist_ok=True)
+                with open(self.history_file, "w") as f:
+                    f.write(file_path)
         except Exception as e:
             print(f"Error saving file history: {e}")
+
+    def simulate_button_click(self, action):
+        """Simulates a button click animation when a keyboard shortcut is used"""
+        button = self.toolbar.widgetForAction(action)
+        if button:
+            # Save original style
+            original_style = button.styleSheet()
+            
+            # Apply pressed style with transition
+            button.setStyleSheet("""
+                QToolButton {
+                    background-color: #666666;
+                }
+            """)
+            
+            # Reset style after 150ms with a longer duration for better visibility
+            QTimer.singleShot(150, lambda: button.setStyleSheet(original_style))
+
+    def toggle_terminal(self):
+        """Toggles the visibility of the terminal in the current tab."""
+        current_tab = self.tab_widget.currentWidget()
+        if not current_tab:
+            return
+
+        splitter = current_tab.layout().itemAt(0).widget()
+        terminal_container = splitter.widget(1)  # Terminal is the second widget in splitter
+
+        if terminal_container.isVisible():
+            # Save current sizes before hiding
+            self.last_sizes = splitter.sizes()
+            terminal_container.hide()
+            # Give all space to editor
+            splitter.setSizes([1, 0])
+        else:
+            terminal_container.show()
+            if hasattr(self, 'last_sizes'):
+                # Restore previous sizes
+                splitter.setSizes(self.last_sizes)
+            else:
+                # Default 50-50 split
+                splitter.setSizes([500, 500])
+
+        # Update button state
+        self.terminal_action.setChecked(terminal_container.isVisible())
 
 class AnotherWindow(MyDrawppIDE):
     def __init__(self):
