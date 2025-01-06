@@ -61,7 +61,10 @@ NAME ?= "Draw ++"
 .DEFAULT_GOAL := compile_run
 
 # Compile and run in sequence
-compile_run: compile run
+compile_run:
+	@$(MAKE) --no-print-directory compile
+	@echo "-#blue Starting the program..."
+	@$(MAKE) --no-print-directory run
 
 # Build the executable
 all: clean_log $(EXEC)
@@ -115,8 +118,7 @@ $(OBJ_DIR_O)/%.o: %.c
 
 # Run the program and overwrite the run log
 run: clean clean_log all
-	$(LOG) "-#blue === Launching Application ==="
-	$(LOG) "-#blue - Starting the program..."
+	@echo "-#blue Launching Application !"
 ifeq ($(OS),Windows_NT)
 	$(SILENT)./$(EXEC) || true
 else

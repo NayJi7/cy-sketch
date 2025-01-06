@@ -87,6 +87,7 @@ if (-not (Test-Path "$msys2Path\usr\bin\bash.exe")) {
 # Setup MSYS2 packages
 Write-Host "`nSetting up MSYS2 packages..." -ForegroundColor Yellow
 Write-Host "When you will press Enter a terminal will open. Please run these commands: (Select and right click to copy paste)" -ForegroundColor Cyan
+Write-Host "If everything closes without finishing, just restart the bat script again" -ForegroundColor Cyan
 Write-Host "1. pacman -Scc --noconfirm" -ForegroundColor Green
 Write-Host "2. pacman -Syyu --noconfirm" -ForegroundColor Green
 Write-Host "3. pacman -S --needed --overwrite '*' mingw-w64-x86_64-gcc mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_gfx mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-python mingw-w64-x86_64-make --noconfirm" -ForegroundColor Green

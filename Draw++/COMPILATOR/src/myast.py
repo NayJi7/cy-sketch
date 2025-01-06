@@ -1338,5 +1338,5 @@ def execute_ast(ast, debug, filename):
     with open(filename, 'w') as f:
         f.write(c_code)
 
-    print(f"-#green Generated C code successfully. Written to: {filename}")
+    print(f"-#green Compilation completed successfully")
 # @}
