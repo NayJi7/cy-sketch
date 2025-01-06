@@ -158,7 +158,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
 
         # Ajouter des règles
         self.add_rules(["var","func", "return"], self.keyword_format)
-        self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon"], self.drawing_format)
+        self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon", "draw ellipse", "draw arc", ], self.drawing_format)
         self.add_rules(["for", "while", "if", "else", "elif"], self.control_format)
 
     def add_rules(self, patterns, text_format):
