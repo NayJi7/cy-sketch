@@ -9,12 +9,14 @@ PyQt5==5.15.9  # Required for the IDE
 PyQt5-sip<13,>=12.11  # Required for PyQt5
 PyQt5-Qt5>=5.15.2  # Required for PyQt5
 pyinstaller==5.13.2  # Required for creating executables
+psutil==5.9.7  # For process management (optional, but used for stopping processes)
 
 # Note: Python 3.6 or higher is required but should be installed separately
 # Standard library modules (no need to install):
 # - difflib
 # - argparse
-# - os
+# - osimport re
+
 # - sys
 # - re
 # - copy
