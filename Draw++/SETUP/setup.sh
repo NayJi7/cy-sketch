@@ -138,8 +138,8 @@ build_executable() {
 }
 
 # Lancement des fonctions
-#install_dependencies
-#install_python_dependencies
+install_dependencies
+install_python_dependencies
 include_resources
 build_executable
 setup_desktop_integration
