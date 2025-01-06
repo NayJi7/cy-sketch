@@ -37,6 +37,7 @@ int isPointInPolygon(int x, int y, int cx, int cy, int radius, int sides);
 int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance);
 int isPointInSquare(int x, int y, int squareX, int squareY, int size);
 int isPointInTriangle(int x, int y, int cx, int cy, int radius);
+bool isPointInShape(Shape* shape, int x, int y);
 
 void moveShapeUp(void);
 void moveShapeDown(void);

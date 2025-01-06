@@ -20,7 +20,7 @@ OBJ_DIR_O = SDL/files.o
 OBJ_DIR_EXE = SDL/files.exe
 
 # List of source files
-SRC = .to_run.c SDL/src/form.c SDL/src/cursorEvents.c SDL/src/formEvents.c SDL/src/colors.c SDL/src/animations.c
+SRC = .to_run.c SDL/src/form.c SDL/src/cursorEvents.c SDL/src/formEvents.c SDL/src/colors.c SDL/src/animations.c SDL/src/game.c
 
 # List of object files (replace .c with .o and add the directory path)
 OBJ = $(addprefix $(OBJ_DIR_O)/, $(notdir $(SRC:.c=.o)))
