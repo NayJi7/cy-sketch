@@ -8,6 +8,7 @@
 #include "../files.h/cursorEvents.h"
 #include "../files.h/animations.h"
 #include "../files.h/colors.h"
+#include "../files.h/game.h"
 
 // ANSI escape codes for colors
 #define RED_COLOR "-#red "
@@ -68,8 +69,19 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
         return;
     }
 
-    int running = 1; // Main loop control flag.
+    // Initialiser le jeu
+    GameState gameState;
+    initGame(&gameState);
+    
+    Uint32 lastTime = SDL_GetTicks();
+    int running = 1;
+    
     while (running) {
+        // Calculer le deltaTime pour updateGame
+        Uint32 currentTime = SDL_GetTicks();
+        float deltaTime = (currentTime - lastTime) / 1000.0f;
+        lastTime = currentTime;
+        
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -315,15 +327,52 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                 }
                 break;
 
-                case SDL_KEYDOWN: {
-                    strncpy(lastKeyPressed, SDL_GetKeyName(event.key.keysym.sym), sizeof(lastKeyPressed) - 1);
-                    lastKeyPressed[sizeof(lastKeyPressed) - 1] = '\0';
+                case SDL_KEYDOWN:
+                    if (event.key.repeat != 0) break;
                     switch (event.key.keysym.sym) {
-                        case SDLK_ESCAPE:
-                            if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                                printf("Exit application\n\n");
+                        case SDLK_g:  // Activer le mode jeu
+                            if (!gameState.isGameMode) {
+                                initGame(&gameState);
+                                gameState.isGameMode = true;  // Entrer dans le mode jeu
+                                if (DEBUG) printf("Game mode activated!\n");
                             }
+                            break;
+
+                        case SDLK_KP_ENTER:
+                        case SDLK_RETURN:
+                            if (gameState.isGameMode) {
+                                // Mode jeu : démarrer la partie
+                                if (!gameState.isPlaying) {
+                                    gameState.isPlaying = true;
+                                    if (DEBUG) printf("Game started!\n");
+                                }
+                            } else {
+                                // Mode normal : gérer les animations
+                                if (DEBUG) {
+                                    printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                    printf("Apply animation to selected shapes\n\n");
+                                }
+                                for (int i = 0; i < shapeCount; i++) {
+                                    if (shapes[i].selected) {
+                                        if(shapes[i].isAnimating) {
+                                            shapes[i].isAnimating = false;
+                                        }
+                                        applyAnimation(&shapes[i]);
+                                    }
+                                }
+                            }
+                            break;
+
+                        case SDLK_SPACE:  // Quitter le mode jeu
+                            if (gameState.isGameMode) {
+                                gameState.isGameMode = false;
+                                gameState.isPlaying = false;
+                                restoreShapes(&gameState);  // Restaurer les formes
+                                if (DEBUG) printf("Game mode exited!\n");
+                            }
+                            break;
+
+                        case SDLK_ESCAPE:  // Quitter l'application
                             running = 0;
                             break;
                         case SDLK_RIGHT:
@@ -370,21 +419,6 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 }
                             }
                             break;
-                        case SDLK_KP_ENTER:
-                        case SDLK_RETURN:
-                            if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                                printf("Apply animation to selected shapes\n\n");
-                            }
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    if(shapes[i].isAnimating) {
-                                        shapes[i].isAnimating = false;
-                                    }
-                                    applyAnimation(&shapes[i]);
-                                }
-                            }
-                            break;
                         case SDLK_BACKSPACE:
                             if (DEBUG) {
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
@@ -408,7 +442,6 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;
                     }
                     break;
-                }
 
                 case SDL_MOUSEWHEEL:
                     if (DEBUG) {
@@ -423,13 +456,20 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if (DEBUG) {
-                        printf("Mouse Button Pressed\n");
-                        printf("Toggle selection of shape under cursor\n\n");
-                    }
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        // Handle shape selection using the cursor.
-                        handleCursorSelection(event.button.x, event.button.y);
+                    if (gameState.isPlaying) {
+                        // Vérifier si on a cliqué sur une forme
+                        for (int i = 0; i < shapeCount; i++) {
+                            if (isPointInShape(&shapes[i], event.button.x, event.button.y)) {
+                                gameState.score += 100;
+                                deleteShape(i);
+                                break;
+                            }
+                        }
+                    } else {
+                        // Code existant pour la sélection des formes
+                        if (event.button.button == SDL_BUTTON_LEFT) {
+                            handleCursorSelection(event.button.x, event.button.y);
+                        }
                     }
                     break;
 
@@ -476,23 +516,31 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
         // Render all shapes in z-order
         renderAllShapes(renderer);
 
-        // Render the custom cursor.
+        // Render the custom cursor
         renderCursor(renderer, &cursor);
-        renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
-        
-        // Display rotation information for the selected shape
-        for (int i = 0; i < shapeCount; i++) {
-            if (shapes[i].selected) {
-                renderShapeInfo(renderer, font, &shapes[i]);
-                break; // Show only for the first selected shape
+
+        if (gameState.isGameMode) {
+            // Mode jeu (actif ou en attente)
+            renderGameUI(renderer, font, &gameState);
+        } else {
+            // Mode normal
+            renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
+            for (int i = 0; i < shapeCount; i++) {
+                if (shapes[i].selected) {
+                    renderShapeInfo(renderer, font, &shapes[i]);
+                    break;
+                }
             }
+            renderLastKeyPressed(renderer, font);
         }
 
-        // Display the last key pressed
-        renderLastKeyPressed(renderer, font);
-        
         // Present the updated frame
         SDL_RenderPresent(renderer);
+
+        // Update game state
+        if (gameState.isPlaying) {
+            updateGame(&gameState, deltaTime, cursor.x, cursor.y);
+        }
     }
     TTF_CloseFont(font);
     TTF_Quit();

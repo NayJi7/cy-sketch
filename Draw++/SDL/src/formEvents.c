@@ -1371,6 +1371,77 @@ int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
     return distance <= tolerance && dot >= -buffer && dot <= 1 + buffer;
 }
 
+
+bool isPointInShape(Shape* shape, int x, int y) {
+    switch (shape->type) {
+        case SHAPE_CIRCLE:
+            return isPointInCircle(x, y, 
+                shape->data.circle.x, 
+                shape->data.circle.y, 
+                shape->data.circle.radius);
+            
+        case SHAPE_RECTANGLE:
+            return isPointInRectangle(x, y,
+                shape->data.rectangle.x,
+                shape->data.rectangle.y,
+                shape->data.rectangle.width,
+                shape->data.rectangle.height);
+            
+        case SHAPE_SQUARE:
+            return isPointInSquare(x, y,
+                shape->data.square.x,
+                shape->data.square.y,
+                shape->data.square.c);
+            
+        case SHAPE_ELLIPSE:
+            return isPointInEllipse(x, y,
+                shape->data.ellipse.x,
+                shape->data.ellipse.y,
+                shape->data.ellipse.rx,
+                shape->data.ellipse.ry);
+            
+        case SHAPE_POLYGON:
+            return isPointInPolygon(x, y,
+                shape->data.polygon.cx,
+                shape->data.polygon.cy,
+                shape->data.polygon.radius,
+                shape->data.polygon.sides);
+            
+        case SHAPE_TRIANGLE:
+            return isPointInTriangle(x, y,
+                shape->data.triangle.cx,
+                shape->data.triangle.cy,
+                shape->data.triangle.radius);
+            
+        case SHAPE_ARC:
+            return isPointInArc(x, y,
+                shape->data.arc.x,
+                shape->data.arc.y,
+                shape->data.arc.radius,
+                shape->data.arc.start_angle,
+                shape->data.arc.end_angle);
+            
+        case SHAPE_LINE:
+            return isPointInLine(x, y,
+                shape->data.line.x1,
+                shape->data.line.y1,
+                shape->data.line.x2,
+                shape->data.line.y2,
+                5); // tolérance de 5 pixels
+            
+        case SHAPE_ROUNDED_RECTANGLE:
+            return isPointInRoundedRectangle(x, y,
+                shape->data.rounded_rectangle.x1,
+                shape->data.rounded_rectangle.y1,
+                shape->data.rounded_rectangle.w,
+                shape->data.rounded_rectangle.h,
+                shape->data.rounded_rectangle.rad);
+            
+        default:
+            return false;
+    }
+}
+
 /**
  * @brief Moves a selected shape one layer up in the z-order
  */
