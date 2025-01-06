@@ -131,6 +131,10 @@ build_executable() {
 
   # Rendre l'exécutable exécutable
   chmod +x DrawStudioCode
+
+  # Rendre l'historique accessible en écriture
+  rm -rf Draw++/IDE/.history
+  touch Draw++/IDE/.history
 }
 
 # Lancement des fonctions
