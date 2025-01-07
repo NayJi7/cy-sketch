@@ -220,46 +220,6 @@ int drawSquare(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int c
 }
 
 
-/**
- * @brief Draws a rounded rectangle on the SDL renderer.
- * 
- * @param x1 The x-coordinate of the top-left corner.
- * @param y1 The y-coordinate of the top-left corner.
- * @param x2 The x-coordinate of the bottom-right corner.
- * @param y2 The y-coordinate of the bottom-right corner.
- * @param rad The radius of the corners.
- */
-int drawRoundedRectangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 rad, SDL_Color color, char *type) {
-
-    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
-        printf("%sExecutionError: Invalid type for rounded rectangle '%s'. Must be 'filled' or 'empty'.\n", 
-               RED_COLOR, type);
-        return -1;
-    }
-    else
-    {
-       
-        if (handleEvents(renderer, texture) == -1) return -1;
-
-        if (strcmp(type, "empty") == 0) {
-            if (roundedRectangleRGBA(renderer, x1, y1, x2, y2, rad, color.r, color.g, color.b, color.a) != 0) {
-                printf("%sExecutionError: Failed to draw empty rounded rectangle.\n", RED_COLOR);
-                return -1;
-            }
-        } else if (strcmp(type, "filled") == 0) {
-            if (roundedBoxRGBA(renderer, x1, y1, x2, y2, rad, color.r, color.g, color.b, color.a) != 0) {
-                printf("%sExecutionError: Failed to draw filled rounded rectangle.\n", RED_COLOR);
-                return -1;
-            }
-        } 
-        
-        renderTexture(renderer, texture, 750);
-        if (handleEvents(renderer, texture) == -1) return -1;
-        SDL_SetRenderTarget(renderer, NULL); 
-    } 
-    return 0;
-}
-
 int drawTriangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, SDL_Color color, char *type) 
 {
     // Validate the number of sides
@@ -597,103 +557,6 @@ int drawAnimatedSquare(SDL_Renderer* renderer, SDL_Texture *texture, int x, int 
         SDL_SetRenderTarget(renderer, NULL);
     }
     
-    return 0;
-}
-
-/**
- * @brief Draws an animated rounded rectangle progressively.
- * 
- * @param x X-coordinate of the top-left corner.
- * @param y Y-coordinate of the top-left corner.
- * @param w Width of the rounded rectangle.
- * @param h Height of the rounded rectangle.
- * @param radius Radius of the rounded corners.
- * @return -1 if an event interrupts the drawing, 0 otherwise.
- */
-int drawAnimatedRoundedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int w, int h, int radius, SDL_Color color, char *type) {
-    
-    // Validate that the radius fits within the dimensions.
-    if (radius * 2 > w || radius * 2 > h) {
-        printf("Invalid radius: too large for the rectangle dimensions.\n");
-        return -1;
-    }
-    else if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
-        printf("Invalid animatedRoundedRectangle type: \"%s.\". Must be filled or empty.\n", type);
-        return -1;
-    }
-    else
-    {
-        SDL_SetRenderTarget(renderer, texture);
-
-        setRenderColor(renderer, color);
-
-        if (strcmp(type, "empty") == 0) {
-            // Draw rounded corners
-            for (double theta = 0; theta <= M_PI / 2; theta += 0.01) {
-                if (handleEvents(renderer, texture) == -1) return -1;
-
-                // Top-Left corner 
-                SDL_RenderDrawPoint(renderer, x + radius - (int)(radius * cos(theta)), y + radius - (int)(radius * sin(theta)));
-                renderTexture(renderer, texture, 1);
-
-                // Top-Right corner
-                SDL_RenderDrawPoint(renderer, x + w - radius + (int)(radius * cos(theta)), y + radius - (int)(radius * sin(theta)));
-                renderTexture(renderer, texture, 1);
-
-                // Bottom-Left corner
-                SDL_RenderDrawPoint(renderer, x + radius - (int)(radius * cos(theta)), y + h - radius + (int)(radius * sin(theta)));
-                renderTexture(renderer, texture, 1);
-
-                // Bottom-Right corner
-                SDL_RenderDrawPoint(renderer, x + w - radius + (int)(radius * cos(theta)), y + h - radius + (int)(radius * sin(theta)));
-                renderTexture(renderer, texture, 1);
-            }
-
-            // Draw the left and right edges 
-            for (int j = radius; j < h - radius; ++j) {
-                if (handleEvents(renderer, texture) == -1) return -1;
-
-                SDL_RenderDrawPoint(renderer, x, y + j); // left
-                SDL_RenderDrawPoint(renderer, x + w - 1, y + j); // right
-                renderTexture(renderer, texture, 2);
-            }
-
-            // Draw the top and bottom edges 
-            for (int i = radius; i < w - radius; ++i) {
-                if (handleEvents(renderer, texture) == -1) return -1;
-
-                SDL_RenderDrawPoint(renderer, x + i, y); // top
-                SDL_RenderDrawPoint(renderer, x + i, y + h - 1); // bottom
-                renderTexture(renderer, texture, 4);
-            }
-        } 
-        else if (strcmp(type, "filled") == 0) {
-            // Fill the rectangle with rounded corners row by row.
-            for (int j = 0; j < h; ++j) {
-                for (int i = 0; i < w; ++i) {
-                    // Check if the point is within rounded corners.
-                    int dist_top_left = (i - radius) * (i - radius) + (j - radius) * (j - radius);
-                    int dist_top_right = (i - (w - radius - 1)) * (i - (w - radius - 1)) + (j - radius) * (j - radius);
-                    int dist_bottom_left = (i - radius) * (i - radius) + (j - (h - radius - 1)) * (j - (h - radius - 1));
-                    int dist_bottom_right = (i - (w - radius - 1)) * (i - (w - radius - 1)) + (j - (h - radius - 1)) * (j - (h - radius - 1));
-
-                    // Skip points outside the rounded corners.
-                    if ((dist_top_left > radius * radius && j < radius && i < radius) ||
-                        (dist_top_right > radius * radius && j < radius && i >= w - radius) ||
-                        (dist_bottom_left > radius * radius && j >= h - radius && i < radius) ||
-                        (dist_bottom_right > radius * radius && j >= h - radius && i >= w - radius)) {
-                        continue;
-                    }
-
-                    SDL_RenderDrawPoint(renderer, x + i, y + j);
-                    
-                }
-                if (handleEvents(renderer, texture) == -1) return -1;
-                renderTexture(renderer, texture, 6);
-            }
-        }
-        SDL_SetRenderTarget(renderer, NULL); 
-    }
     return 0;
 }
 
@@ -1159,8 +1022,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
         newShape.type = SHAPE_TRIANGLE;
     } else if (strcmp(shape, "square") == 0) {
         newShape.type = SHAPE_SQUARE;
-    } else if (strcmp(shape, "rounded_rectangle") == 0) {
-        newShape.type = SHAPE_ROUNDED_RECTANGLE;
     }
 
     va_list args;
@@ -1265,41 +1126,6 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
         newShape.data.arc.end_angle = end_angle;
 
         addShape(newShape);
-    } 
-    else if (strcmp(shape, "roundedRectangle") == 0) {
-        if (isAnimated) {
-            int x = va_arg(args, int);
-            int y = va_arg(args, int);
-            int w = va_arg(args, int);
-            int h = va_arg(args, int);
-            int rad = va_arg(args, int);
-            
-            if(drawAnimatedRoundedRectangle(renderer, texture, x, y, w, h, rad, color, type) == -1) return -1;
-
-            newShape.data.rounded_rectangle.x = x;
-            newShape.data.rounded_rectangle.y = y;
-            newShape.data.rounded_rectangle.w = w;
-            newShape.data.rounded_rectangle.h = h;
-            newShape.data.rounded_rectangle.rad = rad;
-
-            addShape(newShape);
-        } else {
-            Sint16 x1 = va_arg(args, int);
-            Sint16 y1 = va_arg(args, int);
-            Sint16 x2 = va_arg(args, int);
-            Sint16 y2 = va_arg(args, int);
-            Sint16 radius = va_arg(args, int);
-
-            if(drawRoundedRectangle(renderer, texture, x1, y1, x2, y2, radius, color, type) == -1) return -1;
-
-            newShape.data.rounded_rectangle.x1 = x1;
-            newShape.data.rounded_rectangle.y1 = y1;
-            newShape.data.rounded_rectangle.x2 = x2;
-            newShape.data.rounded_rectangle.y2 = y2;
-            newShape.data.rounded_rectangle.radius = radius;
-
-            addShape(newShape);
-        }
     } 
     else if (strcmp(shape, "ellipse") == 0) {
         int x = va_arg(args, int);

@@ -105,6 +105,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Move selected shape up\n\n");
                         }
+                        strncpy(lastKeyPressed, "z", sizeof(lastKeyPressed) - 1);
                         moveShapeUp();
                     }
                     else if (strcmp(event.text.text, "s") == 0) {
@@ -112,6 +113,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Move selected shape down\n\n");
                         }
+                        strncpy(lastKeyPressed, "s", sizeof(lastKeyPressed) - 1);
                         moveShapeDown();
                     }
                     else if (strcmp(event.text.text, "a") == 0) {
@@ -119,6 +121,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Toggle animation for selected shape\n\n");
                         }
+                        strncpy(lastKeyPressed, "a", sizeof(lastKeyPressed) - 1);
                         toggleAnimation();
                     }
                     else if (strcmp(event.text.text, "n") == 0) {
@@ -126,6 +129,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Toggle animation for all shapes\n\n");
                         }
+                        strncpy(lastKeyPressed, "n", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             if(shapes[i].isAnimating) {
                                 shapes[i].isAnimating = false;
@@ -137,6 +141,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Reset selected shape to initial state\n\n");
                         }
+                        strncpy(lastKeyPressed, "r", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 resetShape(&shapes[i]);
@@ -148,6 +153,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Toggle selection of shape under cursor\n\n");
                         }
+                        strncpy(lastKeyPressed, "e", sizeof(lastKeyPressed) - 1);
                         int topmostShapeIndex = -1;
                         // Check if cursor is over any shape, keeping track of the last (topmost) one
                         for (int i = 0; i < shapeCount; i++) {
@@ -178,12 +184,6 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                         shapes[i].data.line.x1, shapes[i].data.line.y1,
                                         shapes[i].data.line.x2, shapes[i].data.line.y2,
                                         shapes[i].data.line.thickness);
-                                    break;
-                                case SHAPE_ROUNDED_RECTANGLE:
-                                    isInside = isPointInRoundedRectangle(cursor.x, cursor.y,
-                                        shapes[i].data.rounded_rectangle.x1, shapes[i].data.rounded_rectangle.y1,
-                                        shapes[i].data.rounded_rectangle.x2, shapes[i].data.rounded_rectangle.y2,
-                                        shapes[i].data.rounded_rectangle.radius);
                                     break;
                                 case SHAPE_POLYGON:
                                     isInside = isPointInPolygon(cursor.x, cursor.y,
@@ -237,6 +237,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Rotate selected shapes by -5 degrees\n\n");
                         }
+                        strncpy(lastKeyPressed, "q", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             rotateShape(&shapes[i], -5);
                         }
@@ -246,6 +247,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Rotate selected shapes by 5 degrees\n\n");
                         }
+                        strncpy(lastKeyPressed, "d", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             rotateShape(&shapes[i], 5);
                         }
@@ -255,6 +257,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Zoom in on selected shapes\n\n");
                         }
+                        strncpy(lastKeyPressed, "*", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 zoomShape(&shapes[i], 1.0);
@@ -266,6 +269,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Zoom out on selected shapes\n\n");
                         }
+                        strncpy(lastKeyPressed, "/", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 zoomShape(&shapes[i], -1.0);
@@ -278,6 +282,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Cycle animation mode forward for selected shapes\n\n");
                         }
+                        strncpy(lastKeyPressed, "+", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 if (shapes[i].animation_parser == ANIM_NONE) {
@@ -302,6 +307,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                         if (DEBUG) {
                             printf("Cycle animation mode backward for selected shapes\n\n");
                         }
+                        strncpy(lastKeyPressed, "-", sizeof(lastKeyPressed) - 1);
                         for (int i = 0; i < shapeCount; i++) {
                             if (shapes[i].selected) {
                                 if (shapes[i].animation_parser == ANIM_NONE) {
@@ -377,11 +383,12 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 gameState.isPlaying = true;
                                 if (DEBUG) printf("Game started!\n");
                             } else {
-                                // Mode normal : gérer les animations
+                                // Normal mode: handle animations
                                 if (DEBUG) {
                                     printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                     printf("Apply animation to selected shapes\n\n");
                                 }
+                                strncpy(lastKeyPressed, "Enter", sizeof(lastKeyPressed) - 1);
                                 for (int i = 0; i < shapeCount; i++) {
                                     if (shapes[i].selected) {
                                         if(shapes[i].isAnimating) {
@@ -410,7 +417,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             }
                             break;
 
-                        case SDLK_ESCAPE:  // Quitter l'application
+                        case SDLK_ESCAPE:  // Quit the application
                             running = 0;
                             break;
                         case SDLK_RIGHT:
@@ -418,6 +425,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                 printf("Move selected shapes by 10 pixels to the right\n\n");
                             }
+                            strncpy(lastKeyPressed, "Right", sizeof(lastKeyPressed) - 1);
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], 10, 0);
@@ -430,6 +438,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                 printf("Move selected shapes by 10 pixels to the left\n\n");
                             }
+                            strncpy(lastKeyPressed, "Left", sizeof(lastKeyPressed) - 1);
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], -10, 0);
@@ -442,6 +451,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                 printf("Move selected shapes by 10 pixels up\n\n");
                             }
+                            strncpy(lastKeyPressed, "Up", sizeof(lastKeyPressed) - 1);
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], 0, -10);
@@ -454,6 +464,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                 printf("Move selected shapes by 10 pixels down\n\n");
                             }
+                            strncpy(lastKeyPressed, "Down", sizeof(lastKeyPressed) - 1);
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     moveShape(&shapes[i], 0, 10);
@@ -466,6 +477,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                 printf("Remove last animation from selected shapes\n\n");
                             }
+                            strncpy(lastKeyPressed, "Backspace", sizeof(lastKeyPressed) - 1);
                             for (int i = 0; i < shapeCount; i++) {
                                 if (shapes[i].selected) {
                                     if(shapes[i].isAnimating) {
@@ -481,6 +493,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                 printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
                                 printf("Delete selected shape\n\n");
                             }
+                            strncpy(lastKeyPressed, "Delete", sizeof(lastKeyPressed) - 1);
                             deleteSelectedShape();
                             break;
                     }
@@ -540,10 +553,10 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
         renderCursor(renderer, &cursor);
 
         if (gameState.isGameMode) {
-            // Mode jeu (actif ou en attente)
+            // Game mode (active or waiting)
             renderGameUI(renderer, font, &gameState);
         } else {
-            // Mode normal
+            // Normal mode
             renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
             for (int i = 0; i < shapeCount; i++) {
                 if (shapes[i].selected) {
@@ -724,9 +737,6 @@ int findShapeAtCursor(int x, int y) {
             case SHAPE_ARC:
                 if(isPointInArc(x, y, shape->data.arc.x, shape->data.arc.y, shape->data.arc.radius, shape->data.arc.start_angle, shape->data.arc.end_angle)) return i;
                 break;
-            case SHAPE_ROUNDED_RECTANGLE:
-                if(isPointInRoundedRectangle(x, y, shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1, shape->data.rounded_rectangle.x2, shape->data.rounded_rectangle.y2, shape->data.rounded_rectangle.radius)) return i;
-                break;
             case SHAPE_POLYGON:
                 if(isPointInPolygon(x, y, shape->data.polygon.cx, shape->data.polygon.cy, shape->data.polygon.radius, shape->data.polygon.sides)) return i;
                 break;
@@ -893,16 +903,6 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
                     animation_chose);
             snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;  
-        case SHAPE_ROUNDED_RECTANGLE: 
-            snprintf(text, sizeof(text), "Form: Rounded Rect %s\nRotation: %.1f deg\nSize: %dx%d\nRadius: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
-                    formType, shape->rotation, 
-                    shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1,
-                    shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1,
-                    shape->data.rounded_rectangle.radius,
-                    shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
-                    animation_chose);
-            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
-            break;
         case SHAPE_POLYGON: 
             snprintf(text, sizeof(text), "Form: Polygon %s\nRotation: %.1f deg\nRadius: %d\nSides: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
                     formType, shape->rotation, 

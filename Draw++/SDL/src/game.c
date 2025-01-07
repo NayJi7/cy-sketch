@@ -1,6 +1,11 @@
 #include "../files.h/game.h"
 #include <math.h>
 
+/**
+ * @brief Get the name of the specified game type
+ * @param type The game type (GAME_ESCAPE or GAME_DEFENSE)
+ * @return The name of the game as a string
+ */
 const char* getGameName(GameType type) {
     switch (type) {
         case GAME_ESCAPE:
@@ -12,6 +17,13 @@ const char* getGameName(GameType type) {
     }
 }
 
+/**
+ * @brief Initialize a new game state
+ * @param game Pointer to the game state to initialize
+ * 
+ * Sets up initial values for score, timers, and game mode.
+ * Saves the current shapes and sets game-specific variables based on the game type.
+ */
 void initGame(GameState* game) {
     game->score = 0;
     game->isPlaying = false;
@@ -40,10 +52,22 @@ void initGame(GameState* game) {
         game->spawnTimer = 2.0f;  // Initial spawn timer
         game->basesRemaining = game->savedShapeCount;
     } else {
-        game->timeLeft = game->savedShapeCount * 10.0f;  // 10 seconds per shape for escape game
+        game->timeLeft = game->savedShapeCount * 2.0f;  // 5 seconds per shape for escape game
     }
 }
 
+/**
+ * @brief Update the game state each frame
+ * @param game Pointer to the current game state
+ * @param deltaTime Time elapsed since last frame
+ * @param cursorX Current X position of the cursor
+ * @param cursorY Current Y position of the cursor
+ * @param window SDL window pointer
+ * @param renderer SDL renderer pointer
+ * 
+ * Handles game logic updates including time management, win conditions,
+ * and game-specific updates for each game mode.
+ */
 void updateGame(GameState* game, float deltaTime, int cursorX, int cursorY, SDL_Window* window, SDL_Renderer* renderer) {
     if (!game || !window || !renderer) return;  // Safety check
     
@@ -88,6 +112,14 @@ void updateGame(GameState* game, float deltaTime, int cursorX, int cursorY, SDL_
     }
 }
 
+/**
+ * @brief Render the game UI elements
+ * @param renderer SDL renderer pointer
+ * @param font TTF font for text rendering
+ * @param game Pointer to the current game state
+ * 
+ * Renders score, timer, game messages, and instructions based on the current game state.
+ */
 void renderGameUI(SDL_Renderer* renderer, TTF_Font* font, GameState* game) {
     SDL_Color textColor = {0, 0, 0, 255};
     int windowWidth, windowHeight;
@@ -191,6 +223,12 @@ void renderGameUI(SDL_Renderer* renderer, TTF_Font* font, GameState* game) {
     SDL_DestroyTexture(texture);
 }
 
+/**
+ * @brief Restore shapes to their original state
+ * @param game Pointer to the current game state
+ * 
+ * Restores all shapes from the saved state, maintaining their original properties.
+ */
 void restoreShapes(GameState* game) {
     // Clear current shapes
     shapeCount = 0;
@@ -202,6 +240,15 @@ void restoreShapes(GameState* game) {
     shapeCount = game->savedShapeCount;
 }
 
+/**
+ * @brief Reset shapes to random positions
+ * @param game Pointer to the current game state
+ * @param window SDL window pointer
+ * @param renderer SDL renderer pointer
+ * 
+ * Repositions all shapes randomly within the center area of the screen
+ * while maintaining their original properties and dimensions.
+ */
 void resetShapes(GameState* game, SDL_Window* window, SDL_Renderer* renderer) {
     // Clear current shapes
     shapeCount = 0;
@@ -278,10 +325,40 @@ void resetShapes(GameState* game, SDL_Window* window, SDL_Renderer* renderer) {
                 shapes[i].data.polygon.cx = centerX + (rand() % (2 * spreadX) - spreadX);
                 shapes[i].data.polygon.cy = centerY + (rand() % (2 * spreadY) - spreadY);
                 break;
+            case SHAPE_LINE:
+                marginX = marginY = shapes[i].data.line.thickness + 10;
+                // Calculate current line length
+                int oldDx = shapes[i].data.line.x2 - shapes[i].data.line.x1;
+                int oldDy = shapes[i].data.line.y2 - shapes[i].data.line.y1;
+                float length = sqrt(oldDx * oldDx + oldDy * oldDy);
+                float angle = atan2(oldDy, oldDx);
+                
+                // Move starting point
+                shapes[i].data.line.x1 = centerX + (rand() % (2 * spreadX) - spreadX);
+                shapes[i].data.line.y1 = centerY + (rand() % (2 * spreadY) - spreadY);
+                
+                // Calculate new endpoint keeping same length and angle
+                shapes[i].data.line.x2 = shapes[i].data.line.x1 + (int)(length * cos(angle));
+                shapes[i].data.line.y2 = shapes[i].data.line.y1 + (int)(length * sin(angle));
+                break;
+            case SHAPE_ARC:
+                marginX = marginY = shapes[i].data.arc.radius + 10;
+                shapes[i].data.arc.x = centerX + (rand() % (2 * spreadX) - spreadX);
+                shapes[i].data.arc.y = centerY + (rand() % (2 * spreadY) - spreadY);
+                break;
         }
     }
 }
 
+/**
+ * @brief Run the escape game logic
+ * @param game Pointer to the current game state
+ * @param cursorX Current X position of the cursor
+ * @param cursorY Current Y position of the cursor
+ * 
+ * Handles shape movement, collision detection, and capture mechanics
+ * for the shape escape game mode.
+ */
 void escapeRun(GameState* game, int cursorX, int cursorY) {
     if (!game || shapeCount <= 0) return;  // Safety check
     
@@ -309,38 +386,40 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
                 shapeX = shapes[i].data.circle.x;
                 shapeY = shapes[i].data.circle.y;
                 {
-                    float dx = cursorX - shapeX;
-                    float dy = cursorY - shapeY;
-                    float distSq = dx*dx + dy*dy;
-                    isCaught = distSq <= shapes[i].data.circle.radius * shapes[i].data.circle.radius;
+                    isCaught = isPointInCircle(cursorX, cursorY,
+                        shapes[i].data.circle.x, shapes[i].data.circle.y,
+                        shapes[i].data.circle.radius);
                 }
                 break;
             case SHAPE_RECTANGLE:
                 if (shapes[i].data.rectangle.width <= 0 || shapes[i].data.rectangle.height <= 0) continue;  // Safety check
                 shapeX = shapes[i].data.rectangle.x + shapes[i].data.rectangle.width/2;
                 shapeY = shapes[i].data.rectangle.y + shapes[i].data.rectangle.height/2;
-                isCaught = cursorX >= shapes[i].data.rectangle.x &&
-                          cursorX <= shapes[i].data.rectangle.x + shapes[i].data.rectangle.width &&
-                          cursorY >= shapes[i].data.rectangle.y &&
-                          cursorY <= shapes[i].data.rectangle.y + shapes[i].data.rectangle.height;
+                {
+                    isCaught = isPointInRectangle(cursorX, cursorY,
+                        shapes[i].data.rectangle.x, shapes[i].data.rectangle.y,
+                        shapes[i].data.rectangle.width, shapes[i].data.rectangle.height);
+                }
                 break;
             case SHAPE_SQUARE:
                 if (shapes[i].data.square.c <= 0) continue;  // Safety check
                 shapeX = shapes[i].data.square.x + shapes[i].data.square.c/2;
                 shapeY = shapes[i].data.square.y + shapes[i].data.square.c/2;
-                isCaught = cursorX >= shapes[i].data.square.x &&
-                          cursorX <= shapes[i].data.square.x + shapes[i].data.square.c &&
-                          cursorY >= shapes[i].data.square.y &&
-                          cursorY <= shapes[i].data.square.y + shapes[i].data.square.c;
+                {
+                    isCaught = isPointInSquare(cursorX, cursorY,
+                        shapes[i].data.square.x, shapes[i].data.square.y,
+                        shapes[i].data.square.c);
+                }
+
                 break;
             case SHAPE_ELLIPSE:
                 if (shapes[i].data.ellipse.rx <= 0 || shapes[i].data.ellipse.ry <= 0) continue;  // Safety check
                 shapeX = shapes[i].data.ellipse.x;
                 shapeY = shapes[i].data.ellipse.y;
                 {
-                    float dx = (cursorX - shapeX) / (float)shapes[i].data.ellipse.rx;
-                    float dy = (cursorY - shapeY) / (float)shapes[i].data.ellipse.ry;
-                    isCaught = (dx*dx + dy*dy) <= 1.0f;
+                    isCaught = isPointInEllipse(cursorX, cursorY,
+                        shapes[i].data.ellipse.x, shapes[i].data.ellipse.y,
+                        shapes[i].data.ellipse.rx, shapes[i].data.ellipse.ry);
                 }
                 break;
             case SHAPE_TRIANGLE:
@@ -348,10 +427,9 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
                 shapeX = shapes[i].data.triangle.cx;
                 shapeY = shapes[i].data.triangle.cy;
                 {
-                    float dx = cursorX - shapeX;
-                    float dy = cursorY - shapeY;
-                    float distSq = dx*dx + dy*dy;
-                    isCaught = distSq <= shapes[i].data.triangle.radius * shapes[i].data.triangle.radius;
+                    isCaught = isPointInTriangle(cursorX, cursorY,
+                        shapes[i].data.triangle.cx, shapes[i].data.triangle.cy,
+                        shapes[i].data.triangle.radius);
                 }
                 break;
             case SHAPE_POLYGON:
@@ -359,10 +437,34 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
                 shapeX = shapes[i].data.polygon.cx;
                 shapeY = shapes[i].data.polygon.cy;
                 {
-                    float dx = cursorX - shapeX;
-                    float dy = cursorY - shapeY;
-                    float distSq = dx*dx + dy*dy;
-                    isCaught = distSq <= shapes[i].data.polygon.radius * shapes[i].data.polygon.radius;
+                    isCaught = isPointInPolygon(cursorX, cursorY,
+                        shapes[i].data.polygon.cx, shapes[i].data.polygon.cy,
+                        shapes[i].data.polygon.radius,
+                        shapes[i].data.polygon.sides);
+                }
+                break;
+            case SHAPE_LINE:
+                if (shapes[i].data.line.thickness <= 0) continue;  // Safety check
+                // Calculer le centre de la ligne
+                shapeX = (shapes[i].data.line.x1 + shapes[i].data.line.x2) / 2;
+                shapeY = (shapes[i].data.line.y1 + shapes[i].data.line.y2) / 2;
+                {
+                    isCaught = isPointInLine(cursorX, cursorY,
+                        shapes[i].data.line.x1, shapes[i].data.line.y1,
+                        shapes[i].data.line.x2, shapes[i].data.line.y2,
+                        shapes[i].data.line.thickness);
+                }
+                break;
+            case SHAPE_ARC:
+                if (shapes[i].data.arc.radius <= 0) continue;  // Safety check
+                shapeX = shapes[i].data.arc.x;
+                shapeY = shapes[i].data.arc.y;
+                {
+                    isCaught = isPointInArc(cursorX, cursorY,
+                        shapes[i].data.arc.x, shapes[i].data.arc.y,
+                        shapes[i].data.arc.radius,
+                        shapes[i].data.arc.start_angle,
+                        shapes[i].data.arc.end_angle);
                 }
                 break;
             default:
@@ -377,8 +479,8 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
 
         // If cursor is close, make shape run away
         if (dist < 300) {
-            float speed = 8.0f;
-            float speedMultiplier = 1.0f + (300.0f - dist) / 80.0f;
+            float speed = 12.0f;
+            float speedMultiplier = 1.0f + (300.0f - dist) / 60.0f;
             speed *= speedMultiplier;
             
             float moveX = (dx/dist) * speed;
@@ -409,6 +511,12 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
                     break;
                 case SHAPE_POLYGON:
                     marginX = marginY = shapes[i].data.polygon.radius;
+                    break;
+                case SHAPE_LINE:
+                    marginX = marginY = shapes[i].data.line.thickness;
+                    break;
+                case SHAPE_ARC:
+                    marginX = marginY = shapes[i].data.arc.radius;
                     break;
                 default:
                     marginX = marginY = 25;
@@ -460,6 +568,13 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
     }
 }
 
+/**
+ * @brief Initialize the defense game mode
+ * @param game Pointer to the current game state
+ * 
+ * Sets up initial values for the defense game mode and normalizes
+ * the size of base shapes for balanced gameplay.
+ */
 void initDefenseMode(GameState* game) {
     // Initialize defense-specific variables
     game->enemyCount = 0;
@@ -498,10 +613,26 @@ void initDefenseMode(GameState* game) {
                 if (shapes[i].data.polygon.radius > 50)
                     shapes[i].data.polygon.radius = 50;
                 break;
+            case SHAPE_LINE:
+                if (shapes[i].data.line.thickness > 10)
+                    shapes[i].data.line.thickness = 10;
+                break;
+            case SHAPE_ARC:
+                if (shapes[i].data.arc.radius > 50)
+                    shapes[i].data.arc.radius = 50;
+                break;
         }
     }
 }
 
+/**
+ * @brief Spawn a new enemy in defense mode
+ * @param game Pointer to the current game state
+ * @param window SDL window pointer
+ * @param renderer SDL renderer pointer
+ * 
+ * Creates a new enemy shape with random position and movement pattern.
+ */
 void spawnEnemy(GameState* game, SDL_Window* window, SDL_Renderer* renderer) {
     if (game->enemyCount >= 50) return;  // Max enemy limit
     
@@ -582,6 +713,17 @@ void spawnEnemy(GameState* game, SDL_Window* window, SDL_Renderer* renderer) {
     game->enemyCount++;
 }
 
+/**
+ * @brief Update the defense game state
+ * @param game Pointer to the current game state
+ * @param deltaTime Time elapsed since last frame
+ * @param cursorX Current X position of the cursor
+ * @param cursorY Current Y position of the cursor
+ * @param window SDL window pointer
+ * @param renderer SDL renderer pointer
+ * 
+ * Handles enemy spawning, movement, and collision detection for defense mode.
+ */
 void updateDefenseGame(GameState* game, float deltaTime, int cursorX, int cursorY, SDL_Window* window, SDL_Renderer* renderer) {
     if (!game->isPlaying) return;
     
@@ -750,9 +892,16 @@ void updateDefenseGame(GameState* game, float deltaTime, int cursorX, int cursor
                     }
                     break;
                 }
-                case SHAPE_ARC:
-                case SHAPE_ROUNDED_RECTANGLE:
-                case SHAPE_LINE:
+                case SHAPE_ARC: {
+                    float dx = enemyX - shapes[j].data.arc.x;
+                    float dy = enemyY - shapes[j].data.arc.y;
+                    float minDist = enemyRadius + shapes[j].data.arc.radius;
+                    if (dx*dx + dy*dy < minDist*minDist) {
+                        collided = true;
+                    }
+                    break;
+                }
+                case SHAPE_LINE: {
                     // Use simple circle collision for these shapes
                     float dx = enemyX - shapes[j].data.circle.x;
                     float dy = enemyY - shapes[j].data.circle.y;
@@ -761,6 +910,7 @@ void updateDefenseGame(GameState* game, float deltaTime, int cursorX, int cursor
                         collided = true;
                     }
                     break;
+                }
             }
             
             if (collided) {
@@ -785,6 +935,13 @@ void updateDefenseGame(GameState* game, float deltaTime, int cursorX, int cursor
     }
 }
 
+/**
+ * @brief Render the defense game elements
+ * @param renderer SDL renderer pointer
+ * @param game Pointer to the current game state
+ * 
+ * Renders all active enemies in the defense game mode.
+ */
 void renderDefenseGame(SDL_Renderer* renderer, GameState* game) {
     // Render all active enemies
     for (int i = 0; i < game->enemyCount; i++) {

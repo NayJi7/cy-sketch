@@ -384,49 +384,6 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
             break;
         }
 
-        case SHAPE_ROUNDED_RECTANGLE: {
-            setRenderColor(renderer, shape->color);
-
-            // Draw the rounded rectangle
-            if (strcmp(shape->typeForm, "filled") == 0) {
-                roundedBoxRGBA(renderer,
-                            shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
-                            shape->data.rounded_rectangle.x2, shape->data.rounded_rectangle.y2,
-                            shape->data.rounded_rectangle.radius,
-                            shape->color.r, shape->color.g, shape->color.b, shape->color.a);
-            } else if (strcmp(shape->typeForm, "empty") == 0) {
-                roundedRectangleRGBA(renderer,
-                                shape->data.rounded_rectangle.x1, shape->data.rounded_rectangle.y1,
-                                shape->data.rounded_rectangle.x2, shape->data.rounded_rectangle.y2,
-                                shape->data.rounded_rectangle.radius,
-                                shape->color.r, shape->color.g, shape->color.b, shape->color.a);
-            }
-
-            // Add a selection highlight if the shape is selected
-            if (shape->selected) {
-                SDL_Color selectedColor = selectColor(shape->color);
-                int enlargement = 5;
-                if (strcmp(shape->typeForm, "filled") == 0) {
-                    roundedBoxRGBA(renderer,
-                                shape->data.rounded_rectangle.x1 - enlargement, 
-                                shape->data.rounded_rectangle.y1 - enlargement,
-                                shape->data.rounded_rectangle.x2 + enlargement, 
-                                shape->data.rounded_rectangle.y2 + enlargement,
-                                shape->data.rounded_rectangle.radius + enlargement,
-                                selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
-                } else {
-                    roundedRectangleRGBA(renderer,
-                                    shape->data.rounded_rectangle.x1 - enlargement, 
-                                    shape->data.rounded_rectangle.y1 - enlargement,
-                                    shape->data.rounded_rectangle.x2 + enlargement, 
-                                    shape->data.rounded_rectangle.y2 + enlargement,
-                                    shape->data.rounded_rectangle.radius + enlargement,
-                                    selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
-                }
-            }
-            break;
-        }
-
         case SHAPE_POLYGON: {
             setRenderColor(renderer, shape->color);
 
@@ -680,12 +637,6 @@ void addShape(Shape shape) {
         case SHAPE_LINE:
             shape.data.line.initial_thickness = shape.data.line.thickness;
             break;
-        case SHAPE_ROUNDED_RECTANGLE:
-            shape.data.rounded_rectangle.initial_radius = shape.data.rounded_rectangle.radius;
-            shape.data.rounded_rectangle.initial_w = shape.data.rounded_rectangle.w;
-            shape.data.rounded_rectangle.initial_h = shape.data.rounded_rectangle.h;
-            shape.data.rounded_rectangle.initial_rad = shape.data.rounded_rectangle.rad;
-            break;
         case SHAPE_POLYGON:
             shape.data.polygon.initial_radius = shape.data.polygon.radius;
             shape.data.polygon.initial_sides = shape.data.polygon.sides;
@@ -739,12 +690,15 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.rectangle.height = (int)(shape->data.rectangle.width / aspectRatio);
 
             // Set a minimum width to prevent the rectangle from disappearing
-            const int minWidth = 10;
-
+            const int minWidth = 40;
+            const int maxWidth = 100;
             // Check and adjust if the width falls below the minimum
             if (shape->data.rectangle.width < minWidth) {
                 shape->data.rectangle.width = minWidth;
                 shape->data.rectangle.height = (int)(minWidth / aspectRatio); // Adjust height proportionally
+            } else if (shape->data.rectangle.width > maxWidth) {
+                shape->data.rectangle.width = maxWidth;
+                shape->data.rectangle.height = (int)(maxWidth / aspectRatio);
             }
             break;
         }
@@ -755,11 +709,14 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.square.c += (int)(zoomFactor * 10);
 
             // Set a minimum to prevent the square from disappearing
-            const int min = 10;
+            const int min = 30;
+            const int max = 100;
 
             // Check and adjust if the side falls below the minimum
             if (shape->data.square.c < min) {
                 shape->data.square.c = min;
+            } else if (shape->data.square.c > max) {
+                shape->data.square.c = max;
             }
             break;
         }
@@ -769,57 +726,40 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.circle.radius += (int)(zoomFactor * 5);
 
             // Ensure a minimum radius to keep the circle visible
-            if (shape->data.circle.radius < 10) {
-                shape->data.circle.radius = 10;
-            }
+            if (shape->data.circle.radius < 30) {
+                shape->data.circle.radius = 30;
+            } else if (shape->data.circle.radius > 100) {
+                shape->data.circle.radius = 100;
+            }   
             break;
         }
 
         case SHAPE_ELLIPSE: {
-            // Adjust both radii while maintaining aspect ratio
+            // Calculate the center point of the ellipse
+            int centerX = shape->data.ellipse.x;
+            int centerY = shape->data.ellipse.y;
+
+            // Calculate current aspect ratio
             float aspectRatio = (float)shape->data.ellipse.rx / shape->data.ellipse.ry;
-            shape->data.ellipse.rx += (int)(zoomFactor * 5);
-            shape->data.ellipse.ry = (int)(shape->data.ellipse.rx / aspectRatio);
+
+            // Apply zoom factor to both radii while maintaining aspect ratio
+            float zoomMultiplier = 1.0f + (zoomFactor * 0.1f);
+            int newRx = (int)(shape->data.ellipse.rx * zoomMultiplier);
+            int newRy = (int)(newRx / aspectRatio);
 
             // Ensure minimum radii
-            if (shape->data.ellipse.rx < 15) shape->data.ellipse.rx = 15;
-            if (shape->data.ellipse.ry < 10) shape->data.ellipse.ry = 10;
-            break;
-        }
+            if (newRx < 35) newRx = 35;
+            else if (newRx > 95) newRx = 95;
+            if (newRy < 25) newRy = 25;
+            else if (newRy > 80) newRy = 80;
 
-        case SHAPE_ROUNDED_RECTANGLE: {
-            // Calculate the current dimensions
-            int width = shape->data.rounded_rectangle.x2 - shape->data.rounded_rectangle.x1;
-            int height = shape->data.rounded_rectangle.y2 - shape->data.rounded_rectangle.y1;
+            // Update the radii
+            shape->data.ellipse.rx = newRx;
+            shape->data.ellipse.ry = newRy;
 
-            // Define minimum allowed dimensions to avoid collapse
-            const int minDimension = 40;
-            
-            if (zoomFactor < 0 && (width <= minDimension || height <= minDimension)) {
-                break; // Skip zooming if dezoom would shrink dimensions below minimum
-            }
-
-            // Apply zoom, ensuring the dimensions stay above the minimum
-            int newWidth = width + (int)(width * 0.05f * zoomFactor);
-            int newHeight = height + (int)(height * 0.05f * zoomFactor);
-            if (newWidth < minDimension) newWidth = minDimension;
-            if (newHeight < minDimension) newHeight = minDimension;
-
-            // Calculate the center
-            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
-            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
-            
-            // Update the coordinates to maintain the center
-            shape->data.rounded_rectangle.x1 = centerX - newWidth / 2;
-            shape->data.rounded_rectangle.y1 = centerY - newHeight / 2;
-            shape->data.rounded_rectangle.x2 = centerX + newWidth / 2;
-            shape->data.rounded_rectangle.y2 = centerY + newHeight / 2;
-
-            // Adjust the corner radius proportionally
-            shape->data.rounded_rectangle.radius = (int)(newHeight * 0.2f);
-            if (shape->data.rounded_rectangle.radius < 10) {
-                shape->data.rounded_rectangle.radius = 10; // Set a minimum radius
-            }
+            // Keep the center position fixed
+            shape->data.ellipse.x = centerX;
+            shape->data.ellipse.y = centerY;
             break;
         }
 
@@ -830,6 +770,8 @@ void zoomShape(Shape *shape, float zoomFactor) {
             // Ensure a minimum radius to keep the polygon visible
             if (shape->data.polygon.radius < 35) {
                 shape->data.polygon.radius = 35;
+            } else if (shape->data.polygon.radius > 100) {
+                shape->data.polygon.radius = 100;
             }
             break;
         }
@@ -841,6 +783,8 @@ void zoomShape(Shape *shape, float zoomFactor) {
             // Ensure a minimum radius to keep the triangle visible
             if (shape->data.triangle.radius < 30) {
                 shape->data.triangle.radius = 30;
+            } else if (shape->data.triangle.radius > 100) {
+                shape->data.triangle.radius = 100;
             }
             break;
         }
@@ -853,22 +797,35 @@ void zoomShape(Shape *shape, float zoomFactor) {
             // Calculate current line vector
             float dx = shape->data.line.x2 - shape->data.line.x1;
             float dy = shape->data.line.y2 - shape->data.line.y1;
-
+            
+            // Calculate current length and direction
+            float currentLength = sqrt(dx*dx + dy*dy);
+            float dirX = dx / currentLength;  // Normalize direction vector
+            float dirY = dy / currentLength;
+            
             // Apply zoom factor to the line length
             float zoomMultiplier = 1.0f + (zoomFactor * 0.1f);
-            dx *= zoomMultiplier;
-            dy *= zoomMultiplier;
+            float newLength = currentLength * zoomMultiplier;
 
-            // Update line endpoints while keeping the center fixed
-            shape->data.line.x1 = centerX - dx/2;
-            shape->data.line.y1 = centerY - dy/2;
-            shape->data.line.x2 = centerX + dx/2;
-            shape->data.line.y2 = centerY + dy/2;
+            
+            // Ensure minimum length while preserving direction
+            if (newLength < 50) {
+                newLength = 50;
+            } else if (newLength > 100) {
+                newLength = 100;
+            }
+            
+            // Calculate new endpoints using normalized direction
+            float halfLength = newLength / 2;
+            shape->data.line.x1 = centerX - dirX * halfLength;
+            shape->data.line.y1 = centerY - dirY * halfLength;
+            shape->data.line.x2 = centerX + dirX * halfLength;
+            shape->data.line.y2 = centerY + dirY * halfLength;
 
             // Adjust the thickness
             int newThickness = shape->data.line.thickness + (int)(zoomFactor * 2);
-            if (newThickness < 1) newThickness = 1;
-            if (newThickness > 255) newThickness = 255;  // Max value for Uint8
+            if (newThickness < 15) newThickness = 15;
+            if (newThickness > 20) newThickness = 20;
             shape->data.line.thickness = newThickness;
             break;
         }
@@ -878,8 +835,11 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.arc.radius += (int)(zoomFactor * 5);
 
             // Ensure a minimum radius to avoid rendering issues
-            if (shape->data.arc.radius < 30) {
-                shape->data.arc.radius = 30;
+            if (shape->data.arc.radius < 50) {
+                shape->data.arc.radius = 50;
+            }
+            else if (shape->data.arc.radius > 100) {
+                shape->data.arc.radius = 100;
             }
             break;
         }
@@ -983,20 +943,6 @@ void moveShapesWithMouse(Shape *shapes, int shapeCount, SDL_Event *event, Cursor
                     cursor->y = event->motion.y;
                     break;
                 }
-
-                case SHAPE_ROUNDED_RECTANGLE: {
-                    // Get the relative movement of the mouse
-                    int dx = event->motion.xrel;
-                    int dy = event->motion.yrel;
-
-                    // Update the rectangle's corners based on relative movement
-                    shapes[i].data.rounded_rectangle.x1 += dx;
-                    shapes[i].data.rounded_rectangle.y1 += dy;
-                    shapes[i].data.rounded_rectangle.x2 += dx;
-                    shapes[i].data.rounded_rectangle.y2 += dy;
-
-                    break;
-                }
                 
                 case SHAPE_POLYGON: {
                     // Update the polygon's center to match the current cursor position
@@ -1084,15 +1030,6 @@ void moveSelectedShapes(Shape *shapes, int shapeCount, int dx, int dy) {
                     shapes[i].data.line.y1 += dy;
                     shapes[i].data.line.x2 += dx;
                     shapes[i].data.line.y2 += dy;
-                    break;
-                }
-
-                case SHAPE_ROUNDED_RECTANGLE: {
-                    // Update the rounded rectangle's corners by the offset
-                    shapes[i].data.rounded_rectangle.x1 += dx;
-                    shapes[i].data.rounded_rectangle.y1 += dy;
-                    shapes[i].data.rounded_rectangle.x2 += dx;
-                    shapes[i].data.rounded_rectangle.y2 += dy;
                     break;
                 }
 
@@ -1223,48 +1160,6 @@ int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH)
 int isPointInSquare(int x, int y, int squareX, int squareY, int squareC) {
     // Check if the point lies within the square's boundaries.
     return (x >= squareX && x <= squareX + squareC && y >= squareY && y <= squareY + squareC);
-}
-
-/**
- * @brief Checks if a point lies inside a rounded rectangle.
- * 
- * @param x1 X-coordinate of the top-left corner.
- * @param y1 Y-coordinate of the top-left corner.
- * @param x2 X-coordinate of the bottom-right corner.
- * @param y2 Y-coordinate of the bottom-right corner.
- * @param radius Radius of the rounded corners.
- * 
- * @return 1 if the point is inside the rounded rectangle, 0 otherwise.
- */
-int isPointInRoundedRectangle(Sint16 px, Sint16 py, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Sint16 radius) {
-    // Ensure that the coordinates of the rectangle are in the correct order.
-    if (x1 > x2) {
-        Sint16 temp = x1;
-        x1 = x2;
-        x2 = temp;
-    }
-
-    if (y1 > y2) {
-        Sint16 temp = y1;
-        y1 = y2;
-        y2 = temp;
-    }
-
-    // Check if the point lies in the central rectangular zone.
-    if (px >= x1 + radius && px <= x2 - radius && py >= y1 && py <= y2) {
-        return 1;
-    }
-
-    // Check if the point lies in the vertical rectangular zones.
-    if (px >= x1 && px <= x2 && py >= y1 + radius && py <= y2 - radius) {
-        return 1;
-    }
-
-    // Check if the point lies inside the rounded corners.
-    return (isPointInCircle(px, py, x1 + radius, y1 + radius, radius) ||
-            isPointInCircle(px, py, x2 - radius, y1 + radius, radius) ||
-            isPointInCircle(px, py, x1 + radius, y2 - radius, radius) ||
-            isPointInCircle(px, py, x2 - radius, y2 - radius, radius));
 }
 
 /**
@@ -1429,14 +1324,6 @@ bool isPointInShape(Shape* shape, int x, int y) {
                 shape->data.line.y2,
                 5); // tolérance de 5 pixels
             
-        case SHAPE_ROUNDED_RECTANGLE:
-            return isPointInRoundedRectangle(x, y,
-                shape->data.rounded_rectangle.x1,
-                shape->data.rounded_rectangle.y1,
-                shape->data.rounded_rectangle.w,
-                shape->data.rounded_rectangle.h,
-                shape->data.rounded_rectangle.rad);
-            
         default:
             return false;
     }
@@ -1559,12 +1446,6 @@ void resetShape(Shape *shape) {
         case SHAPE_LINE:
             shape->data.line.thickness = shape->data.line.initial_thickness;
             break;
-        case SHAPE_ROUNDED_RECTANGLE:
-            shape->data.rounded_rectangle.radius = shape->data.rounded_rectangle.initial_radius;
-            shape->data.rounded_rectangle.w = shape->data.rounded_rectangle.initial_w;
-            shape->data.rounded_rectangle.h = shape->data.rounded_rectangle.initial_h;
-            shape->data.rounded_rectangle.rad = shape->data.rounded_rectangle.initial_rad;
-            break;
         case SHAPE_POLYGON:
             shape->data.polygon.radius = shape->data.polygon.initial_radius;
             shape->data.polygon.sides = shape->data.polygon.initial_sides;
@@ -1612,12 +1493,6 @@ void moveShape(Shape *shape, int dx, int dy) {
             shape->data.line.y1 += dy;
             shape->data.line.x2 += dx;
             shape->data.line.y2 += dy;
-            break;
-        case SHAPE_ROUNDED_RECTANGLE:
-            shape->data.rounded_rectangle.x1 += dx;
-            shape->data.rounded_rectangle.y1 += dy;
-            shape->data.rounded_rectangle.x2 += dx;
-            shape->data.rounded_rectangle.y2 += dy;
             break;
         case SHAPE_POLYGON:
             shape->data.polygon.cx += dx;

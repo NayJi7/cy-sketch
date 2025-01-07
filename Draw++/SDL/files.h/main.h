@@ -23,7 +23,6 @@ typedef enum
     SHAPE_ELLIPSE, 
     SHAPE_ARC, 
     SHAPE_RECTANGLE, 
-    SHAPE_ROUNDED_RECTANGLE, 
     SHAPE_POLYGON, 
     SHAPE_TRIANGLE,
     SHAPE_SQUARE,
@@ -74,12 +73,6 @@ typedef struct {
             int x, y, width, height;
             int initial_width, initial_height;  // Initial values
         } rectangle;
-        struct { 
-            Sint16 x1, y1, x2, y2, radius;
-            int x, y, w, h, rad;
-            Sint16 initial_radius;
-            int initial_w, initial_h, initial_rad;  // Initial values
-        } rounded_rectangle;
         struct { 
             int cx, cy, radius, sides;
             int initial_radius, initial_sides;  // Initial values

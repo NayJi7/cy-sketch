@@ -255,20 +255,6 @@ void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
             animation = ANIM_NONE; // disabling animation for line
             break;
         }
-        case SHAPE_ROUNDED_RECTANGLE: {
-            int centerX = (shape->data.rounded_rectangle.x1 + shape->data.rounded_rectangle.x2) / 2;
-            int centerY = (shape->data.rounded_rectangle.y1 + shape->data.rounded_rectangle.y2) / 2;
-            int originalWidth = 200;  // Base width
-            int originalHeight = 100;  // Base height
-            int newWidth = (int)(originalWidth * zoom);
-            int newHeight = (int)(originalHeight * zoom);
-            shape->data.rounded_rectangle.x1 = centerX - newWidth/2;
-            shape->data.rounded_rectangle.y1 = centerY - newHeight/2;
-            shape->data.rounded_rectangle.x2 = centerX + newWidth/2;
-            shape->data.rounded_rectangle.y2 = centerY + newHeight/2;
-            shape->data.rounded_rectangle.radius = (int)(20 * zoom);  // Base radius 20
-            break;
-        }
     }
 }
 

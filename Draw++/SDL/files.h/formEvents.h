@@ -32,7 +32,7 @@ int isPointInCircle(int x, int y, int cx, int cy, int radius);
 int isPointInEllipse(int x, int y, int cx, int cy, int rx, int ry);
 int isPointInArc(int x, int y, int cx, int cy, int radius, int startAngle, int endAngle);
 int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH);
-int isPointInRoundedRectangle(Sint16 x, Sint16 y, Sint16 rx, Sint16 ry, Sint16 width, Sint16 height, Sint16 radius);
+
 int isPointInPolygon(int x, int y, int cx, int cy, int radius, int sides);
 int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance);
 int isPointInSquare(int x, int y, int squareX, int squareY, int size);
