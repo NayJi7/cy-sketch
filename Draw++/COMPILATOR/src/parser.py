@@ -282,7 +282,7 @@ def p_boucle(p):
 def p_error(p):
     if p:
         # Basic error message
-        print(f"-#green Syntax error: '{p.value}' at line {p.lineno}, column {find_column(p.lexer.lexdata, p.lexpos)}")
+        print(f"-#red Syntax error: '{p.value}' at line {p.lineno}, column {find_column(p.lexer.lexdata, p.lexpos)}")
         
         # Provide specific suggestions based on token type
         if p.type in ("LPAREN", "RPAREN"):
