@@ -12,6 +12,7 @@
 
 // ANSI escape codes for colors
 #define RED_COLOR "-#red "
+#define FRAME_DELAY 16  // ~60 FPS (1000ms/60)
 
 #ifndef DEBUG   // DEBUG is defined in the compilation command (makefile DEBUG=1)
 #define DEBUG 1 
@@ -19,7 +20,6 @@
 
 // Definition of the global variable
 char lastKeyPressed[32] = "";
-
 void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* window){
     if (mainTexture) SDL_DestroyTexture(mainTexture);
     if (renderer) SDL_DestroyRenderer(renderer);
@@ -73,6 +73,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
     initGame(&gameState);
     
     Uint32 lastTime = SDL_GetTicks();
+    Uint32 frameStart = SDL_GetTicks();
     int running = 1;
     
     while (running) {
@@ -563,6 +564,14 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
         int windowWidth, windowHeight;
         SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
         updateAnimations(shapes, shapeCount, windowWidth, windowHeight);
+
+        // Cap frame rate to 60 FPS
+        Uint32 frameEnd = SDL_GetTicks();
+        Uint32 frameTime = frameEnd - frameStart;
+        if (frameTime < FRAME_DELAY) {
+            SDL_Delay(FRAME_DELAY - frameTime);
+        }
+        frameStart = SDL_GetTicks();
 
         // Present the updated frame
         SDL_RenderPresent(renderer);

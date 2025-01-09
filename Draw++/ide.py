@@ -813,6 +813,10 @@ class MyDrawppIDE(QMainWindow):
         editor = splitter.widget(0)  # First widget in splitter is the editor
         terminal = tab_data['terminal']
 
+        # Make sure terminal is visible
+        if not terminal.isVisible():
+            self.toggle_terminal()
+
         # Vérifier si le fichier doit être sauvegardé
         current_file_name = self.tab_widget.tabText(self.tab_widget.currentIndex())
         if current_file_name.startswith('New Tab'):

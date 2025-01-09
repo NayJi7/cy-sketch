@@ -692,7 +692,7 @@ void spawnEnemy(GameState* game, SDL_Window* window, SDL_Renderer* renderer) {
     // Add some randomness to the angle (±30 degrees)
     angle += ((rand() % 60 - 30) * M_PI / 180.0f);
     
-    int baseSpeed = 1;  // Minimum base speed in pixels per frame
+    int baseSpeed = 10;  // Minimum base speed in pixels per frame
     int speedVariation = rand() % 2 + 1;  // 1 to 2 pixel variation
     int totalSpeed = baseSpeed + speedVariation;  // 1 to 2 pixels per frame
     
