@@ -183,7 +183,8 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                                     isInside = isPointInLine(cursor.x, cursor.y,
                                         shapes[i].data.line.x1, shapes[i].data.line.y1,
                                         shapes[i].data.line.x2, shapes[i].data.line.y2,
-                                        shapes[i].data.line.thickness);
+                                        shapes[i].data.line.thickness,
+                                        shapes[i].rotation);
                                     break;
                                 case SHAPE_POLYGON:
                                     isInside = isPointInPolygon(cursor.x, cursor.y,
@@ -730,7 +731,13 @@ int findShapeAtCursor(int x, int y) {
                 if(isPointInTriangle(x, y, shape->data.triangle.cx, shape->data.triangle.cy, shape->data.triangle.radius)) return i;
                 break;
             case SHAPE_LINE:
-                if(isPointInLine(x, y, shape->data.line.x1, shape->data.line.y1, shape->data.line.x2, shape->data.line.y2, shape->data.line.thickness)) return i;        
+                if(isPointInLine(x, y, 
+                                shape->data.line.x1, 
+                                shape->data.line.y1, 
+                                shape->data.line.x2, 
+                                shape->data.line.y2, 
+                                shape->data.line.thickness,
+                                shape->rotation)) return i;
                 break;
         }
     }

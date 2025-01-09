@@ -452,7 +452,8 @@ void escapeRun(GameState* game, int cursorX, int cursorY) {
                     isCaught = isPointInLine(cursorX, cursorY,
                         shapes[i].data.line.x1, shapes[i].data.line.y1,
                         shapes[i].data.line.x2, shapes[i].data.line.y2,
-                        shapes[i].data.line.thickness);
+                        shapes[i].data.line.thickness,
+                        shapes[i].rotation);
                 }
                 break;
             case SHAPE_ARC:
@@ -908,11 +909,10 @@ void updateDefenseGame(GameState* game, float deltaTime, int cursorX, int cursor
                     
                     // Utiliser isPointInLine pour une détection précise
                     if (isPointInLine(enemyX, enemyY,
-                                     shapes[j].data.line.x1,
-                                     shapes[j].data.line.y1,
-                                     shapes[j].data.line.x2,
-                                     shapes[j].data.line.y2,
-                                     shapes[j].data.line.thickness + enemyRadius)) {
+                                     shapes[j].data.line.x1, shapes[j].data.line.y1,
+                                     shapes[j].data.line.x2, shapes[j].data.line.y2,
+                                     shapes[j].data.line.thickness + enemyRadius,
+                                     shapes[j].rotation)) {
                         collided = true;
                     }
                     break;

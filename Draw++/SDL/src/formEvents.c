@@ -1253,9 +1253,28 @@ int isPointInTriangle(int x, int y, int cx, int cy, int radius) {
  * @param tolerance Distance threshold for hit detection
  * @return 1 if point is within line's hitbox, 0 otherwise
  */
-int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
+int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance, int rotation) {
     // Augmenter la tolérance pour une meilleure sélection
     tolerance = tolerance + 5;
+
+    // Calculate the center of the line
+    float centerX = (x1 + x2) / 2.0f;
+    float centerY = (y1 + y2) / 2.0f;
+
+    // Convert rotation to radians
+    float angle = -rotation * M_PI / 180.0f;  // Negative because we're rotating backwards
+
+    // Translate point to origin (relative to line center)
+    float translatedX = x - centerX;
+    float translatedY = y - centerY;
+
+    // Rotate point
+    float rotatedX = translatedX * cos(angle) - translatedY * sin(angle);
+    float rotatedY = translatedX * sin(angle) + translatedY * cos(angle);
+
+    // Translate back
+    float finalX = rotatedX + centerX;
+    float finalY = rotatedY + centerY;
 
     // Calculer la longueur de la ligne
     float lineLength = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -1266,8 +1285,8 @@ int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
     float dy = (y2 - y1) / lineLength;
 
     // Vecteur du point de début de la ligne au point de test
-    float px = x - x1;
-    float py = y - y1;
+    float px = finalX - x1;
+    float py = finalY - y1;
 
     // Projection du point sur la ligne
     float projection = px * dx + py * dy;
@@ -1337,7 +1356,8 @@ bool isPointInShape(Shape* shape, int x, int y) {
                 shape->data.line.y1,
                 shape->data.line.x2,
                 shape->data.line.y2,
-                5); // 5 pixel tolerance for hit detection
+                5,  // 5 pixel tolerance for hit detection
+                shape->rotation);
             
         default:
             return false;
