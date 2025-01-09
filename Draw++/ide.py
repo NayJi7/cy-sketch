@@ -7,6 +7,7 @@ import subprocess
 import sys
 import psutil
 from PyQt5.QtCore import QTimer
+import re
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
 
@@ -15,21 +16,26 @@ if platform.system() == "Windows":
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         super().__init__(editor)
-        self.editor = editor  # Référence à l'éditeur principal
+        self.editor = editor  # Reference to the main editor
 
     def sizeHint(self):
-        """Retourne la largeur de la marge pour les numéros de ligne."""
+        """Returns the width of the margin for line numbers."""
         return QSize(self.editor.line_number_area_width(), 0)
 
     def paintEvent(self, event):
-        """Dessine les numéros de ligne."""
+        """Draws the line numbers."""
         self.editor.line_number_area_paint_event(event)
+
+    def setToolTip(self, tooltip):
+        """Set the tooltip for the line number area."""
+        super().setToolTip(tooltip)  # Ensure the tooltip is set correctly
 
 class CodeEditor(QPlainTextEdit):
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.lineNumberArea = LineNumberArea(self)
+        self.highlighter = SyntaxHighlighter(self.document())  # Store highlighter reference
 
         self.blockCountChanged.connect(self.update_line_number_area_width)
         self.updateRequest.connect(self.update_line_number_area)
@@ -37,6 +43,107 @@ class CodeEditor(QPlainTextEdit):
 
         self.update_line_number_area_width(0)
         self.highlight_current_line()
+
+        # Add timer for delayed syntax checking
+        self.syntax_check_timer = QTimer(self)
+        self.syntax_check_timer.setSingleShot(True)
+        self.syntax_check_timer.timeout.connect(self.check_syntax)
+        self.textChanged.connect(self.start_syntax_check_timer)
+
+    def start_syntax_check_timer(self):
+        """Start the timer for delayed syntax checking."""
+        self.syntax_check_timer.start(1000)  # Check syntax after 1 second of no typing
+
+    def check_syntax(self):
+        """Check syntax of the current text and highlight errors."""
+        from COMPILATOR.src.lexer import init_lexer, suggest_keyword
+        from COMPILATOR.src.parser import init_parser
+        from COMPILATOR.src.myast import execute_ast
+
+        text = self.toPlainText()
+        error_lines = set()
+
+        # Get the terminal safely
+        terminal = None
+        try:
+            current_tab = self.parent()
+            while current_tab and not isinstance(current_tab, QWidget) or not hasattr(current_tab, 'layout') or not current_tab.layout():
+                current_tab = current_tab.parent()
+                if not current_tab:
+                    break
+            
+            if current_tab and current_tab.layout():
+                splitter = current_tab.layout().itemAt(0).widget()
+                if splitter:
+                    terminal_container = splitter.widget(1)
+                    if terminal_container:
+                        terminal = terminal_container.findChild(QPlainTextEdit)
+        except Exception:
+            pass  # Silently fail if we can't get the terminal
+
+        output = ""  # Initialize output variable
+        try:
+            lexer = init_lexer()
+            parser = init_parser()
+            lexer.input(text)
+            
+            try:
+                output = parser.parse(text, lexer=lexer)  # Capture output from parsing
+                trad = execute_ast(output, False, "IDE")
+                # Clear error highlighting if parsing succeeds
+                if hasattr(self, 'highlighter'):
+                    self.highlighter.set_error_lines(set())
+            except SyntaxError as e:
+                # Extract line number from error message
+                error_msg = str(e)
+                line_match = re.search(r'line (\d+)', error_msg)
+                unexpected_match = re.search(r'unexpected end', error_msg)
+                if line_match:
+                    line_num = int(line_match.group(1))
+                    # Add the line number to error lines
+                    error_lines.add(line_num - 1)  # Convert to 0-based line number
+                    
+                    # Update the highlighter
+                    if hasattr(self, 'highlighter'):
+                        self.highlighter.set_error_lines(error_lines)
+                        # Force a complete rehighlight
+                        self.document().markContentsDirty(0, len(text))
+                        self.highlighter.rehighlight()
+                
+                elif unexpected_match:
+                    for i in range(lexer.lineno):
+                        error_lines.add(i)
+                    
+                    # Update the highlighter
+                    if hasattr(self, 'highlighter'):
+                        self.highlighter.set_error_lines(error_lines)
+                        # Force a complete rehighlight
+                        self.document().markContentsDirty(0, len(text))
+                        self.highlighter.rehighlight()
+
+        except Exception as e:
+            if terminal:
+                cursor = terminal.textCursor()
+                cursor.movePosition(QTextCursor.End)
+                error_format = QTextCharFormat()
+                error_format.setForeground(QColor("red"))
+                cursor.insertText(f"-#red Error during syntax checking: {str(e)}\n", error_format)
+                terminal.setTextCursor(cursor)
+                terminal.ensureCursorVisible()
+
+        # Handle translation errors specifically
+        if "Error during the traduction of the main AST" in output:
+            # Extract line number and message
+            translation_error_match = re.search(r'Error during the traduction of the main AST : (.+)', output)
+            if translation_error_match:
+                translation_error_msg = translation_error_match.group(1)
+                cursor.insertText(f"-#red {translation_error_msg}\n", error_format)
+                terminal.setTextCursor(cursor)
+                terminal.ensureCursorVisible()
+
+        # Make sure the error highlighting is visible
+        if error_lines:
+            self.viewport().update()
 
     def keyPressEvent(self, event):
         # Handle Ctrl+C and Ctrl+X to copy/cut whole line if no text is selected
@@ -138,6 +245,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):
         super().__init__(document)
         self.rules = []
+        self.error_lines = set()  # Store lines with syntax errors
 
         # Définir les formats
         self.keyword_format = QTextCharFormat()
@@ -154,6 +262,12 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.control_format.setForeground(QColor("#42a5f5"))  # Bleu clair
         self.control_format.setFontWeight(QFont.Bold)
 
+        # Format pour les erreurs syntaxiques - Make it more visible
+        self.error_format = QTextCharFormat()
+        self.error_format.setUnderlineStyle(QTextCharFormat.WaveUnderline)
+        self.error_format.setUnderlineColor(QColor(Qt.red))
+        self.error_format.setForeground(QColor(Qt.red))  # Red text
+
         # Ajouter des règles
         self.add_rules(["var","func", "return"], self.keyword_format)
         self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon", "draw ellipse", "draw arc", ], self.drawing_format)
@@ -166,19 +280,35 @@ class SyntaxHighlighter(QSyntaxHighlighter):
             regex = QRegExp(rf"\b{pattern}\b")
             self.rules.append((regex, text_format))
 
+    def set_error_lines(self, error_lines):
+        """Met à jour les lignes contenant des erreurs syntaxiques."""
+        self.error_lines = error_lines
+        self.rehighlight()
+
     def highlightBlock(self, text):
         """Applique les règles de surlignage au bloc de texte donné."""
+        # Get the actual line number (0-based)
+        block_number = self.currentBlock().blockNumber()
 
-        print("HighlightBlock called")
+        # Apply error underlining first if this block has an error
+        if block_number in self.error_lines:
+            self.setFormat(0, len(text), self.error_format)
 
-
+        # Then apply syntax highlighting
         for regex, text_format in self.rules:
             index = regex.indexIn(text)
-            while index >= 0:  # Tant qu'il y a des correspondances
+            while index >= 0:
                 length = regex.matchedLength()
-                self.setFormat(index, length, text_format)
+                # Create a combined format that preserves error underlining
+                if block_number in self.error_lines:
+                    combined_format = QTextCharFormat(text_format)
+                    combined_format.setUnderlineStyle(self.error_format.underlineStyle())
+                    combined_format.setUnderlineColor(self.error_format.underlineColor())
+                    combined_format.setBackground(self.error_format.background())
+                    self.setFormat(index, length, combined_format)
+                else:
+                    self.setFormat(index, length, text_format)
                 index = regex.indexIn(text, index + length)
-
 
 class MyDrawppIDE(QMainWindow):
     '''Classe principale de l'IDE'''

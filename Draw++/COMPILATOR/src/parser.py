@@ -35,7 +35,7 @@ def p_instruction(p):
 # @param p A tuple containing the draw command, shape, and parameters.
 def p_draw(p):
     '''draw : DRAW forme LPAREN parametres RPAREN'''
-    p[0] = ('draw', p[2], p[4])
+    p[0] = ('draw', p[2], p[4], p.lineno(1))
 # @}
 
 # @{
@@ -278,42 +278,46 @@ def p_boucle(p):
 
 # @{
 # @brief Handles syntax errors and provides suggestions based on the error type.
-# List of valid keywords and tokens in your language
 def p_error(p):
     if p:
-        # Basic error message
-        print(f"-#red Syntax error: '{p.value}' at line {p.lineno}, column {find_column(p.lexer.lexdata, p.lexpos)}")
+        # Basic error message with line number
+        error_msg = f"Syntax error: '{p.value}' at line {p.lineno}, column {find_column(p.lexer.lexdata, p.lexpos)}"
         
-        # Provide specific suggestions based on token type
+        # Provide specific suggestions based on token type (without line numbers)
         if p.type in ("LPAREN", "RPAREN"):
-            print("-#blue Suggestion: Ensure parenthesis '(' and ')' are balanced.")
+            suggestion = "Ensure parenthesis '(' and ')' are balanced."
         elif p.type in ("LBRACE", "RBRACE"):
-            print("-#blue Suggestion: Check that all braces '{' and '}' are properly matched.")
+            suggestion = "Check that all braces '{' and '}' are properly matched."
         elif p.type == "SEMICOLON":
-            print("-#blue Suggestion: Remove the semicolons ';' at the end of each statement where it's not required.")
+            suggestion = "Remove the semicolons ';' at the end of each statement where it's not required."
         elif p.type == "IDENTIFIER":
             # Suggest corrections for identifiers
             suggestions = suggest_keyword(p.value)
             if suggestions:
-                print(f"-#blue Did you mean: {', '.join(suggestions)}?")
+                suggestion = f"Did you mean '{suggestions}'?"
             else:
-                print(f"-#blue Suggestion: Check if '{p.value}' is declared or is a valid keyword.")
+                suggestion = f"Check if '{p.value}' is declared or is a valid keyword."
         elif p.type in ("NUMBER", "STRING", "BOOLEAN"):
-            print("-#blue Suggestion: Check the format of the value or verify its context in the statement.")
+            suggestion = "Check the format of the value or verify its context in the statement."
         elif p.type in ("PLUS", "MINUS", "TIMES", "DIVIDE"):
-            print("-#blue Suggestion: Ensure the arithmetic operation has valid operands.")
+            suggestion = "Ensure the arithmetic operation has valid operands."
         elif p.type in ("EQ", "NEQ", "LT", "GT", "LE", "GE"):
-            print("-#blue Suggestion: Verify the comparison expression and its operands.")
+            suggestion = "Verify the comparison expression and its operands."
         elif p.type == "COMMA":
-            print("-#blue Suggestion: Check the use of commas in parameter lists or argument separation.")
+            suggestion = "Check the use of commas in parameter lists or argument separation."
         else:
-            print("-#blue Suggestion: Verify syntax and refer to the language grammar.")
+            suggestion = "Verify syntax and refer to the language grammar."
+
+        print(f"-#blue Suggestion: {suggestion}")
+        
+        # Raise exception for the IDE's error highlighting
+        raise SyntaxError(f"{error_msg}")
     else:
         # Handle unexpected end of input
-        print("-#red Syntax error: unexpected end of file.")
-        print("-#blue Suggestion: Ensure all blocks, parentheses, or braces are properly closed.")
-
-    sys.exit(1)
+        error_msg = "Syntax error: unexpected end of file."
+        suggestion = "Ensure all blocks, parentheses, or braces are properly closed."
+        print(f"-#blue Suggestion: {suggestion}")
+        raise SyntaxError(error_msg)
 # @}
 
 # === 3. Parser Initialization ===

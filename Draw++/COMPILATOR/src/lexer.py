@@ -164,7 +164,8 @@ def t_IDENTIFIER(t):
     elif t.value in known_identifiers:
         t.type = 'IDENTIFIER'
     else:
-        raise SyntaxError(f"LexicalError: Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
+        error_msg = f"Unknown identifier '{t.value}' at line {t.lexer.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}"
+        raise SyntaxError(error_msg)
     return t
 
 # @brief Matches numbers, both integers and floats
@@ -213,10 +214,11 @@ def t_COMMENT_MULTILINE(t):
     t.lexer.lineno += t.value.count('\n')
     pass
 
-# @brief Handles lexical errors by printing the offending character and skipping it
+# @brief Handles lexical errors by raising an exception
 # @param t Token object containing the unmatched value
 def t_error(t):
-    raise Exception(f"LexicalError : illegal character '{t.value[0]}' at line {t.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}")
+    error_msg = f"Illegal character '{t.value[0]}' at line {t.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}"
+    raise SyntaxError(error_msg)
 
 # @brief Finds the column number of a given position in the input text
 # @param input_text The full input string

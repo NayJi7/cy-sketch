@@ -12,13 +12,12 @@ def print_error(e):
     if type(e) is str:
         print(f"-#red {e}")
         if "Unknown identifier" in e:
-            suggestion = suggest_keyword(e.split("'")[1])
+            suggestion = suggest_keyword(e.split("'")[1].split("'")[0])
             if suggestion:
-                print(f"-#blue Suggestion : Did you mean '{suggestion}' ?")
+                print(f"-#blue Suggestion: Did you mean '{suggestion}'?")
             else:
-                print(f"-#blue Suggestion : Check if you intitalized correctly all your variables and functions.")
-    sys.exit(1)
-# @}
+                print(f"-#blue Suggestion: Check if you initialized correctly all your variables and functions.")
+        raise SyntaxError(e)
 
 def print_error_interractive(e):
     if type(e) is str:
@@ -26,7 +25,8 @@ def print_error_interractive(e):
         if "Unknown identifier" in e:
             suggestion = suggest_keyword(e.split("'")[1])
             if suggestion:
-                print(f"-#blue Suggestion : Did you mean '{suggestion}' ?")
+                print(f"-#blue Suggestion: Did you mean '{suggestion}'?")
+        raise SyntaxError(e)
 
 # @{
 # @brief Converts a condition to its C representation.
@@ -271,6 +271,7 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
     elif isinstance(node, tuple) and node[0] == 'draw':
         forme = node[1]
         parametres = node[2]
+        line_no = node[3] if len(node) > 3 else 'unknown'
 
         if tabulation > 0: 
             c_code += "\t" * tabulation
@@ -306,16 +307,16 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             c_code += '\t' * tabulation + '}'
 
         elif expected_args != len(parametres):
-            raise IndexError(f"IndexError : draw {forme} function requires {expected_args} arguments, but you gave {len(parametres)}")
+            raise IndexError(f"IndexError : draw {forme} function requires {expected_args} arguments, but you gave {len(parametres)} at line {line_no}")
         
         if parametres[0] != "animated" and parametres[0] != "instant":
-            raise ValueError(f"ValueError : '{parametres[0]}' is not a valid mode for draw {forme} function")
+            raise ValueError(f"ValueError : '{parametres[0]}' is not a valid mode for draw {forme} function at line {line_no}")
         
         if parametres[1] != "filled" and parametres[1] != "empty":
-            raise ValueError(f"ValueError : '{parametres[1]}' is not a valid type for draw {forme} function")
+            raise ValueError(f"ValueError : '{parametres[1]}' is not a valid type for draw {forme} function at line {line_no}")
             
         if parametres[2] not in colors:
-            raise ValueError(f"ValueError : '{parametres[2]}' is not a valid color for draw {forme} function")
+            raise ValueError(f"ValueError : '{parametres[2]}' is not a valid color for draw {forme} function at line {line_no}")
 
         if forme == "circle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
