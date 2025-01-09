@@ -349,37 +349,54 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
 
         case SHAPE_LINE: {
             setRenderColor(renderer, shape->color);
-
+            
+            // Update the actual thickness in the shape structure
+            if (strcmp(shape->typeForm, "empty") == 0) {
+                shape->data.line.thickness = 1;
+            }
+            
+            // Calculate rotation
             int x1 = shape->data.line.x1;
             int y1 = shape->data.line.y1;
             int x2 = shape->data.line.x2;
             int y2 = shape->data.line.y2;
-            int thickness = shape->data.line.thickness;
-
-            // Apply rotation if necessary.
+            
             if (shape->rotation != 0) {
-                int cx = (shape->data.line.x1 + shape->data.line.x2) / 2;
-                int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
+                // Calculate center point
+                int cx = (x1 + x2) / 2;
+                int cy = (y1 + y2) / 2;
+                
+                // Convert rotation to radians
                 double angle = shape->rotation * M_PI / 180.0;
-
-                int rotatedX1 = cos(angle) * (shape->data.line.x1 - cx) - sin(angle) * (shape->data.line.y1 - cy) + cx;
-                int rotatedY1 = sin(angle) * (shape->data.line.x1 - cx) + cos(angle) * (shape->data.line.y1 - cy) + cy;
-                int rotatedX2 = cos(angle) * (shape->data.line.x2 - cx) - sin(angle) * (shape->data.line.y2 - cy) + cx;
-                int rotatedY2 = sin(angle) * (shape->data.line.x2 - cx) + cos(angle) * (shape->data.line.y2 - cy) + cy;
-
-                x1 = rotatedX1;
-                y1 = rotatedY1;
-                x2 = rotatedX2;
-                y2 = rotatedY2;
+                
+                // Rotate points around center
+                int rx1 = cx + (int)((x1 - cx) * cos(angle) - (y1 - cy) * sin(angle));
+                int ry1 = cy + (int)((x1 - cx) * sin(angle) + (y1 - cy) * cos(angle));
+                int rx2 = cx + (int)((x2 - cx) * cos(angle) - (y2 - cy) * sin(angle));
+                int ry2 = cy + (int)((x2 - cx) * sin(angle) + (y2 - cy) * cos(angle));
+                
+                x1 = rx1;
+                y1 = ry1;
+                x2 = rx2;
+                y2 = ry2;
             }
-
-            // Render the line
-            thickLineRGBA(renderer, x1, y1, x2, y2, thickness, shape->color.r, shape->color.g, shape->color.b, shape->color.a);
-
-            // Highlight if the line is selected
+            
+            // Draw the line with appropriate thickness
+            if (shape->data.line.thickness > 1) {
+                thickLineRGBA(renderer, x1, y1, x2, y2,
+                    shape->data.line.thickness,
+                    shape->color.r, shape->color.g, shape->color.b, shape->color.a);
+            } else {
+                lineRGBA(renderer, x1, y1, x2, y2,
+                    shape->color.r, shape->color.g, shape->color.b, shape->color.a);
+            }
+            
+            // Draw selection indicator if selected
             if (shape->selected) {
                 SDL_Color selectedColor = selectColor(shape->color);
-                thickLineRGBA(renderer, x1, y1, x2, y2, thickness + 5, selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
+                thickLineRGBA(renderer, x1, y1, x2, y2,
+                    shape->data.line.thickness + 4,
+                    selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
             }
             break;
         }
@@ -790,43 +807,40 @@ void zoomShape(Shape *shape, float zoomFactor) {
         }
 
         case SHAPE_LINE: {
-            // Calculate the center point of the line
-            int centerX = (shape->data.line.x1 + shape->data.line.x2) / 2;
-            int centerY = (shape->data.line.y1 + shape->data.line.y2) / 2;
+            // Calculate the center of the line
+            int cx = (shape->data.line.x1 + shape->data.line.x2) / 2;
+            int cy = (shape->data.line.y1 + shape->data.line.y2) / 2;
 
-            // Calculate current line vector
-            float dx = shape->data.line.x2 - shape->data.line.x1;
-            float dy = shape->data.line.y2 - shape->data.line.y1;
-            
-            // Calculate current length and direction
-            float currentLength = sqrt(dx*dx + dy*dy);
-            float dirX = dx / currentLength;  // Normalize direction vector
-            float dirY = dy / currentLength;
-            
-            // Apply zoom factor to the line length
-            float zoomMultiplier = 1.0f + (zoomFactor * 0.1f);
-            float newLength = currentLength * zoomMultiplier;
+            // Adjust the endpoints to zoom in or out while preserving the center
+            shape->data.line.x1 += (int)((shape->data.line.x1 - cx) * zoomFactor * 0.1);
+            shape->data.line.y1 += (int)((shape->data.line.y1 - cy) * zoomFactor * 0.1);
+            shape->data.line.x2 += (int)((shape->data.line.x2 - cx) * zoomFactor * 0.1);
+            shape->data.line.y2 += (int)((shape->data.line.y2 - cy) * zoomFactor * 0.1);
 
+            // Calculate the new length of the line
+            int dx = shape->data.line.x2 - shape->data.line.x1;
+            int dy = shape->data.line.y2 - shape->data.line.y1;
+            double length = sqrt(dx * dx + dy * dy);
+
+            // Ensure length stays between min and max values
+            const double minLength = 50.0;
+            const double maxLength = 300.0;
             
-            // Ensure minimum length while preserving direction
-            if (newLength < 50) {
-                newLength = 50;
-            } else if (newLength > 100) {
-                newLength = 100;
+            if (length < minLength) {
+                // Scale up to minimum length
+                double scale = minLength / length;
+                shape->data.line.x1 = cx + (int)((shape->data.line.x1 - cx) * scale);
+                shape->data.line.y1 = cy + (int)((shape->data.line.y1 - cy) * scale);
+                shape->data.line.x2 = cx + (int)((shape->data.line.x2 - cx) * scale);
+                shape->data.line.y2 = cy + (int)((shape->data.line.y2 - cy) * scale);
+            } else if (length > maxLength) {
+                // Scale down to maximum length
+                double scale = maxLength / length;
+                shape->data.line.x1 = cx + (int)((shape->data.line.x1 - cx) * scale);
+                shape->data.line.y1 = cy + (int)((shape->data.line.y1 - cy) * scale);
+                shape->data.line.x2 = cx + (int)((shape->data.line.x2 - cx) * scale);
+                shape->data.line.y2 = cy + (int)((shape->data.line.y2 - cy) * scale);
             }
-            
-            // Calculate new endpoints using normalized direction
-            float halfLength = newLength / 2;
-            shape->data.line.x1 = centerX - dirX * halfLength;
-            shape->data.line.y1 = centerY - dirY * halfLength;
-            shape->data.line.x2 = centerX + dirX * halfLength;
-            shape->data.line.y2 = centerY + dirY * halfLength;
-
-            // Adjust the thickness
-            int newThickness = shape->data.line.thickness + (int)(zoomFactor * 2);
-            if (newThickness < 15) newThickness = 15;
-            if (newThickness > 20) newThickness = 20;
-            shape->data.line.thickness = newThickness;
             break;
         }
 
@@ -1231,39 +1245,40 @@ int isPointInTriangle(int x, int y, int cx, int cy, int radius) {
 }
 
 /**
- * @brief Checks if a point lies near a line segment.
+ * @brief Checks if a point is within a line's hitbox
  * 
- * @param x1 X-coordinate of the line's starting point.
- * @param y1 Y-coordinate of the line's starting point.
- * @param x2 X-coordinate of the line's ending point.
- * @param y2 Y-coordinate of the line's ending point.
- * @param tolerance Distance threshold for proximity to the line.
- * 
- * @return 1 if the point is near the line, 0 otherwise.
+ * @param x,y The point coordinates to check
+ * @param x1,y1 First endpoint of the line
+ * @param x2,y2 Second endpoint of the line
+ * @param tolerance Distance threshold for hit detection
+ * @return 1 if point is within line's hitbox, 0 otherwise
  */
 int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance) {
-    // Calculate the length of the line segment squared
-    float lineLength2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-    
-    if (lineLength2 == 0) {
-        // If the line is actually a point, just check distance to that point
-        float dx = x - x1;
-        float dy = y - y1;
-        return (dx * dx + dy * dy) <= (tolerance * tolerance);
-    }
+    // Augmenter la tolérance pour une meilleure sélection
+    tolerance = tolerance + 5;
 
-    // Calculate the cross product to get the perpendicular distance
-    float crossProduct = abs((x2 - x1) * (y1 - y) - (x1 - x) * (y2 - y1));
-    float distance = crossProduct / sqrt(lineLength2);
+    // Calculer la longueur de la ligne
+    float lineLength = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    if (lineLength == 0) return 0;  // Éviter division par zéro
 
-    // Calculate the projection of the point onto the line
-    float dot = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / lineLength2;
+    // Calculer les vecteurs normalisés
+    float dx = (x2 - x1) / lineLength;
+    float dy = (y2 - y1) / lineLength;
 
-    // Add a tiny buffer to make endpoint selection easier, but not too much
-    float buffer = 0.005;
-    
-    // Check if point is within tolerance distance and between line endpoints (with small buffer)
-    return distance <= tolerance && dot >= -buffer && dot <= 1 + buffer;
+    // Vecteur du point de début de la ligne au point de test
+    float px = x - x1;
+    float py = y - y1;
+
+    // Projection du point sur la ligne
+    float projection = px * dx + py * dy;
+
+    // Distance perpendiculaire à la ligne
+    float perpDist = fabs(px * (-dy) + py * dx);
+
+    // Le point est valide s'il est :
+    // 1. À une distance perpendiculaire inférieure à la tolérance
+    // 2. La projection est entre le début et la fin de la ligne
+    return (perpDist <= tolerance && projection >= -tolerance && projection <= lineLength + tolerance);
 }
 
 
@@ -1322,7 +1337,7 @@ bool isPointInShape(Shape* shape, int x, int y) {
                 shape->data.line.y1,
                 shape->data.line.x2,
                 shape->data.line.y2,
-                5); // tolérance de 5 pixels
+                5); // 5 pixel tolerance for hit detection
             
         default:
             return false;

@@ -339,20 +339,26 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
                RED_COLOR, type);
         return -1;
     }
-    else
-    {
-        if (handleEvents(renderer, texture) == -1) return -1;
 
-        // Always use thickLineRGBA for consistent thickness
+    if (handleEvents(renderer, texture) == -1) return -1;
+
+    // Use different drawing methods based on type
+    if (strcmp(type, "filled") == 0) {
         if (thickLineRGBA(renderer, x1, y1, x2, y2, width, color.r, color.g, color.b, color.a) != 0) {
-            printf("%sExecutionError: Failed to draw line.\n", RED_COLOR);
+            printf("%sExecutionError: Failed to draw filled line.\n", RED_COLOR);
             return -1;
         }
-        
-        renderTexture(renderer, texture, 750);
-        if (handleEvents(renderer, texture) == -1) return -1;
-        SDL_SetRenderTarget(renderer, NULL);
+    } else { // empty type
+        if (lineRGBA(renderer, x1, y1, x2, y2, color.r, color.g, color.b, color.a) != 0) {
+            printf("%sExecutionError: Failed to draw empty line.\n", RED_COLOR);
+            return -1;
+        }
     }
+    
+    renderTexture(renderer, texture, 750);
+    if (handleEvents(renderer, texture) == -1) return -1;
+    SDL_SetRenderTarget(renderer, NULL);
+    
     return 0;
 }
 
@@ -908,50 +914,69 @@ int drawAnimatedCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, int 
  * @return -1 if an event interrupts the drawing, 0 otherwise.
  */
 int drawAnimatedLine(SDL_Renderer *renderer, SDL_Texture *texture, int x1, int y1, int x2, int y2, int thickness, SDL_Color color, char *type) {
-
-    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
+    if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)) {
         printf("%sExecutionError: Invalid type for line '%s'. Must be 'filled' or 'empty'.\n", 
                RED_COLOR, type);
         return -1;
     }
-    else
-    {
-        SDL_SetRenderTarget(renderer, texture);
 
-        setRenderColor(renderer, color);
+    SDL_SetRenderTarget(renderer, texture);
+    setRenderColor(renderer, color);
 
-        // Variable initialisation for the Bresenham algorithm
-        int dx = abs(x2 - x1);
-        int dy = abs(y2 - y1);
-        int sx = (x1 < x2) ? 1 : -1;
-        int sy = (y1 < y2) ? 1 : -1;
-        int err = dx - dy;
+    // Calculate line properties
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double length = sqrt(dx * dx + dy * dy);
+    
+    if (length == 0) return 0;
 
-        while (x1 != x2 || y1 != y2) {
-            if (handleEvents(renderer, texture) == -1) return -1;
+    // Calculate angle and perpendicular
+    double angle = atan2(dy, dx);
+    double perpendicular = angle + M_PI/2;
 
-            // Draw the actual point
-            if (strcmp(type, "filled") == 0) {
-                for (int tx = -thickness / 2; tx <= thickness / 2; tx++) {
-                    for (int ty = -thickness / 2; ty <= thickness / 2; ty++) {
-                        SDL_RenderDrawPoint(renderer, x1 + tx, y1 + ty);
-                    }
-                }
-            } else {
-                SDL_RenderDrawPoint(renderer, x1, y1);
+    // Increase steps even more for perfect continuity
+    int steps = (int)(length * 5); // Triple the steps for perfect continuity
+    double stepX = dx / steps;
+    double stepY = dy / steps;
+
+    double currentX = x1;
+    double currentY = y1;
+    double lastX = x1;
+    double lastY = y1;
+
+    for (int i = 0; i <= steps; i++) {
+        if (handleEvents(renderer, texture) == -1) return -1;
+
+        if (strcmp(type, "filled") == 0) {
+            // Draw with increased density for thickness
+            for (int t = -thickness/2; t <= thickness/2; t++) {
+                double offsetX = t * cos(perpendicular);
+                double offsetY = t * sin(perpendicular);
+                
+                SDL_RenderDrawLine(renderer, 
+                    lastX + offsetX, lastY + offsetY,
+                    currentX + offsetX, currentY + offsetY
+                );
+                // Add extra points for perfect coverage
+                SDL_RenderDrawPoint(renderer, currentX + offsetX, currentY + offsetY);
             }
-
-            renderTexture(renderer, texture, 10);
-
-            // Update of coordinates for the Bresenham algorithm
-            int e2 = 2 * err;
-            if (e2 > -dy) { err -= dy; x1 += sx; }
-            if (e2 < dx) { err += dx; y1 += sy; }
+        } else {
+            SDL_RenderDrawLine(renderer, lastX, lastY, currentX, currentY);
         }
-        SDL_SetRenderTarget(renderer, NULL); 
+
+        renderTexture(renderer, texture, 3);
+
+        lastX = currentX;
+        lastY = currentY;
+        currentX = x1 + stepX * (i + 1);
+        currentY = y1 + stepY * (i + 1);
     }
+
+    SDL_SetRenderTarget(renderer, NULL);
     return 0;
 }
+
+
 
 
 /**

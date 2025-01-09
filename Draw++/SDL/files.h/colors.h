@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-// Déclaration des variables de couleur externes
+// External color variables declaration
 extern SDL_Color red;
 extern SDL_Color blue;
 extern SDL_Color green;

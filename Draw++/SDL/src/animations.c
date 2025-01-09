@@ -124,6 +124,32 @@ void animation_bounce(Shape *shape, AnimationType animation, int width, int heig
             }
             break;
         }
+
+        case SHAPE_LINE: {
+            // Move the line using both velocity components
+            if (frameCounter >= 7) {
+                // Move both endpoints of the line
+                shape->data.line.x1 += (int)shape->bounce_velocity;
+                shape->data.line.y1 += (int)shape->bounce_direction;
+                shape->data.line.x2 += (int)shape->bounce_velocity;
+                shape->data.line.y2 += (int)shape->bounce_direction;
+            }
+
+            // Check for collision with window boundaries
+            // Horizontal collision
+            if (shape->data.line.x1 <= 0 || shape->data.line.x2 <= 0 || 
+                shape->data.line.x1 >= width || shape->data.line.x2 >= width) {
+                shape->bounce_velocity *= -1;  // Reverse horizontal direction
+            }
+
+            // Vertical collision
+            if (shape->data.line.y1 <= 0 || shape->data.line.y2 <= 0 || 
+                shape->data.line.y1 >= height || shape->data.line.y2 >= height) {
+                shape->bounce_direction *= -1;  // Reverse vertical direction
+            }
+            break;
+        }
+
         case SHAPE_SQUARE: {
             if (shape->data.square.x <= 0 || 
                 shape->data.square.x + shape->data.square.c >= width) {

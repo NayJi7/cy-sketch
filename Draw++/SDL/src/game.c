@@ -902,11 +902,17 @@ void updateDefenseGame(GameState* game, float deltaTime, int cursorX, int cursor
                     break;
                 }
                 case SHAPE_LINE: {
-                    // Use simple circle collision for these shapes
-                    float dx = enemyX - shapes[j].data.circle.x;
-                    float dy = enemyY - shapes[j].data.circle.y;
-                    float minDist = enemyRadius + 25;  // Default radius of 25 for unsupported shapes
-                    if (dx*dx + dy*dy < minDist*minDist) {
+                    // Utiliser le centre de la ligne et sa longueur pour la collision
+                    float lineX = (shapes[j].data.line.x1 + shapes[j].data.line.x2) / 2;
+                    float lineY = (shapes[j].data.line.y1 + shapes[j].data.line.y2) / 2;
+                    
+                    // Utiliser isPointInLine pour une détection précise
+                    if (isPointInLine(enemyX, enemyY,
+                                     shapes[j].data.line.x1,
+                                     shapes[j].data.line.y1,
+                                     shapes[j].data.line.x2,
+                                     shapes[j].data.line.y2,
+                                     shapes[j].data.line.thickness + enemyRadius)) {
                         collided = true;
                     }
                     break;

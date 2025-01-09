@@ -13,6 +13,7 @@ typedef struct {
     bool selected;  // Indicates whether the shape is selected
 } Circle;
 
+
 int handleEvents(SDL_Renderer* renderer, SDL_Texture* texture);
 Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible);
 void renderCursor(SDL_Renderer *renderer, const Cursor *cursor);

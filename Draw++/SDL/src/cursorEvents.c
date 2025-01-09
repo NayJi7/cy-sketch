@@ -334,8 +334,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                     break;
                 }
 
-                case SDL_KEYDOWN: {
-                    if (event.key.repeat != 0) break;
+                case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
                         case SDLK_g:
                             if (!gameState.isGameMode) {
@@ -421,55 +420,43 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             running = 0;
                             break;
                         case SDLK_RIGHT:
+                            strncpy(lastKeyPressed, "Right", sizeof(lastKeyPressed) - 1);
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - Right\n");
                                 printf("Move selected shapes by 10 pixels to the right\n\n");
                             }
-                            strncpy(lastKeyPressed, "Right", sizeof(lastKeyPressed) - 1);
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    moveShape(&shapes[i], 10, 0);
-                                }
-                            }
+                            moveSelectedShapes(shapes, shapeCount, 10, 0);
+                            cursor.x += 10;  // Déplacer le curseur
                             break;
 
                         case SDLK_LEFT:
+                            strncpy(lastKeyPressed, "Left", sizeof(lastKeyPressed) - 1);
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - Left\n");
                                 printf("Move selected shapes by 10 pixels to the left\n\n");
                             }
-                            strncpy(lastKeyPressed, "Left", sizeof(lastKeyPressed) - 1);
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    moveShape(&shapes[i], -10, 0);
-                                }
-                            }
+                            moveSelectedShapes(shapes, shapeCount, -10, 0);
+                            cursor.x -= 10;  // Déplacer le curseur
                             break;
 
                         case SDLK_UP:
+                            strncpy(lastKeyPressed, "Up", sizeof(lastKeyPressed) - 1);
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - Up\n");
                                 printf("Move selected shapes by 10 pixels up\n\n");
                             }
-                            strncpy(lastKeyPressed, "Up", sizeof(lastKeyPressed) - 1);
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    moveShape(&shapes[i], 0, -10);
-                                }
-                            }
+                            moveSelectedShapes(shapes, shapeCount, 0, -10);
+                            cursor.y -= 10;  // Déplacer le curseur
                             break;
 
                         case SDLK_DOWN:
+                            strncpy(lastKeyPressed, "Down", sizeof(lastKeyPressed) - 1);
                             if (DEBUG) {
-                                printf("Key Pressed - %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                                printf("Key Pressed - Down\n");
                                 printf("Move selected shapes by 10 pixels down\n\n");
                             }
-                            strncpy(lastKeyPressed, "Down", sizeof(lastKeyPressed) - 1);
-                            for (int i = 0; i < shapeCount; i++) {
-                                if (shapes[i].selected) {
-                                    moveShape(&shapes[i], 0, 10);
-                                }
-                            }
+                            moveSelectedShapes(shapes, shapeCount, 0, 10);
+                            cursor.y += 10;  // Déplacer le curseur
                             break;
 
                         case SDLK_BACKSPACE:
@@ -498,7 +485,6 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
                             break;
                     }
                     break;
-                }
 
                 case SDL_MOUSEWHEEL:
                     if (DEBUG) {
@@ -893,7 +879,8 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
             snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
             break;
         case SHAPE_LINE: 
-            snprintf(text, sizeof(text), "Form: Line \nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s", 
+            snprintf(text, sizeof(text), "Form: Line %s\nRotation: %.1f deg\nLength: %d\nThickness: %d\nStart: (%d,%d)\nEnd: (%d,%d) \nAnimation Picking: %s", 
+                    formType, 
                     shape->rotation,
                     (int)sqrt(pow(shape->data.line.x2 - shape->data.line.x1, 2) + 
                              pow(shape->data.line.y2 - shape->data.line.y1, 2)),
@@ -901,7 +888,10 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
                     shape->data.line.x1, shape->data.line.y1,
                     shape->data.line.x2, shape->data.line.y2,
                     animation_chose);
-            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", getAnimationName(shape->animations[0]), getAnimationName(shape->animations[1]), getAnimationName(shape->animations[2]));
+            snprintf(text2, sizeof(text2), "Animation List: %s, %s, %s", 
+                    getAnimationName(shape->animations[0]), 
+                    getAnimationName(shape->animations[1]), 
+                    getAnimationName(shape->animations[2]));
             break;  
         case SHAPE_POLYGON: 
             snprintf(text, sizeof(text), "Form: Polygon %s\nRotation: %.1f deg\nRadius: %d\nSides: %d\nPosition: (%d,%d) \nAnimation Picking: %s", 
