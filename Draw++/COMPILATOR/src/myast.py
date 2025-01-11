@@ -17,6 +17,10 @@ def print_error(e):
                 print(f"-#blue Suggestion: Did you mean '{suggestion}'?")
             else:
                 print(f"-#blue Suggestion: Check if you initialized correctly all your variables and functions.")
+        
+        if "expected" in e:
+            suggestion = suggest_keyword(e.split("expected ")[1].split(" ")[0])
+            print(f"-#blue Suggestion: Change the value of the parameter to {suggestion}.")
         raise SyntaxError(e)
 
 def print_error_interractive(e):
@@ -320,404 +324,170 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
 
         if forme == "circle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
         elif forme == "ellipse":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius x
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius y
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
         elif forme == "line":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x1
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y1
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #x2
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #y2
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
             t = resolve_value_and_find_variable(ast, parametres[7], current_position) #width
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
         elif forme == "polygon":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
         elif forme == "triangle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
         elif forme == "rectangle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #w
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #h
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
         elif forme == "square":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
         elif forme == "arc":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #r
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #startangle
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[7], current_position) #endangle
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
         elif forme == "triangle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
         elif forme == "square":
 
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #c
-            if t[0] == ("int" or "float"):
-                if "char" in t[0] and '"' not in t[1]:
-                    if t == None:
-                        raise ValueError(f"ValueError : '{t[1]}' variable not initialized")
-                    elif t[0] != ("int" or "float"):
-                        raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")
-            else:
-                raise TypeError(f'TypeError : {t[1]} is {t[0]}, expected int or float') if '"' in t[1] else TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int or float")         
+            if t[0] != ("int"):
+                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")         
 
         if semicolon:
             c_code += ";"

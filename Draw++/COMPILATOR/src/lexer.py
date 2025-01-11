@@ -2,36 +2,47 @@ import re
 import ply.lex as lex
 from difflib import get_close_matches
 
+# @brief Suggests a similar keyword for a given word
+# @param word The word to find suggestions for
+# @return The closest keyword match or None if no match found
 def suggest_keyword(word):
     suggestions = get_close_matches(word, keywords.keys(), n=1, cutoff=0.6)
     return suggestions[0] if suggestions else None
 
+# @brief Retrieves all declared identifiers in the code
+# @param t Token containing lexer information
+# @return List of known identifiers
 def get_known_identifiers(t):
     known_identifiers = []
 
     text = t.lexer.lexdata
     lines = text.split('\n')
-    lines = [x for x in lines if x != ""] # supprimes toutes les lignes vides
-    for line in lines :
-        line = line.strip('\n')
-        line = line.strip('\t')
+    lines = [x for x in lines if x != ""]  # Remove empty lines
+    for line in lines:
+        line = line.strip('\n')  # Remove trailing newlines
+        line = line.strip('\t')  # Remove leading/trailing tabs
 
+        # Match variable declarations
         resultat = re.search(r'var (\w+)\s*=', line)
         if resultat:
             known_identifiers.append(resultat.group(1))
 
+        # Match function declarations
         resultat = re.search(r'func\s+(\w+)\s*\(', line)
         if resultat:
             known_identifiers.append(resultat.group(1))
 
+        # Match integer variable declarations
         resultat = re.search(r'int\s+(\w+)[\s,)]', line)
         if resultat:
             known_identifiers.append(resultat.group(1))
 
+        # Match float variable declarations
         resultat = re.search(r'float\s+(\w+)[\s,)]', line)
         if resultat:
             known_identifiers.append(resultat.group(1))
 
+        # Match char variable declarations
         resultat = re.search(r'char\s+(\w+)', line)
         if resultat:
             known_identifiers.append(resultat.group(1))
@@ -40,6 +51,8 @@ def get_known_identifiers(t):
 
 # === 1. Definition of Tokens ===
 
+# @{
+# @brief Dictionary of available colors
 colors = {
     "red": "red",
     "green": "green",
@@ -56,8 +69,6 @@ colors = {
     "purple": "purple",
     "brown": "brown",
     "pink": "pink",
-    "gold": "gold",
-    "silver": "silver"
 }
 
 # @{
@@ -93,7 +104,6 @@ keywords = {
     'rectangle': 'RECTANGLE',
     'arc': 'ARC',
     'or': 'OR',
-    'and': 'AND', 
 }
 
 # Add colors to keywords
@@ -108,14 +118,14 @@ tokens = [
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EQUALS',
     'LT', 'GT', 'LE', 'GE', 'EQ', 'NEQ', 'AND',
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'LBRACKET', 
-    'RBRACKET','COMMA', 'SEMICOLON', 'COLON',
+    'RBRACKET','COMMA', 'SEMICOLON',
 ] + list(keywords.values())
 # @}
 
 # === 2. Token Rules ===
 
 # @{
-# @brief Regular expressions for operators
+# @brief Recognition rules for comparison and arithmetic operators
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
@@ -130,20 +140,25 @@ t_NEQ = r'!='
 # @}
 
 # @{
-# @brief Regular expressions for separators
+# @brief Recognition rules for delimiters
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACE = r'\{'
 t_LBRACKET = r'\['
 t_RBRACKET = r'\]'
 t_COMMA = r','
-t_COLON = r':'
 # @}
 
+# @brief Recognition rule for closing brace
+# @param t Token containing the matched value
+# @return Processed token
 def t_RBRACE(t):
     r'\}'
     return t
 
+# @brief Recognition rule for semicolon
+# @param t Token containing the matched value
+# @return Processed token
 def t_SEMICOLON(t):
     r';'
     return t
@@ -194,21 +209,21 @@ def t_BOOLEAN(t):
 # @brief Ignores spaces and tabs
 t_ignore = ' \t'
 
-# @brief Tracks line numbers for newline characters
-# @param t Token object containing the matched value
+# @brief Recognition rule for newlines
+# @param t Token containing the matched value
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
-# @brief Handles single-line comments starting with '#'
-# @param t Token object containing the matched value
+# @brief Recognition rule for single-line comments
+# @param t Token containing the matched value
 def t_COMMENT(t):
     r'\#.*'
     t.lexer.lineno += t.value.count('\n')
     pass
 
-# @brief Handles multi-line comments enclosed in /* */
-# @param t Token object containing the matched value
+# @brief Recognition rule for multi-line comments
+# @param t Token containing the matched value
 def t_COMMENT_MULTILINE(t):
     r'/\*([^*]|\*[^/])*\*/'
     t.lexer.lineno += t.value.count('\n')

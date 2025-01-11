@@ -11,8 +11,8 @@ import re
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
 
-# Ces 2 classes sont là pour mettre les numéros de ligne, pas important et juste 
-# esthétique, rien à modifier dedans
+# These 2 classes are here to display line numbers, not important and just 
+# aesthetic, nothing to modify inside
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         super().__init__(editor)
@@ -30,6 +30,9 @@ class LineNumberArea(QWidget):
         """Set the tooltip for the line number area."""
         super().setToolTip(tooltip)  # Ensure the tooltip is set correctly
 
+
+# This class is a pre-made class from PyQt5 forums to add line number effects in the IDE.
+# It provides visual effects like line counting, syntax highlighting, and error highlighting.
 class CodeEditor(QPlainTextEdit):
 
     def __init__(self, parent=None):
@@ -55,7 +58,7 @@ class CodeEditor(QPlainTextEdit):
         self.syntax_check_timer.start(1000)  # Check syntax after 1 second of no typing
 
     def check_syntax(self):
-        """Check syntax of the current text and highlight errors."""
+        """Check syntax of the current text and highlight/underline errors."""
         from COMPILATOR.src.lexer import init_lexer, suggest_keyword
         from COMPILATOR.src.parser import init_parser
         from COMPILATOR.src.myast import execute_ast
@@ -175,17 +178,17 @@ class CodeEditor(QPlainTextEdit):
         super().keyPressEvent(event)
 
     def line_number_area_width(self):
-        """Calcule la largeur de la marge pour les numéros de ligne."""
+        """Calculate the width of the margin for line numbers."""
         digits = len(str(self.blockCount()))
         space = 6 + self.fontMetrics().horizontalAdvance('9') * digits
         return space
 
     def update_line_number_area_width(self, _):
-        """Met à jour la largeur de la marge pour les numéros de ligne."""
+        """Update the width of the margin for line numbers."""
         self.setViewportMargins(self.line_number_area_width(), 0, 0, 0)
 
     def update_line_number_area(self, rect, dy):
-        """Redessine les numéros de ligne après un défilement ou une modification."""
+        """Redraw the line numbers after scrolling or modification."""
         if dy:
             self.lineNumberArea.scroll(0, dy)
         else:
@@ -195,13 +198,13 @@ class CodeEditor(QPlainTextEdit):
             self.update_line_number_area_width(0)
 
     def resizeEvent(self, event):
-        """Ajuste la zone des numéros de ligne lorsqu'on redimensionne l'éditeur."""
+        """Adjust the line number area when resizing the editor."""
         super().resizeEvent(event)
         cr = self.contentsRect()
         self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), self.line_number_area_width(), cr.height()))
 
     def line_number_area_paint_event(self, event):
-        """Dessine les numéros de ligne."""
+        """Draw the line numbers."""
         painter = QPainter(self.lineNumberArea)
         painter.fillRect(event.rect(), QColor("#2E2E2E"))
 
@@ -223,7 +226,7 @@ class CodeEditor(QPlainTextEdit):
             block_number += 1
 
     def highlight_current_line(self):
-        """Met en surbrillance la ligne actuelle."""
+        """Highlight the current line."""
         extra_selections = []
 
         if not self.isReadOnly():
@@ -236,7 +239,6 @@ class CodeEditor(QPlainTextEdit):
             extra_selections.append(selection)
 
         self.setExtraSelections(extra_selections)
-
 
 
 # classe pour surligner les mots terminaux dans le langage (return, from , if, cursor...)
@@ -311,9 +313,9 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                 index = regex.indexIn(text, index + length)
 
 class MyDrawppIDE(QMainWindow):
-    '''Classe principale de l'IDE'''
+    '''this is main class of the ide, its from there that the instance of the appliaction below is  created'''
     def __init__(self):
-        super().__init__()
+        super().__init__() #we herit from the QMainWindow class, which is basically the "big" widget from QWidget
         self.process = QProcess(self)
         
         # Store Draw++ location once at initialization
@@ -324,20 +326,24 @@ class MyDrawppIDE(QMainWindow):
             self.draw_folder = current_dir
         elif "_MEI" in current_dir:
             # Case 2: Running from .exe (PyInstaller temp directory)
-            self.draw_folder = "Draw++"
+            self.draw_folder = current_dir
         else:
             # Case 3: Fallback
             raise Exception("Could not locate Draw++ folder. You are here: "+current_dir)
 
-        
+        # Set the window icon
         self.setWindowIcon(QIcon(os.path.join(self.draw_folder, "IDE", "Dpp_circle.ico")))
+        # Set the history file path
         self.history_file = os.path.join(self.draw_folder, "IDE", ".history")
+        # Initialize the UI
         self.init_ui()
+        # Load the last opened file
         self.load_last_file()
 
     def init_ui(self):
-        # Configuration de la fenêtre principale
-        self.setGeometry(100, 100, 1000, 700)
+        # configuration of the main window
+        self.setGeometry(100, 100, 1000, 700) 
+        #we can set the properties of the window, with basic CSS
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #333333;
@@ -367,12 +373,13 @@ class MyDrawppIDE(QMainWindow):
         # Convert to URL format with forward slashes for CSS
         cross_icon_url = cross_icon_path.replace(os.sep, '/')
         
-        # Widget principal avec onglets
+        # creation for the tab widget, which is native to QWidget from PyQt5
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
         self.tab_widget.setTabsClosable(True)  # Enable tab close buttons
         self.tab_widget.tabCloseRequested.connect(self.close_tab)  # Connect close signal
 
+        #we can also set the properties of the window, with basic CSS again
         self.tab_widget.setStyleSheet(f"""
             QTabWidget::pane {{
                 top: -1px;
@@ -422,7 +429,7 @@ class MyDrawppIDE(QMainWindow):
             }}
         """)
 
-        # Boutons pour la barre d'outils
+        # we set the toolbar, which is native to QWidget from PyQt5 again, we can design it with basic css
         self.toolbar = QToolBar("Main Toolbar", self)
         self.toolbar.setStyleSheet("""
             QToolBar {
@@ -457,7 +464,9 @@ class MyDrawppIDE(QMainWindow):
         """)
         self.addToolBar(self.toolbar)
 
-        # Boutons de gauche (fichiers)
+        # we set shortcuts, which are native to QWidget from PyQt5 again, we also connect button with their method, here open_file
+
+        #in the next lines, its the same process, but for the others buttons
         open_action = QAction("Open", self)
         open_action.setShortcut("Ctrl+O")
         open_action.setToolTip("Open (Ctrl+O)")
@@ -465,7 +474,7 @@ class MyDrawppIDE(QMainWindow):
         open_action.triggered.connect(lambda: self.simulate_button_click(open_action))
         self.toolbar.addAction(open_action)
 
-        # Séparateur
+        # Séparator
         separator1 = QWidget()
         separator1.setFixedWidth(1)
         separator1.setStyleSheet("background-color: #1E1E1E;")
@@ -478,7 +487,7 @@ class MyDrawppIDE(QMainWindow):
         save_action.triggered.connect(lambda: self.simulate_button_click(save_action))
         self.toolbar.addAction(save_action)
 
-        # Séparateur
+        # Séparator again
         separator2 = QWidget()
         separator2.setFixedWidth(1)
         separator2.setStyleSheet("background-color: #1E1E1E;")
@@ -523,14 +532,14 @@ class MyDrawppIDE(QMainWindow):
         separator5.setStyleSheet("background-color: #1E1E1E;")
         self.toolbar.addWidget(separator5)
 
-        # Terminal toggle button
+        # Terminal toggle button, same process as the others
         terminal_action = QAction("Terminal", self)
         terminal_action.setShortcut("Ctrl+Alt+T")  # Common shortcut for terminal
         terminal_action.setToolTip("Terminal (Ctrl+Alt+T)")
         terminal_action.setCheckable(True)  # Make it checkable
         terminal_action.setChecked(False)  # Terminal is hidden by default
         terminal_action.triggered.connect(self.toggle_terminal)
-        terminal_action.triggered.connect(lambda: self.simulate_button_click(terminal_action))
+        terminal_action.triggered.connect(lambda: self.simulate_button_click(terminal_action)) #this line is connecting a trigger button event to a process event
         self.toolbar.addAction(terminal_action)
         # Store reference to terminal action
         self.terminal_action = terminal_action
@@ -595,10 +604,15 @@ class MyDrawppIDE(QMainWindow):
         self.addAction(close_tab_action)
 
     def open_new_tab(self):
-        """Créer un nouvel onglet avec un éditeur et un terminal."""
+        """this method is called when the user clicks on the "New Tab" button in the toolbar. It creates a new tab and adds it to the tab widget"""
+
+        #at the begining, we didnt had a hole open new tab class, we did the process into the init_ui method
+        # but i realized by doing that way, there was only one execution of code possible cause there were only one instance for all tabs
+        #so i created a new class for the open new tab method, and now each tab has its own instance, each one has his own process
+
         print("Création d'un nouvel onglet")
 
-        # Crée un nouvel onglet et son layout
+        # creation of a new tab and its properties
         new_tab = QWidget()
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
@@ -607,6 +621,7 @@ class MyDrawppIDE(QMainWindow):
         # Create a splitter
         splitter = QSplitter(Qt.Vertical)
         splitter.setChildrenCollapsible(False)  # Prevent widgets from being collapsed to 0
+        #we can set the properties of the splitter, with basic CSS
         splitter.setStyleSheet("""
             QSplitter {
                 background-color: #333333;
@@ -620,7 +635,7 @@ class MyDrawppIDE(QMainWindow):
             }
         """)
 
-        # Création de l'éditeur
+        # creation of the main editor, same as we done in the main window class
         editor = CodeEditor(self)
         editor.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         editor.setStyleSheet("""
@@ -683,10 +698,10 @@ class MyDrawppIDE(QMainWindow):
         editor.setTabStopDistance(4 * editor.fontMetrics().horizontalAdvance(' '))
         editor.document().setModified(False)
 
-        # Ajouter le surlignage syntaxique
+        # highlighter native method
         highlighter = SyntaxHighlighter(editor.document())
 
-        # Création du terminal avec bouton Clear intégré
+        # creation the terminal, same as we done in the main window class
         terminal_container = QWidget()
         terminal_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         terminal_layout = QVBoxLayout(terminal_container)
@@ -786,7 +801,7 @@ class MyDrawppIDE(QMainWindow):
         clear_action.triggered.connect(terminal.clear)
         self.addAction(clear_action)
 
-        # Positionner le bouton dans le coin supérieur droit du terminal
+        # Here I will position the button in the top right corner of the terminal
         terminal.resizeEvent = lambda e: clear_button.move(
             terminal.width() - clear_button.width() - 25,
             10
@@ -806,11 +821,13 @@ class MyDrawppIDE(QMainWindow):
 
         new_tab.setLayout(layout)
 
+        # Store editor and terminal objects in a dictionary
+        #it permit to each tabs to get his own editor, own terminal (so process connected to), and own highlighter
         if not hasattr(self, 'tabs_data'):
             self.tabs_data = {}
         self.tabs_data[new_tab] = {'editor': editor, 'terminal': terminal, 'highlighter': highlighter}
 
-        # Ajouter l'onglet 
+        # creating the new tab, just by adding in the list of tabs
         tabName = f'New Tab'
         index = self.tab_widget.addTab(new_tab, tabName)
         self.tab_widget.setCurrentWidget(new_tab)
@@ -836,24 +853,25 @@ class MyDrawppIDE(QMainWindow):
                 splitter.setSizes([1, 0])
 
     def update_window_title(self, index):
-        """Met à jour le titre de la fenêtre selon l'onglet actif."""
+        """this class update the window title when the tab change."""
         if index == -1:
             self.setWindowTitle("DrawStudioCode")  # Aucun onglet actif
         else:
             current_tab_title = self.tab_widget.tabText(index)
             self.setWindowTitle(f"DrawStudioCode - {current_tab_title}")
+            # we used the actual index of the code and search into the list of tabs the name of the actual tab
 
 
     def open_file(self):
-        """Ouvre un fichier dans un nouvel onglet ou bascule vers l'onglet existant."""
+        """Open the file in a empty tab or automatically get to the opened file tab"""
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Draw++ Files (*.dpp);;All Files (*)", options=options)
         if file_path:
-            # Vérifier si le fichier est déjà ouvert
+            # verify if the file is already opened
             file_name = os.path.basename(file_path)
             for i in range(self.tab_widget.count()):
                 if self.tab_widget.tabText(i) == file_name:
-                    # Le fichier est déjà ouvert, basculer vers cet onglet
+                    # the file is already opened, we just need to switch to it
                     self.tab_widget.setCurrentIndex(i)
                     return
 
@@ -879,20 +897,20 @@ class MyDrawppIDE(QMainWindow):
             self.update_window_title(self.tab_widget.currentIndex())
 
     def save_file(self):
-        """Sauvegarde le fichier actif. Si c'est un nouveau fichier, demande où sauvegarder."""
+        """save the file in the current tab, if the tab name is "New tab", then we save it as a new file with the save_as_file method"""
         current_tab = self.tab_widget.currentWidget()
         if not current_tab:
             return
 
         current_file_name = self.tab_widget.tabText(self.tab_widget.currentIndex())
-        if current_file_name.startswith('New Tab'):  # C'est un nouveau fichier
-            self.save_as_file()  # Demander où sauvegarder
+        if current_file_name.startswith('New Tab'):  #its a new file , we call save_as method
+            self.save_as_file()  
         else:
             # Get editor from splitter's first widget
             splitter = current_tab.layout().itemAt(0).widget()
             editor = splitter.widget(0)  # First widget in splitter is the editor
             try:
-                with open(current_file_name, "w") as file:
+                with open(current_file_name, "w") as file: #i'm opening the file in write mode, and copy/paste the text in the file
                     file.write(editor.toPlainText())
                 editor.document().setModified(False)
                 self.save_file_history(os.path.abspath(current_file_name))
@@ -900,12 +918,16 @@ class MyDrawppIDE(QMainWindow):
                 QMessageBox.warning(self, "Save Error", f"Could not save file: {str(e)}")
 
     def save_as_file(self):
-        """Sauvegarde le contenu de l'éditeur actif sous un nouveau nom."""
+        """save the content of the active editor under a new name"""
+        
         current_tab_name = self.tab_widget.tabText(self.tab_widget.currentIndex())
+        # Get the name of the current tab
         if current_tab_name.startswith('New Tab'):
             current_tab_name = "MySuperDraw"
-            
+            # If the tab name starts with 'New Tab', change it to 'MySuperDraw'
+
         options = QFileDialog.Options()
+        # Create options for the file dialog
         file_path, _ = QFileDialog.getSaveFileName(
             self, 
             "Save File", 
@@ -913,28 +935,41 @@ class MyDrawppIDE(QMainWindow):
             "Draw++ Files (*.dpp);;All Files (*)", 
             options=options
         )
-        
+        # Open a file dialog to get the save file path
         if file_path:
             current_tab = self.tab_widget.currentWidget()
-            # Get editor from splitter's first widget
+            # Get the current tab widget
             splitter = current_tab.layout().itemAt(0).widget()
+            # Get the splitter widget from the current tab's layout
             editor = splitter.widget(0)  # First widget in splitter is the editor
+            # Get the editor widget from the splitter
             try:
                 with open(file_path, "w") as file:
                     file.write(editor.toPlainText())
+                    # Write the editor's text to the file
                 self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(file_path))
+                # Update the tab text with the file name
                 editor.document().setModified(False)
+                # Mark the document as not modified
                 self.save_file_history(os.path.abspath(file_path))
+                # Save the file path to the file history
             except Exception as e:
                 QMessageBox.warning(self, "Save Error", f"Could not save file: {str(e)}")
+                # Show a warning message if the file could not be saved
 
     def execute_code(self, mode="run"):
-        """Exécute le code de l'éditeur actif selon le mode spécifié (run/compile/debug)."""
-        current_tab = self.tab_widget.currentWidget()
-        if not current_tab:
-            return  # Aucun onglet actif
+        """execute the code of the active editor, depending on the mode specified (run/compile/debug)."""
 
-        # Récupérer l'éditeur et le terminal associés à l'onglet actif
+
+        #go to the report to see how this method works, how i imagined the algorithm
+
+
+        current_tab = self.tab_widget.currentWidget()
+        # Get the current tab widget
+        if not current_tab:
+            return  # No active tab
+
+        # Retrieve the editor and terminal associated with the active tab
         tab_data = self.tabs_data.get(current_tab)
         if not tab_data:
             return
@@ -947,7 +982,7 @@ class MyDrawppIDE(QMainWindow):
         if not terminal.isVisible():
             self.toggle_terminal()
 
-        # Vérifier si le fichier doit être sauvegardé
+        # if we want to run the code, we need to save the file first, so we check it
         current_file_name = self.tab_widget.tabText(self.tab_widget.currentIndex())
         if current_file_name.startswith('New Tab'):
             reply = QMessageBox.question(
@@ -960,22 +995,22 @@ class MyDrawppIDE(QMainWindow):
             
             if reply == QMessageBox.Save:
                 self.save_as_file()
-                # Vérifier si l'utilisateur a annulé la sauvegarde
+                # Check if the user canceled the save
                 if self.tab_widget.tabText(self.tab_widget.currentIndex()).startswith('New Tab'):
-                    return  # L'utilisateur a annulé la sauvegarde, on arrête l'exécution
+                    return  # User canceled the save, stop execution
             else:
-                return  # L'utilisateur a cliqué sur Annuler, on arrête l'exécution
+                return  # User clicked Cancel, stop execution
 
-        # Configurer la commande pour l'exécution
+        # Configure the command for the make file, not the same on windows actually
         if platform.system() == "Windows":
             make_command = "mingw32-make"
         else:
             make_command = "make"
 
-        # Trouver le dossier Draw++
+        # Find the Draw++ folder
         draw_folder = self.draw_folder
 
-        # Créer le fichier .to_compile.dpp dans le dossier Draw++
+        # Create the .to_compile.dpp file in the Draw++ folder, which is basically the file to compile after by PLY
         compile_file_path = os.path.join(draw_folder, ".to_compile.dpp")
         try:
             with open(compile_file_path, "w") as file:
@@ -987,21 +1022,24 @@ class MyDrawppIDE(QMainWindow):
         filename = "NAME=" + self.tab_widget.tabText(self.tab_widget.currentIndex())
         filename = filename.replace('.dpp', '')
 
-        # Nettoyer le terminal avant d'exécuter
+        # Clear the terminal before executing
         terminal.clear()
 
-        # Créer un nouveau processus pour cet onglet
+        # Create a new process for this tab
         process = QProcess(self)
         if platform.system() != "Windows":
             # On Unix systems, make the process a group leader
             if hasattr(process, 'setProcessGroup'):
                 process.setProcessGroup(QProcess.MergeProcessGroup)
-        tab_data['process'] = process  # Stocker le processus dans le dictionnaire
+        tab_data['process'] = process  # Store the process in the dictionary
 
-        # Définir le répertoire de travail sur le dossier Draw++
+        # Set the working directory to the Draw++ folder
         process.setWorkingDirectory(draw_folder)
 
-        # Connecter les sorties au terminal actif
+        # Connect the outputs to the active terminal
+        #a process can have 2 output, standard and error
+        #the standard basically returns us the output in commande prompt of the process
+        #here, this line can send all the output in the display output method
         process.readyReadStandardOutput.connect(lambda: self.display_output(process, terminal))
         process.finished.connect(lambda: self.on_process_finished(current_tab))
 
@@ -1037,7 +1075,8 @@ class MyDrawppIDE(QMainWindow):
             # Connect to the stop function
             self.run_action.triggered.connect(lambda: self.stop_process(current_tab))
 
-        # Configurer la commande et les arguments selon le mode
+        # Configure the command and arguments according to the mode we chose
+        #because the compile, and debug does the same command, but with different arguments, so we can use the same method
         command = make_command
         if mode == "compile":
             arguments = ["compile", filename]
@@ -1046,11 +1085,11 @@ class MyDrawppIDE(QMainWindow):
         else:  # mode run
             arguments = [filename]
 
-        # Démarrer le processus avec la commande et les arguments
+        # Start the process with the command and arguments
         process.start(command, arguments)
 
     def stop_process(self, tab):
-        """Stops the running process for the given tab, including any child processes."""
+        """Simply Stops the running process for the given tab, including any child processes."""
         if tab in self.tabs_data:
             process = self.tabs_data[tab].get('process')
             if process and process.state() == QProcess.Running:
@@ -1099,7 +1138,7 @@ class MyDrawppIDE(QMainWindow):
         self.enable_run_buttons()
 
     def on_process_finished(self, tab):
-        """Called when a process finishes running"""
+        """Called when a process finishes running, when an execution is killed by stop button, we reactive the run button"""
         # Re-enable run buttons and restore appearance
         run_button = self.toolbar.widgetForAction(self.run_action)
         if run_button:
@@ -1136,7 +1175,7 @@ class MyDrawppIDE(QMainWindow):
         self.execute_code("compile")
 
     def debug_code(self):
-        """Exécute le code en mode debug."""
+        """executes the code in debug mode : calls the execute_code method with the debug argument"""
         # Show terminal if it's hidden
         current_tab = self.tab_widget.currentWidget()
         if current_tab:
@@ -1149,8 +1188,14 @@ class MyDrawppIDE(QMainWindow):
         self.execute_code("debug")
 
     def display_output(self, process, terminal):
-        """Affiche les sorties dans le terminal spécifié avec des couleurs simples pour certaines séquences."""
+        """display the output in the specified terminal with simple colors for certain sequences,"""
+        #we get the readStandardOutput process return and we display it in the terminal
+        
+        #for windows, we rework the output by forcing the utf8 method for a readable output
         output = process.readAllStandardOutput().data().decode('utf-8', errors='ignore')
+
+        #in the compilator, when an output starts by -#red, it means that the output is an error message, so we color it in red
+        #same for -#green and -#blue
         
         for line in output.splitlines():
             # Handle debug lines without coloring them
@@ -1166,11 +1211,11 @@ class MyDrawppIDE(QMainWindow):
                 line = line.replace('-#blue ', '')
                 self.append_colored_text(terminal, line + "\n", QColor("blue"))
             else:
-                # Les lignes sans tag sont affichées en blanc
+                # lines without -#red, -#green or -#blue are displayed in white
                 self.append_colored_text(terminal, line + "\n", QColor("white"))
 
     def append_colored_text(self, terminal, text, color=QColor("white")):
-        """Ajoute une ligne de texte colorée dans le terminal spécifié."""
+        """add the text in the terminal with the specified color"""
         cursor = terminal.textCursor()
         cursor.movePosition(QTextCursor.End)  # Place le curseur à la fin
         text_format = QTextCharFormat()
@@ -1182,27 +1227,33 @@ class MyDrawppIDE(QMainWindow):
 
 
     def display_error(self, process, terminal):
-        """Affiche les erreurs dans le terminal spécifié."""
+        """Display the error in the termninal, these errors are not expected errors, they are errors that the program can't handle, like python error or gcc error : we use it in extreme debug case"""
         error_output = process.readAllStandardError().data().decode('utf-8', errors='ignore')
 
         for line in error_output.splitlines():  # Découpe en lignes
             self.append_colored_text(terminal, line + "\n", QColor("yellow"))  # Rouge par défaut pour les erreurs
 
     def show_new_window(self):
+        """method connected to new window button, it creates a new window with a new tab, this window affect of self a new class of window
+            which is here the AnotherWindow class, this window below is a copy of the  MyDrawppIDE class, but again , with its own comportment and process"""
         self.w = AnotherWindow()
         self.w.show()
 
     def close_tab(self, index):
-        """Ferme l'onglet à l'index spécifié avec une demande de sauvegarde si nécessaire."""
+        """close the tab at the specified index with a save request if necessary"""
+        #the button close is affected to every tab, personnalize in the CSS, this is the method it calls
+        #we get the actual tab index, and kill it, save it if it has been modified
+
+        #getting the actual tab index
         tab = self.tab_widget.widget(index)
-        if not tab:
+        if not tab: #if no tabs, go away dude !
             return
 
         # Get editor from splitter's first widget
         splitter = tab.layout().itemAt(0).widget()
         editor = splitter.widget(0)  # First widget in splitter is the editor
         
-        if editor.document().isModified():  # Si le document a été modifié
+        if editor.document().isModified():  # if the document is modified
             reply = QMessageBox.question(
                 self,
                 "Save Changes",
@@ -1211,14 +1262,14 @@ class MyDrawppIDE(QMainWindow):
             )
 
             if reply == QMessageBox.Save:
-                # Si l'utilisateur veut sauvegarder
+                # if the use wants to save
                 current_file_name = self.tab_widget.tabText(index)
                 if current_file_name.startswith('New Tab'):
-                    # C'est un nouveau fichier, on utilise Save As
-                    self.tab_widget.setCurrentIndex(index)  # Switch to the tab being closed
+                    # its a new file, we use save as
+                    self.tab_widget.setCurrentIndex(index)  # Switch to the tab being closed, so the next index in the tab list
                     self.save_as_file()
                 else:
-                    # C'est un fichier existant
+                    # its an existing file, we save it
                     try:
                         with open(current_file_name, "w") as file:
                             file.write(editor.toPlainText())
@@ -1227,18 +1278,19 @@ class MyDrawppIDE(QMainWindow):
                         return  # Ne pas fermer l'onglet si la sauvegarde échoue
 
             elif reply == QMessageBox.Cancel:
-                return  # Ne pas fermer l'onglet
+                return  #do not close the tab, we cancel the close, so sad..
 
-        # Nettoyer les références dans tabs_data
+        # clean the references in the tab list/data
         if tab in self.tabs_data:
             del self.tabs_data[tab]
         
-        # Fermer l'onglet
+        # finally kills and close the tab
         self.tab_widget.removeTab(index)
 
     def closeEvent(self, event):
-        """Gère l'événement de fermeture de l'application."""
-        # Vérifier tous les onglets non sauvegardés
+        """handle the close event of the application, we ask the user if he wants to save the files before closing"""
+
+        #check all the unsaved files by looping the tabs
         unsaved_tabs = []
         for i in range(self.tab_widget.count()):
             tab = self.tab_widget.widget(i)
@@ -1248,7 +1300,7 @@ class MyDrawppIDE(QMainWindow):
                 unsaved_tabs.append((i, self.tab_widget.tabText(i)))
 
         if unsaved_tabs:
-            # S'il y a des onglets non sauvegardés
+            # if unsaved files/tabs, we ask the user if he wants to save them
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Warning)
             msg.setWindowTitle("Unsaved Changes")
@@ -1265,14 +1317,14 @@ class MyDrawppIDE(QMainWindow):
             ret = msg.exec_()
             
             if ret == QMessageBox.Save:
-                # Sauvegarder tous les fichiers non sauvegardés
+                # save all the unsaved files
                 for tab_index, _ in unsaved_tabs:
                     self.tab_widget.setCurrentIndex(tab_index)
                     if self.tab_widget.tabText(tab_index).startswith('New Tab'):
                         self.save_as_file()
                     else:
                         self.save_file()
-                    # Vérifier si la sauvegarde a été annulée
+                    # check if the save was canceledl
                     tab = self.tab_widget.widget(tab_index)
                     splitter = tab.layout().itemAt(0).widget()
                     editor = splitter.widget(0)  # First widget in splitter is the editor
@@ -1296,33 +1348,42 @@ class MyDrawppIDE(QMainWindow):
             event.accept()
 
     def load_last_file(self):
-        """Charge le dernier fichier édité s'il existe."""
+        """loads the last file opened if there is one"""
+        #the last file is stored in the history file, we just need to read it and open it
         try:
             if os.path.exists(self.history_file):
                 with open(self.history_file, "r") as f:
                     last_file = f.read().strip()
+                    # Read the last opened file path from the history file
                     if last_file and os.path.exists(last_file) and not last_file.startswith('New Tab'):
                         try:
                             with open(last_file, "r") as file:
                                 current_tab = self.tab_widget.currentWidget()
-                                # Get editor from splitter's first widget
+                                # Get the current tab widget
                                 splitter = current_tab.layout().itemAt(0).widget()
+                                # Get the splitter widget from the current tab's layout
                                 editor = splitter.widget(0)  # First widget in splitter is the editor
+                                # Get the editor widget from the splitter
                                 editor.setPlainText(file.read())
+                                # Set the editor's text to the content of the last opened file
                                 self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(last_file))
+                                # Update the tab text with the file name
                                 editor.document().setModified(False)
+                                # Mark the document as not modified
                                 self.update_window_title(self.tab_widget.currentIndex())
+                                # Update the window title with the current tab index
                         except Exception as e:
                             print(f"Error reading last file {last_file}: {e}")
                             # If we can't read the last file, just start with a new tab
                             pass
         except Exception as e:
             print(f"Error loading history file: {e}")
+    # Print an error message if the history file can't be loaded
 
     def save_file_history(self, file_path):
         """Sauvegarde le chemin du fichier dans l'historique."""
         try:
-            # Only save if it's a real file path and not a new tab
+            # Only save if it's a real file path and not a new tab with 'new tab' title
             if file_path and os.path.exists(file_path) and not file_path.endswith('New Tab'):
                 os.makedirs(os.path.dirname(self.history_file), exist_ok=True)
                 with open(self.history_file, "w") as f:
@@ -1348,7 +1409,7 @@ class MyDrawppIDE(QMainWindow):
             QTimer.singleShot(150, lambda: button.setStyleSheet(original_style))
 
     def toggle_terminal(self):
-        """Toggles the visibility of the terminal in the current tab."""
+        """Toggles the visibility of the terminal in the current tab"""
         current_tab = self.tab_widget.currentWidget()
         if not current_tab:
             return
@@ -1405,13 +1466,17 @@ def kill_process_tree(pid):
         print(f"Error while killing process tree for PID {pid}: {e}")
 
 class AnotherWindow(MyDrawppIDE):
+    """ this class is used to create a new window, it is used to create a new window when the user clicks on the "New Window" button in the main window. """
     def __init__(self):
         super().__init__()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
 
+    app = QApplication(sys.argv)
     window = MyDrawppIDE()
+
+    #these horrible lines are just to get our Logo in the little python executable while running on windows
+    #only work on Windows
     if platform.system() == "Windows":
         icon = QIcon(os.path.join(window.draw_folder, "IDE", "Dpp_circle.ico"))
         app.setWindowIcon(icon)

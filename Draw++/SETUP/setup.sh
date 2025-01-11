@@ -105,10 +105,10 @@ build_executable() {
     --clean \
     --onefile \
     --name="DrawStudioCode" \
-    --add-data "$IDE_DIR:DPP/IDE" \
-    --add-data "$IDE_DIR/Dpp_circle.ico:DPP/IDE" \
-    --add-data "$IDE_DIR/.history:DPP/IDE" \
-    --add-data "$SDL_DIR/fonts/Consolas.ttf:DPP/IDE" \
+    --add-data "$IDE_DIR:IDE" \
+    --add-data "$IDE_DIR/Dpp_circle.ico:IDE" \
+    --add-data "$IDE_DIR/.history:IDE" \
+    --add-data "$SDL_DIR/fonts/Consolas.ttf:IDE" \
     --hidden-import=PIL \
     --hidden-import=PIL._imagingtk \
     --hidden-import=PIL._tkinter_finder \

@@ -3,6 +3,9 @@ import sys
 import ply.yacc as yacc
 from COMPILATOR.src.lexer import tokens, find_column, suggest_keyword
 
+# @brief Parsing module for Draw++ language
+# @details Defines grammar and production rules for the syntactic analyzer
+
 # === 1. Parser Rules ===
 
 # @{
@@ -73,6 +76,8 @@ def p_arg(p):
     p[0] = p[1]
 # @}
 
+# @brief Defines special parameters for shapes
+# @param p Tuple containing production information
 def p_specialparam(p):
     '''specialparam : ANIMATED
                     | INSTANT
@@ -80,6 +85,8 @@ def p_specialparam(p):
                     | EMPTY'''
     p[0] = p[1]
 
+# @brief Defines available colors
+# @param p Tuple containing production information
 def p_color(p):
     '''color : red
              | green
@@ -98,24 +105,29 @@ def p_color(p):
              | pink'''
     p[0] = p[1]
 
+# @brief Defines basic data types
+# @param p Tuple containing production information
 def p_type(p):
     '''type : INT
             | FLOAT
             | CHAR'''
     p[0] = p[1]
 
+# @brief Handles function parameters
+# @param p Tuple containing production information
+# @details Supports simple parameters and arrays
 def p_func_param(p):
     '''fparametres : fparametres COMMA type IDENTIFIER
                    | fparametres COMMA type IDENTIFIER LBRACKET NUMBER RBRACKET
                    | type IDENTIFIER
                    | type IDENTIFIER LBRACKET NUMBER RBRACKET'''
-    if len(p) == 5:
+    if len(p) == 5:         # Regular parameter with type
         p[0] = p[1] + [p[3] + ' ' + p[4]]
-    elif len(p) == 8:
+    elif len(p) == 8:       # Array parameter with size
         p[0] = p[1] + [p[3] + ' ' + str(p[4] + p[5] + str(p[6]) + p[7])]
-    elif len(p) == 3:
+    elif len(p) == 3:       # Single parameter with type
         p[0] = [p[1] + ' ' + p[2]]
-    elif len(p) == 6:
+    elif len(p) == 6:       # Single array parameter with size
         p[0] = [p[1] + ' ' + str(p[2] + p[3] + str(p[4]) + p[5])]
 
 # @{
@@ -126,8 +138,8 @@ def p_function(p):
     p[0] = ('func', p[2], p[4], p[6]) if len(p) == 7 else ('func', p[2], p[5]) 
 # @}
 
-# @{
-# @brief Handles function calls
+# @brief Gère les appels de fonction
+# @param p Tuple contenant les informations de production
 def p_func(p):
     '''func : IDENTIFIER LPAREN parametres RPAREN
             | IDENTIFIER LPAREN RPAREN'''
@@ -144,8 +156,8 @@ def p_expression_arithmetic(p):
     p[0] = ('op', p[2], p[1], p[3])
 # @}
 
-# @{
-# @brief Handles atomic arithmetic expressions like numbers, identifiers, or grouped expressions.
+# @brief Defines rules for atomic arithmetic expressions
+# @param p Tuple containing production information
 def p_expression_arithmetic_atomic(p):
     '''expression_arithmetic : LPAREN expression_arithmetic RPAREN
                              | NUMBER
@@ -153,21 +165,26 @@ def p_expression_arithmetic_atomic(p):
     p[0] = p[1] if len(p) == 2 else p[2]
 # @}
 
-# @brief Handles set color instructions.
+# @brief Handles color definition instructions
+# @param p Tuple containing production information
 def p_set_color(p):
     '''set : SET elem COLOR LPAREN color RPAREN'''
     p[0] = ('setcolor', p[2], p[5])
 
-# @brief Handles set size instructions for window.
+# @brief Handles window size definition instructions
+# @param p Tuple containing production information
 def p_set_size_two(p):
     '''set : SET elem SIZE LPAREN NUMBER COMMA NUMBER RPAREN'''
     p[0] = ('setsize', p[2], p[5], p[7])
 
-# @brief Handles set size instructions for cursor.
+# @brief Handles cursor size definition instructions
+# @param p Tuple containing production information
 def p_set_size_one(p):
     '''set : SET elem SIZE LPAREN NUMBER RPAREN'''
     p[0] = ('setsize', p[2], p[5])
 
+# @brief Defines modifiable elements (window, cursor)
+# @param p Tuple containing production information
 def p_elem(p):
     '''elem : WINDOW
             | CURSOR'''
@@ -187,8 +204,8 @@ def p_modification(p):
     p[0] = ('modify', p[1], p[3])
 # @}
 
-# @{
-# @brief Defines possible values: numbers, identifiers, strings, or booleans.
+# @brief Defines possible values (numbers, identifiers, strings, booleans)
+# @param p Tuple containing production information
 def p_valeur(p):
     '''valeur : NUMBER
               | IDENTIFIER
@@ -197,8 +214,8 @@ def p_valeur(p):
     p[0] = p[1]
 # @}
 
-# @{
-# @brief Defines possible values: numbers, identifiers, strings, or booleans.
+# @brief Handles return statement
+# @param p Tuple containing production information
 def p_return(p):
     '''return : RET valeur'''
     p[0] = ('ret', p[2])
@@ -280,10 +297,10 @@ def p_boucle(p):
 # @brief Handles syntax errors and provides suggestions based on the error type.
 def p_error(p):
     if p:
-        # Basic error message with line number
+        # Basic error message with line and column info
         error_msg = f"Syntax error: '{p.value}' at line {p.lineno}, column {find_column(p.lexer.lexdata, p.lexpos)}"
         
-        # Provide specific suggestions based on token type (without line numbers)
+        # Provide context-specific suggestions
         if p.type in ("LPAREN", "RPAREN"):
             suggestion = "Ensure parenthesis '(' and ')' are balanced."
         elif p.type in ("LBRACE", "RBRACE"):
@@ -322,7 +339,6 @@ def p_error(p):
 
 # === 3. Parser Initialization ===
 
-# @{
 # @brief Initializes the parser and generates parsing tables in a specified directory.
 def init_parser():
     # Directory for generated parser files
@@ -338,7 +354,7 @@ def init_parser():
 
     # Build the parser with generated files in the specified directory
     parser = yacc.yacc(
-        debug=True,
+        debug=False,
         outputdir=generated_folder,
         tabmodule="parsetab"
     )
