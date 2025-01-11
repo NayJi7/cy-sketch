@@ -249,6 +249,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.rules = []
         self.error_lines = set()  # Store lines with syntax errors
 
+        
         # Définir les formats
         self.keyword_format = QTextCharFormat()
         self.keyword_format.setForeground(QColor("#ff5733"))  # Orange
@@ -270,10 +271,54 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.error_format.setUnderlineColor(QColor(Qt.red))
         self.error_format.setForeground(QColor(Qt.red))  # Red text
 
+        # Nouveau format pour 'field' et 'instant' en violet
+        self.violet_format = QTextCharFormat()
+        self.violet_format.setForeground(QColor("#8A2BE2"))  # Violet
+        self.violet_format.setFontWeight(QFont.Bold)
+
+        # Nouveau format pour 'set window size' et 'set window color' en bleu ciel
+        self.light_blue_format = QTextCharFormat()
+        self.light_blue_format.setForeground(QColor("#ADD8E6"))  # Bleu ciel
+        self.light_blue_format.setFontWeight(QFont.Bold)
+
+        # Format pour 'set' en bleu foncé
+        self.dark_blue_format = QTextCharFormat()
+        self.dark_blue_format.setForeground(QColor("#0075f9"))  # Bleu foncé
+        self.dark_blue_format.setFontWeight(QFont.Bold)
+
+        # Formats pour les couleurs
+        self.color_formats = {
+            "red": QTextCharFormat(),
+            "blue": QTextCharFormat(),
+            "green": QTextCharFormat(),
+            "yellow": QTextCharFormat(),
+            "purple": QTextCharFormat(),
+            "orange": QTextCharFormat(),
+            "black": QTextCharFormat(),
+            "white": QTextCharFormat(),
+            "gray": QTextCharFormat(),
+            "pink": QTextCharFormat(),
+            "brown": QTextCharFormat(),
+            "cyan": QTextCharFormat(),
+            "magenta": QTextCharFormat()
+        }
+
+        # Définir les couleurs pour chaque format
+        for color, format in self.color_formats.items():
+            format.setForeground(QColor(color))
+
         # Ajouter des règles
-        self.add_rules(["var","func", "return"], self.keyword_format)
-        self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon", "draw ellipse", "draw arc", ], self.drawing_format)
-        self.add_rules(["for", "while", "if", "else", "elif"], self.control_format)
+        self.add_rules(["var","func", "return","int","float","char"], self.keyword_format)
+        self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon", "draw ellipse", "draw arc"], self.drawing_format)
+        self.add_rules(["for", "while", "if", "else", "elif", "or", "and"], self.control_format)
+        self.add_rules(["field", "instant"], self.violet_format)
+        self.add_rules(["set", "color", "size"], self.dark_blue_format)
+        self.add_rules(["window", "cursor"], self.light_blue_format)
+
+        # Ajouter des règles pour les couleurs
+        for color in self.color_formats.keys():
+            self.add_rules([color], self.color_formats[color])
+
 
     def add_rules(self, patterns, text_format):
         """Ajoute des règles de surlignage."""

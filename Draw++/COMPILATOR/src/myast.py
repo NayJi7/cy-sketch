@@ -454,41 +454,6 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
 
-        elif forme == "triangle":
-            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-        elif forme == "square":
-
-            t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-            t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-            t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            
-            t = resolve_value_and_find_variable(ast, parametres[6], current_position) #c
-            if t[0] != ("int"):
-                raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")         
-
         if semicolon:
             c_code += ";"
 

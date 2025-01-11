@@ -173,14 +173,14 @@ def p_set_color(p):
 
 # @brief Handles window size definition instructions
 # @param p Tuple containing production information
-def p_set_size_two(p):
-    '''set : SET elem SIZE LPAREN NUMBER COMMA NUMBER RPAREN'''
+def p_set_size_win(p):
+    '''set : SET WINDOW SIZE LPAREN NUMBER COMMA NUMBER RPAREN'''
     p[0] = ('setsize', p[2], p[5], p[7])
 
 # @brief Handles cursor size definition instructions
 # @param p Tuple containing production information
-def p_set_size_one(p):
-    '''set : SET elem SIZE LPAREN NUMBER RPAREN'''
+def p_set_size_curs(p):
+    '''set : SET CURSOR SIZE LPAREN NUMBER RPAREN'''
     p[0] = ('setsize', p[2], p[5])
 
 # @brief Defines modifiable elements (window, cursor)
