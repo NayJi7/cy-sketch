@@ -94,4 +94,6 @@ typedef struct {
     } data;
 } Shape;
 
+void mainLoop(SDL_Window *window, SDL_Renderer *renderer, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB);
+
 #endif

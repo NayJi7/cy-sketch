@@ -750,43 +750,34 @@ void zoomShape(Shape *shape, float zoomFactor) {
             int centerX = shape->data.ellipse.x;
             int centerY = shape->data.ellipse.y;
 
-            // Store previous radii
+            // Store previous radii in case we need to revert
             int prevRx = shape->data.ellipse.rx;
             int prevRy = shape->data.ellipse.ry;
 
             // Store aspect ratio
             float aspectRatio = (float)prevRy / prevRx;
 
-            // Calculate new rx with direct addition instead of multiplier
-            int newRx = prevRx + (int)(zoomFactor * 5);
-            
-            // Ensure newRx stays within bounds
-            const int minRadius = 10;
-            const int maxRadius = 1000;
-            
-            if (newRx < minRadius) {
-                newRx = minRadius;
-            } else if (newRx > maxRadius) {
-                newRx = maxRadius;
+            // Apply zoom factor with smoother scaling
+            float zoomMultiplier;
+            if (zoomFactor > 0) {
+                zoomMultiplier = 1.0f + (zoomFactor * 0.05f);
+            } else {
+                zoomMultiplier = 1.0f / (1.0f - (zoomFactor * 0.05f));
             }
 
-            // Calculate new ry while preserving aspect ratio
-            int newRy = (int)(newRx * aspectRatio);
-            
-            // Ensure newRy also stays within bounds
-            if (newRy < minRadius) {
-                newRy = minRadius;
-                // Recalculate rx to maintain minimum aspect ratio
-                newRx = (int)(newRy / aspectRatio);
-            } else if (newRy > maxRadius) {
-                newRy = maxRadius;
-                // Recalculate rx to maintain maximum aspect ratio
-                newRx = (int)(newRy / aspectRatio);
-            }
+            // Calculate new dimensions while maintaining aspect ratio
+            int newRx = (int)(prevRx * zoomMultiplier);
+            int newRy = (int)(newRx * aspectRatio);  // Use aspect ratio to calculate ry
 
-            // Apply the new values
-            shape->data.ellipse.rx = newRx;
-            shape->data.ellipse.ry = newRy;
+            // Set reasonable limits
+            const int minRadius = 2;
+            const int maxRadius = 3000;
+
+            // Only apply the new values if they're within limits
+            if (newRx >= minRadius && newRx <= maxRadius) {
+                shape->data.ellipse.rx = newRx;
+                shape->data.ellipse.ry = newRy;
+            }
 
             // Keep the center position fixed
             shape->data.ellipse.x = centerX;
