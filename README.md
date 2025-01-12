@@ -22,12 +22,16 @@ Draw++ est composé de trois modules principaux qui travaillent ensemble :
 - Mode debug pour le développement
 
 ### 💻 Module IDE
-- Interface moderne avec coloration syntaxique
-- Multi-fenêtres et multi-onglets
-- Terminal intégré avec retours colorés
-- Recherche et remplacement avancés
-- Gestion des processus et sauvegarde automatique
-- Barre d'outils personnalisable
+
+- Interface graphique moderne et intuitive
+- Coloration syntaxique, et dynamique pour les attributs de couleurs
+- Ouverture de fenêtres et onglets en simultané
+- Terminal intégré, avec retour colorié en fonction de la nature de la sortie
+- Raccourcis clavier intégrés
+- Recherche/Remplacement
+- Sauvegarde automatique
+- Barre de menu amovible et modulable
+- Possibilité de kill un process en cours
 
 ## 🚀 Installation
 
