@@ -231,7 +231,8 @@ def make_prototype(ast, node, prototypes):
             c_code += f"void {name}("
             prototype += f"void {name}("
         else:
-            tp, value = resolve_value_and_find_variable(ast, ret)
+            t = resolve_value_and_find_variable(ast, ret)
+            tp, n, value = t[0], t[1], t[2] 
             c_code += f"{tp.split('[')[0]+'*'} {name}(" if "char" in tp else f"{tp} {name}("
             prototype += f"{tp.split('[')[0]+'*'} {name}(" if "char" in tp else f"{tp} {name}("
 
@@ -544,7 +545,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if ret == None:
             c_code += f"void {name}("
         else:
-            tp, value = resolve_value_and_find_variable(ast, ret, None)
+            t = resolve_value_and_find_variable(ast, ret, None)
+            tp, n, value = t[0], t[1], t[2] 
             c_code += f"{tp.split('[')[0]+'*'} {name}(" if "char" in tp else f"{tp} {name}("
 
         if params:
@@ -590,7 +592,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 prot_args[i] = "char[" + size + "]"
 
         for i, arg in enumerate(params):
-            arg_type, arg_val = resolve_value_and_find_variable(ast, arg, current_position)
+            t = resolve_value_and_find_variable(ast, arg, current_position)
+            arg_type, arg_val, arg_true_val = t[0], t[1], t[2] 
             
             if "char" in arg_type and "char" in prot_args[i]:
                 if int(arg_type.split("[")[1].split("]")[0]) > int(prot_args[i].split("[")[1].split("]")[0]):
@@ -666,7 +669,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
     elif isinstance(node, tuple) and node[0] == 'modify':
         var_name = node[1]
         value = node[2]
-        var_type, var_val = resolve_value_and_find_variable(ast,var_name, current_position)
+        t = resolve_value_and_find_variable(ast,var_name, current_position)
+        var_type, var, var_val  = t[0], t[1], t[2]
 
         if tabulation > 0:
             c_code += "\t" * tabulation
@@ -685,7 +689,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             if var_type != "float" : raise TypeError(f"TypeError : '{var_name}' is {var_type} and your trying to assign a float value at line {line_no}") # Wrong type error
             c_code += f'{var_name} = {value}'
         elif isinstance(value, str):  # Identifier case (a string variable)
-            val_type, val = resolve_value_and_find_variable(ast, value, current_position)
+            t = resolve_value_and_find_variable(ast, value, current_position)
+            val_type, val, true_val = t[0], t[1], t[2] 
             if "char" in val_type:
                 if var_type != val_type : raise TypeError(f"TypeError : '{var_name}' is {var_type} and '{val}' is {val_type} at line {line_no}") # Wrong type error
                 c_code += f'strcpy({var_name},{val})' # Copy the string value
@@ -696,7 +701,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise TypeError(f"TypeError: Unsupported type for variable '{value}' at line {line_no}")
         # Case: Operation artihmetic
         elif isinstance(value, tuple) and value[0] == 'op':
-            op_type, op = resolve_value_and_find_variable(ast, value, current_position)
+            t = resolve_value_and_find_variable(ast, value, current_position)
+            op_type, op, op_ret = t[0], t[1], t[2]
             if op_type != var_type:
                 raise TypeError(f"TypeError : '{var_name}' is {var_type} and {op} returns {op_type} at line {line_no}")
             else:
@@ -727,7 +733,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         elif isinstance(value, (int, float)):  # Number case
             c_code += f"{type(value).__name__} {var_name} = {value}"
         elif isinstance(value, str):  # Identifier
-            var_type, var_value = resolve_value_and_find_variable(ast, value, current_position)
+            t_i = resolve_value_and_find_variable(ast, value, current_position)
+            var_type, var, var_val  = t_i[0], t_i[1], t_i[2]
             if "char" in var_type:
                 c_code += f"{var_type.split('[')[0]} {var_name}{'['+var_type.split('[')[1]} = {value}"
             elif var_type:
@@ -736,7 +743,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
                 raise ValueError(f"ValueError: Variable '{value}' not found at line {line_no}")
         # Case: Operation artihmetic
         elif isinstance(value, tuple) and value[0] == 'op':
-            op_type, op = resolve_value_and_find_variable(ast, value, current_position)
+            t_op = resolve_value_and_find_variable(ast, value, current_position)
+            op_type, op, op_val = t_op[0], t_op[1], t_op[2] 
             c_code += f"{op_type} {var_name} = {op}"
         else:
             raise TypeError(f"TypeError: Unsupported value type for '{value}' at line {line_no}")

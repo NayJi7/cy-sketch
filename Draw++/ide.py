@@ -672,7 +672,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         
         self.add_rules(["var","func", "return","int","float","char"], self.keyword_format)
         self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon", "draw ellipse", "draw arc"], self.drawing_format)
-        self.add_rules(["for", "while", "if", "else", "elif", "or", "and"], self.control_format)
+        self.add_rules(["do", "for", "while", "if", "else", "elif", "or", "and"], self.control_format)
         self.add_rules(["filled", "instant", "empty", "animated"], self.violet_format)
         self.add_rules(["set", "color", "size"], self.dark_blue_format)
         self.add_rules(["window", "cursor"], self.light_blue_format)

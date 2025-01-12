@@ -27,6 +27,8 @@ void renderLastKeyPressed(SDL_Renderer *renderer, TTF_Font *font, int bgR, int b
 void handleShapeDeletion(int cursorX, int cursorY);
 void cleanup(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Window* window);
 
+void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB);
+
 extern char lastKeyPressed[32];  // Buffer to store the last pressed key
 
 #endif // CURSOREVENTS_H

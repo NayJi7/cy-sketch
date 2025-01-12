@@ -49,7 +49,7 @@ void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* windo
  * @param event SDL_Event structure to capture and handle user inputs.
  * @param cursor Custom cursor structure used to represent and track the cursor's position.
  */
-void mainLoop(SDL_Window *window, SDL_Renderer *renderer, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB) {
+void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB) {
     #if DEBUG
         printf("Debug: Starting main loop\n");
     #endif
@@ -92,7 +92,6 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, Cursor cursor, int bgc
     // Update cursor color
     cursor.color = inverseColor;
     
-    SDL_Event event;  // Déclarer event localement au lieu de le passer comme paramètre
     while (running) {
         Uint32 currentTime = SDL_GetTicks();
         float deltaTime = (currentTime - lastTime) / 1000.0f;
@@ -554,7 +553,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, Cursor cursor, int bgc
         renderAllShapes(renderer);
 
         // Render the custom cursor
-        renderCursor(renderer, &cursor, bgcolorR, bgcolorG, bgcolorB);
+        renderCursor(renderer, &cursor);
 
         if (gameState.isGameMode) {
             // Game mode (active or waiting)

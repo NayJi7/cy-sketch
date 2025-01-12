@@ -12,6 +12,9 @@ if (true){
 }
 var a = 2
 
-while (a < 2){
-    draw arc(instant, filled, purple, 400, 100, 30, a+1, 60)
+
+while (a<8){
+    draw arc(instant, filled, purple, 400, 100, 30, a, 60)
+    a = a+1
 }
+
