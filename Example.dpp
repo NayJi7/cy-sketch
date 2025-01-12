@@ -1,0 +1,17 @@
+draw circle(instant, filled, red, 100, 100, 200)
+draw rectangle(instant, filled, green, 300, 200, 50, 60)
+draw square(instant, filled, blue, 400, 100, 200)
+draw triangle(instant, filled, yellow, 500, 50, 75)
+draw polygon(instant, filled, pink, 300, 200, 45, 5)
+draw ellipse(instant, filled, brown, 500, 600, 200, 50)
+draw line(instant, filled, orange, 20, 30, 200, 300, 2)
+draw arc(instant, filled, purple, 400, 100, 30, 0, 60)
+
+if (true){
+    draw arc(instant, filled, purple, 400, 100, 30, 0, 60)
+}
+var a = 2
+
+while (a < 2){
+    draw arc(instant, filled, purple, 400, 100, 30, 0, 60)
+}
