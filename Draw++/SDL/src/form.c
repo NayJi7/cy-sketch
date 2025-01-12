@@ -1168,6 +1168,7 @@ int drawShape(SDL_Renderer *renderer, SDL_Texture *texture, char *shape, char *m
         newShape.data.ellipse.y = y;
         newShape.data.ellipse.rx = rx;
         newShape.data.ellipse.ry = ry;
+        newShape.data.ellipse.aspect_ratio = rx/ry;
 
         addShape(newShape);
     } 

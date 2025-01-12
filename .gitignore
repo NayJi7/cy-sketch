@@ -36,11 +36,13 @@ doc/html/
 doc/latex/
 
 # dpp files
-*.dpp
+# *.dpp
 
 # SDL2 DLLs
 SDL2*.dll
 *.dll
+
+
 
 # Environment
 .env

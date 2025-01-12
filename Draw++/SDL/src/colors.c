@@ -19,3 +19,13 @@ SDL_Color pink = {255, 192, 203, 255};
 SDL_Color gold = {255, 215, 0, 255};
 SDL_Color silver = {192, 192, 192, 255};
 SDL_Color bronze = {205, 127, 50, 255}; 
+
+SDL_Color getInverseColor(int bgR, int bgG, int bgB) {
+    SDL_Color inverseColor = {
+        255 - bgR,    // Inverse Red
+        255 - bgG,    // Inverse Green
+        255 - bgB,    // Inverse Blue
+        255          // Alpha remains at 255
+    };
+    return inverseColor;
+}

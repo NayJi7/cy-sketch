@@ -16,6 +16,10 @@ fi
 BASE_DIR=$(realpath $(dirname $(realpath $0))/../../)
 IDE_DIR="$BASE_DIR/Draw++/IDE"
 SDL_DIR="$BASE_DIR/Draw++/SDL"
+COMPILATOR_DIR="$BASE_DIR/Draw++/COMPILATOR"
+
+# Initialize PyInstaller arguments
+PYINSTALLER_ARGS="--clean --onefile --name=DrawStudioCode"
 
 # Function to install required system packages
 install_dependencies() {
@@ -45,21 +49,36 @@ install_python_dependencies() {
 # Function to verify and include resources
 include_resources() {
   echo "Checking and including resources..."
+  
+  # Define the resources
   RESOURCES=(
-    "$IDE_DIR/Dpp_circle.ico"
-    "$IDE_DIR/.history"
-    "$SDL_DIR/fonts/Consolas.ttf"
+    "$BASE_DIR/Draw++/Makefile"
+    "$BASE_DIR/Draw++/interpreter.py"
+    "$IDE_DIR/*.ico"
+    "$IDE_DIR/*.svg"
+    "$IDE_DIR/*.png"
+    "$IDE_DIR/*.bmp"
+    "$SDL_DIR/fonts/*.ttf"
+    "$SDL_DIR/files.h/*.h"
+    "$SDL_DIR/src/*.c"
+    "$COMPILATOR_DIR/src/*.py"
   )
-  for resource in "${RESOURCES[@]}"; do
-    if [ ! -f "$resource" ]; then
-      echo "Missing resource: $resource"
-      if [[ "$resource" == *".history" ]]; then
-        echo "Creating an empty .history file to proceed..."
-        touch "$IDE_DIR/.history"
-      else
-        exit 1
+
+  for RESOURCE in "${RESOURCES[@]}"; do
+    # Skip empty resources
+    [[ -z "$RESOURCE" ]] && continue
+
+    # Expand wildcards into individual files
+    for FILE in $(find $(dirname "$RESOURCE") -name "$(basename "$RESOURCE")" 2>/dev/null); do
+      if [[ -f "$FILE" ]]; then
+        DEST=$(dirname "$FILE" | sed "s|$BASE_DIR/Draw++/||")
+        if [[ "$FILE" == "/home/cytech/gitstore/cy-sketch/Draw++/interpreter.py" || "$FILE" == "/home/cytech/gitstore/cy-sketch/Draw++/Makefile" ]]; then
+          DEST=". "
+        fi
+        echo "Including file: $FILE -> $DEST"
+        PYINSTALLER_ARGS+=" --add-data $FILE:$DEST"
       fi
-    fi
+    done
   done
 }
 
@@ -101,14 +120,7 @@ build_executable() {
     rm -f DrawStudioCode
   fi
 
-  python3 -m PyInstaller \
-    --clean \
-    --onefile \
-    --name="DrawStudioCode" \
-    --add-data "$IDE_DIR:IDE" \
-    --add-data "$IDE_DIR/Dpp_circle.ico:IDE" \
-    --add-data "$IDE_DIR/.history:IDE" \
-    --add-data "$SDL_DIR/fonts/Consolas.ttf:IDE" \
+  python3 -m PyInstaller $PYINSTALLER_ARGS \
     --hidden-import=PIL \
     --hidden-import=PIL._imagingtk \
     --hidden-import=PIL._tkinter_finder \
@@ -117,7 +129,8 @@ build_executable() {
     --hidden-import=PyQt5.QtCore \
     --hidden-import=PyQt5.QtGui \
     --hidden-import=PyQt5.QtWidgets \
-    Draw++/ide.py
+    --name DrawStudioCode \
+    "$BASE_DIR/Draw++/ide.py"
 
   echo "Moving build files to Draw++/IDE..."
   mkdir -p "$IDE_DIR/build"
@@ -141,7 +154,7 @@ build_executable() {
 }
 
 # Ask the user if they already have the necessary dependencies
-read -p "Have you already done this setup once? (y/n) " response
+read -p "Have you already done this setup once? Skip dependencies installation? (y/n) " response
 if [[ "$response" =~ ^[yY]$ ]]; then
     echo "Skipping dependency installation."
 else

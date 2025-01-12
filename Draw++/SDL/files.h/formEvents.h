@@ -17,7 +17,6 @@ void setRenderColor(SDL_Renderer* renderer, SDL_Color color);
 SDL_Color selectColor(SDL_Color color);
 
 int renderTexture(SDL_Renderer* renderer, SDL_Texture* texture, int time);
-void renderText(SDL_Renderer* renderer, const char* text, int x, int y); 
 void renderShape(SDL_Renderer *renderer, Shape *shape);
 void renderAllShapes(SDL_Renderer *renderer);
 void addShape(Shape shape);

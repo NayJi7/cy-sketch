@@ -181,7 +181,7 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
         raise ValueError(f"ValueError : Variable '{value}' is not initialized.")
     
     elif isinstance(value, tuple):  # Operation Node
-        # A AMELIORER
+        # TO IMPROVE
         if value[0] == "op":
             # Resolve operation result type and expression
             left_type, left_c = resolve_value_and_find_variable(ast, value[2], current_position)
@@ -888,7 +888,8 @@ def translate_ast_to_c(ast, filename):
                 topop.append(i) # Save the node's position
                 c_code += translate_node_to_c(ast, prototypes, node,0,0,False)
     except Exception as e:
-        print_error(f"Error during the traduction of the defines' AST : {e}")
+        if DEBUG : print_error(f"Error during the traduction of the defines' AST : {e}")
+        else : print_error(f"{e}")
         return None  # Signal an error occurred
     
     if "#define bgcolorR" not in c_code:
@@ -926,7 +927,8 @@ def translate_ast_to_c(ast, filename):
                 c_code += make_prototype(ast, node, prototypes) # Traduce the functions
         c_code += '\n'
     except Exception as e:
-        print_error(f"Error during the making of the prototypes : {e}")
+        if DEBUG : print_error(f"Error during the making of the prototypes : {e}")
+        else : print_error(f"{e}")
         return None  # Signal an error occurred
 
     c_code += "/////////////////////////////\n"
@@ -939,7 +941,8 @@ def translate_ast_to_c(ast, filename):
                 c_code += translate_node_to_c(ast, prototypes, node, 2, 0, 0, current_position=0) # Traduce the functions
                 topop.append(i) # Save the node's position
     except Exception as e:
-        print_error(f"Error during the traduction of the functions AST : {e}")
+        if DEBUG : print_error(f"Error during the traduction of the functions AST : {e}")
+        else : print_error(f"{e}")
         return None  # Signal an error occurred
     
     if topop:
@@ -1009,7 +1012,8 @@ def translate_ast_to_c(ast, filename):
         for i, node in enumerate(ast):
             c_code += translate_node_to_c(ast, prototypes, node, 1, 1, 1, current_position=i)
     except Exception as e:
-        print_error(f"Error during the traduction of the main AST : {e}")
+        if DEBUG : print_error(f"Error during the traduction of the main AST : {e}")
+        else : print_error(f"{e}")
         return None  # Signal an error occurred
     
     c_code += f'\n'

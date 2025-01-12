@@ -84,21 +84,16 @@ void unapplyAnimation(Shape *shape) {
  * @param height The window height for boundary checking
  */
 void animation_bounce(Shape *shape, AnimationType animation, int width, int height) {
-    static const float velocity = 1.0f;  // Base velocity
-    static int frameCounter = 0;  // Counter to slow down movement
-    
+    static const float velocity = 20.0f;  // Base velocity
+
     // Initialize velocities if not set
     if (shape->bounce_velocity == 0 && shape->bounce_direction == 0) {
         shape->bounce_velocity = velocity;  // Initial x velocity
         shape->bounce_direction = velocity; // Initial y velocity
     }
 
-    // Only move every 7 frames to slow down movement
-    frameCounter++;
-    if (frameCounter >= 7) {
-        frameCounter = 0;
-        moveShape(shape, (int)shape->bounce_velocity, (int)shape->bounce_direction);
-    }
+    // Move the shape
+    moveShape(shape, (int)shape->bounce_velocity, (int)shape->bounce_direction);
 
     // Check and handle boundary collisions based on shape type
     switch (shape->type) {
@@ -126,14 +121,11 @@ void animation_bounce(Shape *shape, AnimationType animation, int width, int heig
         }
 
         case SHAPE_LINE: {
-            // Move the line using both velocity components
-            if (frameCounter >= 7) {
-                // Move both endpoints of the line
-                shape->data.line.x1 += (int)shape->bounce_velocity;
-                shape->data.line.y1 += (int)shape->bounce_direction;
-                shape->data.line.x2 += (int)shape->bounce_velocity;
-                shape->data.line.y2 += (int)shape->bounce_direction;
-            }
+            // Move both endpoints of the line
+            shape->data.line.x1 += (int)shape->bounce_velocity;
+            shape->data.line.y1 += (int)shape->bounce_direction;
+            shape->data.line.x2 += (int)shape->bounce_velocity;
+            shape->data.line.y2 += (int)shape->bounce_direction;
 
             // Check for collision with window boundaries
             // Horizontal collision
@@ -199,7 +191,7 @@ void animation_bounce(Shape *shape, AnimationType animation, int width, int heig
  * @param animation The type of animation being applied
  */
 void animation_rotate(Shape *shape, AnimationType animation) {
-    shape->rotation += 0.15;  // Increment rotation by 0.15 degrees
+    shape->rotation += 4;  // Increment rotation by 0.15 degrees
     if (shape->rotation >= 360.0f) {
         shape->rotation = 0.0f;  // Wrap around at 360 degrees
     }
@@ -216,7 +208,7 @@ void animation_rotate(Shape *shape, AnimationType animation) {
  */
 void animation_zoom(Shape *shape, AnimationType animation) {
     // Update zoom value using shape's own direction (slower speed)
-    shape->zoom += 0.0005f * shape->zoom_direction;
+    shape->zoom += 0.025f * shape->zoom_direction;
     
     // Check bounds and reverse direction if needed
     if (shape->zoom >= 1.5f) {
@@ -244,37 +236,35 @@ void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
     // Apply zoom based on current zoom value
     switch (shape->type) {
         case SHAPE_RECTANGLE: {
-            int originalWidth = 200;  // Base width
-            int originalHeight = 50;  // Base height
-            shape->data.rectangle.width = (int)(originalWidth * zoom);
-            shape->data.rectangle.height = (int)(originalHeight * zoom);
+            shape->data.rectangle.width = (int)(shape->data.rectangle.initial_width * zoom);
+            shape->data.rectangle.height = (int)(shape->data.rectangle.initial_height * zoom);
             break;
         }
 
         case SHAPE_SQUARE: {
-            shape->data.square.c = (int)(100 * zoom); // Base side length 100
+            shape->data.square.c = (int)(shape->data.square.initial_c * zoom); // Base side length 100
             break;
         }
 
         case SHAPE_CIRCLE: {
-            shape->data.circle.radius = (int)(60 * zoom);  // Base radius 60
+            shape->data.circle.radius = (int)(shape->data.circle.initial_radius * zoom);  // Base radius 60
             break;
         }
         case SHAPE_ELLIPSE: {
-            shape->data.ellipse.rx = (int)(70 * zoom);  // Base rx 70
-            shape->data.ellipse.ry = (int)(50 * zoom);  // Base ry 50
+            shape->data.ellipse.rx = (int)(shape->data.ellipse.initial_rx * zoom);  // Base rx 70
+            shape->data.ellipse.ry = (int)(shape->data.ellipse.initial_ry * zoom);  // Base ry 50
             break;
         }
         case SHAPE_POLYGON: {
-            shape->data.polygon.radius = (int)(100 * zoom);  // Base radius 100
+            shape->data.polygon.radius = (int)(shape->data.polygon.initial_radius * zoom);  // Base radius 100
             break;
         }
         case SHAPE_TRIANGLE: {
-            shape->data.triangle.radius = (int)(100 * zoom);  // Base radius 100
+            shape->data.triangle.radius = (int)(shape->data.triangle.initial_radius * zoom);  // Base radius 100
             break;
         }
         case SHAPE_ARC: {
-            shape->data.arc.radius = (int)(100 * zoom);  // Base radius 100
+            shape->data.arc.radius = (int)(shape->data.arc.initial_radius * zoom);  // Base radius 100
             break;
         }
         case SHAPE_LINE: {
@@ -296,7 +286,7 @@ void apply_zoom_to_shape(Shape *shape, float zoom, AnimationType animation) {
  */
 void animation_color(Shape *shape, AnimationType animation) {
     // Update the color phase (controls the position in the color cycle)
-    shape->color_phase += 0.0004f;
+    shape->color_phase += 0.009f;
     if (shape->color_phase >= 1.0f) {
         shape->color_phase = 0.0f;
     }

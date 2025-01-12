@@ -51,7 +51,9 @@ def run_file(file_path, filename):
         lexer.input(filetxt)
         tokens = list(lexer)
     except Exception as e:
-        print_error(f"Error during tokenization : {e}")
+        if DEBUG : print_error(f"Error during tokenization : {e}")
+        else : print_error(f"{e}")
+
 
     if DEBUG:
         print(f"\n[DEBUG] SUCCESS !")
@@ -64,7 +66,8 @@ def run_file(file_path, filename):
     try:
         ast = parser.parse(filetxt, lexer)
     except Exception as e:
-        print_error(f"Error during parsing : {e}")
+        if DEBUG : print_error(f"Error during parsing : {e}")
+        else : print_error(f"{e}")
         
     if DEBUG:
         print(f"\n[DEBUG] AST :")
@@ -131,7 +134,8 @@ def run_interactive():
                 lexer.input(text)
                 tokens = list(lexer)
             except Exception as e:
-                print_error_interractive(f"Error during tokenization : {e}")
+                if DEBUG : print_error_interractive(f"Error during tokenization : {e}")
+                else : print_error_interractive(f"{e}")
                 break
 
             if DEBUG:
@@ -145,7 +149,8 @@ def run_interactive():
             try:
                 ast = parser.parse(text, lexer)
             except Exception as e:
-                print_error_interractive(f"Error during parsing : {e}")
+                if DEBUG : print_error_interractive(f"Error during parsing : {e}")
+                else : print_error_interractive(f"{e}")
                 break
                 
             if DEBUG:

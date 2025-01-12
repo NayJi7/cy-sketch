@@ -50,7 +50,7 @@ typedef struct {
 // Function prototypes
 void initGame(GameState* game);
 void updateGame(GameState* game, float deltaTime, int cursorX, int cursorY, SDL_Window* window, SDL_Renderer* renderer);
-void renderGameUI(SDL_Renderer* renderer, TTF_Font* font, GameState* game);
+void renderGameUI(SDL_Renderer* renderer, TTF_Font* font, GameState* game, int bgR, int bgG, int bgB);
 void restoreShapes(GameState* game);  // Restore shapes to original positions
 void resetShapes(GameState* game, SDL_Window* window, SDL_Renderer* renderer);    // Reset shapes to random positions
 void escapeRun(GameState* game, int cursorX, int cursorY);  // Run the escape game logic
@@ -65,4 +65,4 @@ void spawnEnemy(GameState* game, SDL_Window* window, SDL_Renderer* renderer);
 extern Shape shapes[];
 extern int shapeCount;
 
-#endif /* GAME_H */ 
+#endif /* GAME_H */

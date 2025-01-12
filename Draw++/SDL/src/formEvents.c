@@ -697,8 +697,8 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.rectangle.height = (int)(shape->data.rectangle.width / aspectRatio);
 
             // Set a minimum width to prevent the rectangle from disappearing
-            const int minWidth = 40;
-            const int maxWidth = 100;
+            const int minWidth = 10;
+            const int maxWidth = 1500;
             // Check and adjust if the width falls below the minimum
             if (shape->data.rectangle.width < minWidth) {
                 shape->data.rectangle.width = minWidth;
@@ -716,8 +716,8 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.square.c += (int)(zoomFactor * 10);
 
             // Set a minimum to prevent the square from disappearing
-            const int min = 30;
-            const int max = 100;
+            const int min = 10;
+            const int max = 1500;
 
             // Check and adjust if the side falls below the minimum
             if (shape->data.square.c < min) {
@@ -732,35 +732,59 @@ void zoomShape(Shape *shape, float zoomFactor) {
             // Adjust the radius of the circle
             shape->data.circle.radius += (int)(zoomFactor * 5);
 
+            // Set a minimum and maximum radius
+            const int min = 2;
+            const int max = 1000;
+
             // Ensure a minimum radius to keep the circle visible
-            if (shape->data.circle.radius < 30) {
-                shape->data.circle.radius = 30;
-            } else if (shape->data.circle.radius > 100) {
-                shape->data.circle.radius = 100;
+            if (shape->data.circle.radius < min) {
+                shape->data.circle.radius = min;
+            } else if (shape->data.circle.radius > max) {
+                shape->data.circle.radius = max;
             }   
             break;
         }
 
         case SHAPE_ELLIPSE: {
-            // Calculate the center point of the ellipse
+            // Calculate the center point of the ellipse            
             int centerX = shape->data.ellipse.x;
             int centerY = shape->data.ellipse.y;
 
-            // Calculate current aspect ratio
-            float aspectRatio = (float)shape->data.ellipse.rx / shape->data.ellipse.ry;
+            // Store previous radii
+            int prevRx = shape->data.ellipse.rx;
+            int prevRy = shape->data.ellipse.ry;
 
-            // Apply zoom factor to both radii while maintaining aspect ratio
-            float zoomMultiplier = 1.0f + (zoomFactor * 0.1f);
-            int newRx = (int)(shape->data.ellipse.rx * zoomMultiplier);
-            int newRy = (int)(newRx / aspectRatio);
+            // Store aspect ratio
+            float aspectRatio = (float)prevRy / prevRx;
 
-            // Ensure minimum radii
-            if (newRx < 35) newRx = 35;
-            else if (newRx > 95) newRx = 95;
-            if (newRy < 25) newRy = 25;
-            else if (newRy > 80) newRy = 80;
+            // Calculate new rx with direct addition instead of multiplier
+            int newRx = prevRx + (int)(zoomFactor * 5);
+            
+            // Ensure newRx stays within bounds
+            const int minRadius = 10;
+            const int maxRadius = 1000;
+            
+            if (newRx < minRadius) {
+                newRx = minRadius;
+            } else if (newRx > maxRadius) {
+                newRx = maxRadius;
+            }
 
-            // Update the radii
+            // Calculate new ry while preserving aspect ratio
+            int newRy = (int)(newRx * aspectRatio);
+            
+            // Ensure newRy also stays within bounds
+            if (newRy < minRadius) {
+                newRy = minRadius;
+                // Recalculate rx to maintain minimum aspect ratio
+                newRx = (int)(newRy / aspectRatio);
+            } else if (newRy > maxRadius) {
+                newRy = maxRadius;
+                // Recalculate rx to maintain maximum aspect ratio
+                newRx = (int)(newRy / aspectRatio);
+            }
+
+            // Apply the new values
             shape->data.ellipse.rx = newRx;
             shape->data.ellipse.ry = newRy;
 
@@ -775,10 +799,10 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.polygon.radius += (int)(zoomFactor * 5);
 
             // Ensure a minimum radius to keep the polygon visible
-            if (shape->data.polygon.radius < 35) {
-                shape->data.polygon.radius = 35;
-            } else if (shape->data.polygon.radius > 100) {
-                shape->data.polygon.radius = 100;
+            if (shape->data.polygon.radius < 2) {
+                shape->data.polygon.radius = 2;
+            } else if (shape->data.polygon.radius > 1000) {
+                shape->data.polygon.radius = 1000;
             }
             break;
         }
@@ -788,10 +812,10 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.triangle.radius += (int)(zoomFactor * 5);
 
             // Ensure a minimum radius to keep the triangle visible
-            if (shape->data.triangle.radius < 30) {
-                shape->data.triangle.radius = 30;
-            } else if (shape->data.triangle.radius > 100) {
-                shape->data.triangle.radius = 100;
+            if (shape->data.triangle.radius < 2) {
+                shape->data.triangle.radius = 2;
+            } else if (shape->data.triangle.radius > 1000) {
+                shape->data.triangle.radius = 1000;
             }
             break;
         }
@@ -813,8 +837,8 @@ void zoomShape(Shape *shape, float zoomFactor) {
             double length = sqrt(dx * dx + dy * dy);
 
             // Ensure length stays between min and max values
-            const double minLength = 50.0;
-            const double maxLength = 300.0;
+            const double minLength = 5.0;
+            const double maxLength = 1500.0;
             
             if (length < minLength) {
                 // Scale up to minimum length

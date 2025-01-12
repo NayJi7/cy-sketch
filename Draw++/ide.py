@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QTabWidget,QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit, QSizePolicy, QSplitter, QTabBar)
-from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor, QFont, QIcon,QPainter,QTextFormat
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout, QTabWidget,QPushButton, QFileDialog, QMessageBox, QWidget, QMenuBar, QAction, QToolBar, QPlainTextEdit, QSizePolicy, QSplitter, QTabBar, QToolTip, QLineEdit, QHBoxLayout, QCheckBox)
+from PyQt5.QtGui import QTextCharFormat, QColor, QSyntaxHighlighter, QTextCursor, QFont, QIcon,QPainter,QTextFormat, QFontMetricsF, QTextBlockUserData, QTextDocument
 from PyQt5.QtCore import Qt, QProcess,QRect, QSize,QRegExp
 import os
 import platform
@@ -33,6 +33,11 @@ class LineNumberArea(QWidget):
 
 # This class is a pre-made class from PyQt5 forums to add line number effects in the IDE.
 # It provides visual effects like line counting, syntax highlighting, and error highlighting.
+class TextBlockData(QTextBlockUserData):
+    def __init__(self, tooltip):
+        super().__init__()
+        self.tooltip = tooltip
+
 class CodeEditor(QPlainTextEdit):
 
     def __init__(self, parent=None):
@@ -53,102 +58,305 @@ class CodeEditor(QPlainTextEdit):
         self.syntax_check_timer.timeout.connect(self.check_syntax)
         self.textChanged.connect(self.start_syntax_check_timer)
 
+        # Set up tab handling
+        self.setTabStopDistance(QFontMetricsF(self.font()).horizontalAdvance(' ') * 4)  # 4 spaces per tab
+
+        self.setMouseTracking(True)  # Enable mouse tracking for tooltips
+
+        # Add search functionality
+        self.last_search = ""
+        self.case_sensitive = False
+
     def start_syntax_check_timer(self):
         """Start the timer for delayed syntax checking."""
-        self.syntax_check_timer.start(1000)  # Check syntax after 1 second of no typing
+        self.syntax_check_timer.start(100)  # Check syntax after 1 second of no typing
+
+    def _handle_error(self, error_msg, error_lines, error_messages):
+        """Handle error message parsing and immediate UI update."""
+        from COMPILATOR.src.lexer import suggest_keyword
+
+        # First try to find line number in standard format
+        line_match = re.search(r'at line (\d+)', error_msg)
+        if not line_match:
+            # Try to find line number in AST translation error format
+            if "ValueError : Variable" in error_msg and "is used before initialization" in error_msg:
+                # Extract variable name from error message
+                var_match = re.search(r"Variable '(\w+)' is used", error_msg)
+                if var_match:
+                    var_name = var_match.group(1)
+                    text = self.toPlainText()
+                    lines = text.splitlines()
+                    # Look for the variable as a standalone token
+                    for i, line in enumerate(lines):
+                        # Use regex to find the variable as a standalone word
+                        if re.search(rf'\b{var_name}\b', line):
+                            line_num = i
+                            error_lines.add(line_num)
+                            break
+                    else:  # If no match found
+                        # If no line number found, mark the entire document as having an error
+                        for block_num in range(self.document().blockCount()):
+                            error_lines.add(block_num)
+                        line_num = 0
+            else:
+                # If no line number found, mark the entire document as having an error
+                for block_num in range(self.document().blockCount()):
+                    error_lines.add(block_num)
+                line_num = 0  # Use first line for the error message
+        else:
+            line_num = int(line_match.group(1)) - 1
+            error_lines.add(line_num)
+            
+        suggestion = None
+        
+        # Handle unknown identifier suggestions
+        if "Unknown identifier" in error_msg:
+            unknown_id = error_msg.split("'")[1].split("'")[0]
+            suggestion_word = suggest_keyword(unknown_id)
+            if suggestion_word:
+                suggestion = f"Did you mean '{suggestion_word}'?"
+            else:
+                suggestion = f"Check if you initialized correctly all your variables (with var) and functions (with func)"
+        
+        # Handle expected value suggestions
+        elif "expected" in error_msg:
+            expected_word = error_msg.split("expected ")[1].split(" ")[0]
+            suggestion_word = suggest_keyword(expected_word)
+            if suggestion_word:
+                suggestion = f"Change the value of the parameter to {suggestion_word}"
+
+        # Handle type error suggestions
+        elif "TypeError" in error_msg:
+            if "is not long enough" in error_msg:
+                suggestion = "Increase the size of your char array"
+            elif "cannot compare" in error_msg:
+                suggestion = "Use numeric types for comparisons"
+            elif "cannot be float" in error_msg:
+                suggestion = "Use an integer value instead"
+            elif "trying to assign" in error_msg:
+                suggestion = "Make sure the types match in your assignment"
+            elif "is not a supported color" in error_msg:
+                color = error_msg.split('"')[1]
+                suggestion_word = suggest_keyword(color)
+                if suggestion_word:
+                    suggestion = f"Did you mean '{suggestion_word}'?"
+                else:
+                    suggestion = "Use one of the supported colors"
+
+        # Handle value error suggestions
+        elif "ValueError" in error_msg:
+            if "not initialized" in error_msg or "used before initialization" in error_msg:
+                var_name = error_msg.split("'")[1].split("'")[0]
+                suggestion = f"Initialize the variable '{var_name}' with var before using it"
+                # Clean up the error message for AST translation errors
+                if "Error during the traduction of the main AST" in error_msg:
+                    error_msg = f"Variable '{var_name}' is used before initialization. Initialize it with var"
+            elif "function not initialized" in error_msg:
+                func_name = error_msg.split("'")[1]
+                suggestion = f"Define the function '{func_name}' with func before using it"
+
+        # Handle index error suggestions
+        elif "IndexError" in error_msg:
+            if "requires" in error_msg and "arguments" in error_msg:
+                suggestion = "Check the number of arguments in your function call"
+            elif "is not long enough" in error_msg:
+                suggestion = "The array size is too small for the string"
+
+        # Handle name error suggestions
+        elif "NameError" in error_msg:
+            if "can only change" in error_msg:
+                suggestion = "You can only use 'cursor' or 'window' here"
+
+        # Handle syntax error suggestions
+        elif "Syntax error" in error_msg:
+            if "unexpected end" in error_msg:
+                suggestion = "Check for missing closing brackets or parentheses"
+            elif "parenthesis" in error_msg:
+                suggestion = "Ensure parentheses '(' and ')' are balanced"
+            elif "braces" in error_msg:
+                suggestion = "Check that all braces '{' and '}' are properly matched"
+            elif "semicolon" in error_msg:
+                suggestion = "Remove unnecessary semicolons"
+            elif "comparison" in error_msg:
+                suggestion = "Verify the comparison expression and its operands"
+            elif "comma" in error_msg:
+                suggestion = "Check parameter separation in function calls"
+            elif "Illegal character" in error_msg:
+                char = error_msg.split("'")[1]
+                suggestion = f"Remove or replace the invalid character '{char}'"
+
+        # Handle critical error suggestions
+        elif "CriticalError" in error_msg:
+            if "Unsupported node" in error_msg:
+                suggestion = "There's an error in your code structure"
+
+        error_messages[line_num] = {
+            'error': error_msg,
+            'suggestion': suggestion
+        }
+        
+        if hasattr(self, 'highlighter'):
+            self.highlighter.set_error_lines(error_lines)
+            self.highlighter.error_messages = error_messages
 
     def check_syntax(self):
         """Check syntax of the current text and highlight/underline errors."""
         from COMPILATOR.src.lexer import init_lexer, suggest_keyword
         from COMPILATOR.src.parser import init_parser
         from COMPILATOR.src.myast import execute_ast
+        import sys
+        from io import StringIO
+
+        # Capture stdout to prevent printing success message
+        old_stdout = sys.stdout
+        sys.stdout = StringIO()
 
         text = self.toPlainText()
         error_lines = set()
+        error_messages = {}
 
-        # Get the terminal safely
-        terminal = None
         try:
-            current_tab = self.parent()
-            while current_tab and not isinstance(current_tab, QWidget) or not hasattr(current_tab, 'layout') or not current_tab.layout():
-                current_tab = current_tab.parent()
-                if not current_tab:
-                    break
-            
-            if current_tab and current_tab.layout():
-                splitter = current_tab.layout().itemAt(0).widget()
-                if splitter:
-                    terminal_container = splitter.widget(1)
-                    if terminal_container:
-                        terminal = terminal_container.findChild(QPlainTextEdit)
-        except Exception:
-            pass  # Silently fail if we can't get the terminal
+            # Lexical Analysis
+            lexer = init_lexer()
+            lexer.input(text)
+            try:
+                list(lexer)  # Try to tokenize
+            except SyntaxError as e:
+                sys.stdout = old_stdout  # Restore stdout
+                self._handle_error(str(e), error_lines, error_messages)
+                return
 
-        output = ""  # Initialize output variable
-        try:
+            # Reset lexer for parsing
             lexer = init_lexer()
             parser = init_parser()
             lexer.input(text)
             
             try:
-                output = parser.parse(text, lexer=lexer)  # Capture output from parsing
-                trad = execute_ast(output, False, "IDE")
-                # Clear error highlighting if parsing succeeds
+                ast = parser.parse(text, lexer=lexer)
+                if ast:
+                    execute_ast(ast, False, "IDE")
                 if hasattr(self, 'highlighter'):
                     self.highlighter.set_error_lines(set())
-            except SyntaxError as e:
-                # Extract line number from error message
-                error_msg = str(e)
-                line_match = re.search(r'line (\d+)', error_msg)
-                unexpected_match = re.search(r'unexpected end', error_msg)
-                if line_match:
-                    line_num = int(line_match.group(1))
-                    # Add the line number to error lines
-                    error_lines.add(line_num - 1)  # Convert to 0-based line number
-                    
-                    # Update the highlighter
-                    if hasattr(self, 'highlighter'):
-                        self.highlighter.set_error_lines(error_lines)
-                        # Force a complete rehighlight
-                        self.document().markContentsDirty(0, len(text))
-                        self.highlighter.rehighlight()
-                
-                elif unexpected_match:
-                    for i in range(lexer.lineno):
-                        error_lines.add(i)
-                    
-                    # Update the highlighter
-                    if hasattr(self, 'highlighter'):
-                        self.highlighter.set_error_lines(error_lines)
-                        # Force a complete rehighlight
-                        self.document().markContentsDirty(0, len(text))
-                        self.highlighter.rehighlight()
+            except Exception as e:
+                self._handle_error(str(e), error_lines, error_messages)
 
         except Exception as e:
-            if terminal:
-                cursor = terminal.textCursor()
-                cursor.movePosition(QTextCursor.End)
-                error_format = QTextCharFormat()
-                error_format.setForeground(QColor("red"))
-                cursor.insertText(f"-#red Error during syntax checking: {str(e)}\n", error_format)
-                terminal.setTextCursor(cursor)
-                terminal.ensureCursorVisible()
+            print(f"Error during syntax check: {e}")
 
-        # Handle translation errors specifically
-        if "Error during the traduction of the main AST" in output:
-            # Extract line number and message
-            translation_error_match = re.search(r'Error during the traduction of the main AST : (.+)', output)
-            if translation_error_match:
-                translation_error_msg = translation_error_match.group(1)
-                cursor.insertText(f"-#red {translation_error_msg}\n", error_format)
-                terminal.setTextCursor(cursor)
-                terminal.ensureCursorVisible()
+        finally:
+            sys.stdout = old_stdout  # Restore stdout
 
-        # Make sure the error highlighting is visible
-        if error_lines:
-            self.viewport().update()
+        # Update error highlighting
+        if hasattr(self, 'highlighter'):
+            self.highlighter.set_error_lines(error_lines)
+            self.highlighter.error_messages = error_messages
 
     def keyPressEvent(self, event):
+        # Handle Alt+Up/Down to move lines
+        if event.modifiers() == Qt.AltModifier and event.key() in (Qt.Key_Up, Qt.Key_Down):
+            cursor = self.textCursor()
+            document = self.document()
+            
+            # Get current block number and total blocks
+            current_block = cursor.blockNumber()
+            total_blocks = document.blockCount()
+            
+            # Check if movement is possible
+            if (event.key() == Qt.Key_Up and current_block <= 0) or \
+               (event.key() == Qt.Key_Down and current_block >= total_blocks - 1):
+                return
+            
+            # Begin edit block for undo/redo
+            cursor.beginEditBlock()
+            
+            try:
+                # Store original cursor position within the line
+                original_pos = cursor.positionInBlock()
+                
+                # Select and store current line
+                cursor.movePosition(QTextCursor.StartOfBlock)
+                cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+                current_line = cursor.selectedText()
+                
+                # Move to the target line (up or down)
+                if event.key() == Qt.Key_Up:
+                    cursor.movePosition(QTextCursor.StartOfBlock)
+                    cursor.movePosition(QTextCursor.Up)
+                else:
+                    cursor.movePosition(QTextCursor.StartOfBlock)
+                    cursor.movePosition(QTextCursor.Down)
+                
+                # Select and store target line
+                cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+                target_line = cursor.selectedText()
+                
+                # Replace target line with current line
+                cursor.insertText(current_line)
+                
+                # Move back and replace original line with target line
+                if event.key() == Qt.Key_Up:
+                    cursor.movePosition(QTextCursor.Down)
+                else:
+                    cursor.movePosition(QTextCursor.Up)
+                
+                cursor.movePosition(QTextCursor.StartOfBlock)
+                cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+                cursor.insertText(target_line)
+                
+                # Move cursor to the moved line and restore position within line
+                if event.key() == Qt.Key_Up:
+                    cursor.movePosition(QTextCursor.Up)
+                else:
+                    cursor.movePosition(QTextCursor.Down)
+                
+                cursor.movePosition(QTextCursor.StartOfBlock)
+                cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, min(original_pos, len(target_line)))
+                
+            finally:
+                cursor.endEditBlock()
+                self.setTextCursor(cursor)
+            return
+
+        # Handle Ctrl+D to duplicate current line
+        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_D:
+            cursor = self.textCursor()
+            # Store original position
+            original_position = cursor.position()
+            original_anchor = cursor.anchor()
+            
+            # If text is selected, duplicate the selection
+            if cursor.hasSelection():
+                start = cursor.selectionStart()
+                end = cursor.selectionEnd()
+                text = cursor.selectedText()
+                cursor.setPosition(end)
+                cursor.insertText("\n" + text)
+                # Move to duplicated selection
+                new_start = end + 1
+                new_end = new_start + len(text)
+                cursor.setPosition(new_start)
+                cursor.setPosition(new_end, QTextCursor.KeepAnchor)
+            else:
+                # Get current line text
+                cursor.movePosition(QTextCursor.StartOfLine)
+                line_start = cursor.position()
+                cursor.movePosition(QTextCursor.EndOfLine, QTextCursor.KeepAnchor)
+                text = cursor.selectedText()
+                
+                # Calculate relative position in the line
+                relative_pos = original_position - line_start
+                
+                # Insert duplicated line
+                cursor.movePosition(QTextCursor.EndOfLine)
+                cursor.insertText("\n" + text)
+                
+                # Move cursor to duplicated line
+                cursor.movePosition(QTextCursor.StartOfLine)
+                cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, relative_pos)
+            
+            self.setTextCursor(cursor)
+            return
+
         # Handle Ctrl+C and Ctrl+X to copy/cut whole line if no text is selected
         if event.modifiers() == Qt.ControlModifier and event.key() in (Qt.Key_C, Qt.Key_X):
             cursor = self.textCursor()
@@ -175,6 +383,53 @@ class CodeEditor(QPlainTextEdit):
                     cursor.setPosition(original_position)
                     self.setTextCursor(cursor)
                 return
+
+        # Auto-closing pairs
+        pairs = {
+            '(': ')',
+            '[': ']',
+            '{': '}',
+            '"': '"',
+        }
+        if event.text() in pairs:
+            cursor = self.textCursor()
+            self.insertPlainText(event.text() + pairs[event.text()])
+            cursor.movePosition(QTextCursor.Left, QTextCursor.MoveAnchor, 1)
+            self.setTextCursor(cursor)
+            return
+        # Skip over closing character if it's already there
+        elif event.text() in pairs.values():
+            cursor = self.textCursor()
+            next_char = self.document().characterAt(cursor.position())
+            if next_char == event.text():
+                cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, 1)
+                self.setTextCursor(cursor)
+                return
+
+        # Handle tab key
+        elif event.key() == Qt.Key_Tab:
+            # Insert 4 spaces instead of tab
+            self.insertPlainText('    ')
+            return
+        # Handle auto-indentation
+        elif event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            cursor = self.textCursor()
+            block = cursor.block()
+            text = block.text()
+            
+            # Get the indentation of the current line
+            indentation = ''
+            for char in text:
+                if char.isspace():
+                    indentation += char
+                else:
+                    break
+            
+            # Insert new line with the same indentation
+            super().keyPressEvent(event)
+            self.insertPlainText(indentation)
+            return
+            
         super().keyPressEvent(event)
 
     def line_number_area_width(self):
@@ -240,53 +495,155 @@ class CodeEditor(QPlainTextEdit):
 
         self.setExtraSelections(extra_selections)
 
+    def mouseMoveEvent(self, event):
+        """Handle mouse movement to show tooltips on error lines"""
+        super().mouseMoveEvent(event)
+        cursor = self.cursorForPosition(event.pos())
+        block = cursor.block()
+        data = block.userData()
+        
+        if data and isinstance(data, TextBlockData):
+            QToolTip.showText(event.globalPos(), data.tooltip)
+        else:
+            QToolTip.hideText()
 
-# classe pour surligner les mots terminaux dans le langage (return, from , if, cursor...)
-#  TBD <à mettre à jour avec tous les mots car modifié car ajout d'onglets à fait tout crash>
+    def find_text(self, text, forward=True, case_sensitive=False):
+        """Find text in the editor."""
+        if not text:
+            return False
+
+        # Store search settings
+        self.last_search = text
+        self.case_sensitive = case_sensitive
+
+        # Get cursor for searching
+        cursor = self.textCursor()
+        document = self.document()
+
+        # Create find flags
+        flags = QTextDocument.FindFlags()
+        if not forward:
+            flags |= QTextDocument.FindBackward
+        if case_sensitive:
+            flags |= QTextDocument.FindCaseSensitively
+
+        # If we have a selection, start from the appropriate end
+        if cursor.hasSelection():
+            if forward:
+                cursor.setPosition(cursor.selectionEnd())
+            else:
+                cursor.setPosition(cursor.selectionStart())
+
+        # Find the text
+        cursor = document.find(text, cursor, flags)
+        
+        # If not found from cursor, try from start/end of document
+        if cursor.isNull():
+            cursor = self.textCursor()
+            if forward:
+                cursor.movePosition(QTextCursor.Start)
+            else:
+                cursor.movePosition(QTextCursor.End)
+            cursor = document.find(text, cursor, flags)
+
+        # If found, select it
+        if not cursor.isNull():
+            self.setTextCursor(cursor)
+            return True
+        return False
+
+    def replace_text(self, find_text, replace_with, case_sensitive=False):
+        """Replace selected text if it matches find_text."""
+        cursor = self.textCursor()
+        if cursor.hasSelection():
+            selected_text = cursor.selectedText()
+            if (case_sensitive and selected_text == find_text) or \
+               (not case_sensitive and selected_text.lower() == find_text.lower()):
+                cursor.insertText(replace_with)
+                return True
+        return False
+
+    def replace_all_text(self, find_text, replace_with, case_sensitive=False):
+        """Replace all occurrences of find_text with replace_with."""
+        cursor = self.textCursor()
+        cursor.beginEditBlock()  # Group all replacements as one undo operation
+        
+        # Start from beginning
+        cursor.movePosition(QTextCursor.Start)
+        self.setTextCursor(cursor)
+        
+        count = 0
+        while self.find_text(find_text, True, case_sensitive):
+            if self.replace_text(find_text, replace_with, case_sensitive):
+                count += 1
+        
+        cursor.endEditBlock()
+        return count
+
+
+# Class for highlighting terminal words in the language (return, from, if, cursor...)
+# TBD <to be updated with all words as modified due to tabs addition causing crashes>
 class SyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, document):
         super().__init__(document)
         self.rules = []
         self.error_lines = set()  # Store lines with syntax errors
+        self.error_messages = {}  # Store error messages
 
+        # Define formats
+        self.comment_format = QTextCharFormat()
+        self.comment_format.setForeground(QColor("#808080"))  # Grey color for comments
+        self.comment_format.setFontItalic(True)  # Make comments italic
         
-        # Définir les formats
+        # Store comment states
+        self.multiLineCommentFormat = QTextCharFormat()
+        self.multiLineCommentFormat.setForeground(QColor("#808080"))
+        self.multiLineCommentFormat.setFontItalic(True)
+        
+        self.commentStartExpression = QRegExp("/\\*")
+        self.commentEndExpression = QRegExp("\\*/")
+        
         self.keyword_format = QTextCharFormat()
         self.keyword_format.setForeground(QColor("#ff5733"))  # Orange
         self.keyword_format.setFontWeight(QFont.Bold)
 
-        # Nouveau format pour les fonctions de dessin
+        # New format for drawing functions
         self.drawing_format = QTextCharFormat()
-        self.drawing_format.setForeground(QColor("#00ff00"))  # Vert
+        self.drawing_format.setForeground(QColor("#00ff00"))  # Green
         self.drawing_format.setFontWeight(QFont.Bold)
 
-        # Nouveau format pour les mots-clés de contrôle
+        # New format for control keywords
         self.control_format = QTextCharFormat()
-        self.control_format.setForeground(QColor("#42a5f5"))  # Bleu clair
+        self.control_format.setForeground(QColor("#42a5f5"))  # Light blue
         self.control_format.setFontWeight(QFont.Bold)
 
-        # Format pour les erreurs syntaxiques - Make it more visible
+        # Format for syntax errors - Make it more visible
         self.error_format = QTextCharFormat()
         self.error_format.setUnderlineStyle(QTextCharFormat.WaveUnderline)
         self.error_format.setUnderlineColor(QColor(Qt.red))
         self.error_format.setForeground(QColor(Qt.red))  # Red text
 
-        # Nouveau format pour 'field' et 'instant' en violet
+        # New format for 'field' and 'instant' in violet
         self.violet_format = QTextCharFormat()
         self.violet_format.setForeground(QColor("#8A2BE2"))  # Violet
         self.violet_format.setFontWeight(QFont.Bold)
 
-        # Nouveau format pour 'set window size' et 'set window color' en bleu ciel
+        # New format for 'set window size' and 'set window color' in sky blue
         self.light_blue_format = QTextCharFormat()
-        self.light_blue_format.setForeground(QColor("#ADD8E6"))  # Bleu ciel
+        self.light_blue_format.setForeground(QColor("#ADD8E6"))  # Sky blue
         self.light_blue_format.setFontWeight(QFont.Bold)
 
-        # Format pour 'set' en bleu foncé
+        # Format for 'set' in dark blue
         self.dark_blue_format = QTextCharFormat()
-        self.dark_blue_format.setForeground(QColor("#0075f9"))  # Bleu foncé
+        self.dark_blue_format.setForeground(QColor("#0075f9"))  # Dark blue
         self.dark_blue_format.setFontWeight(QFont.Bold)
 
-        # Formats pour les couleurs
+        # Format for 'true' and 'false' in orange
+        self.orange_format = QTextCharFormat()
+        self.orange_format.setForeground(QColor("#FFA500"))  # Orange
+        self.orange_format.setFontWeight(QFont.Bold)
+
+        # Formats for colors
         self.color_formats = {
             "red": QTextCharFormat(),
             "blue": QTextCharFormat(),
@@ -303,59 +660,144 @@ class SyntaxHighlighter(QSyntaxHighlighter):
             "magenta": QTextCharFormat()
         }
 
-        # Définir les couleurs pour chaque format
+        # Define colors for each format
         for color, format in self.color_formats.items():
             format.setForeground(QColor(color))
 
-        # Ajouter des règles
+        # Add rules
+        # Add comment rules with proper regex patterns
+        comment_regex = QRegExp("#.*$")  # Match # and everything after it until end of line
+        comment_regex.setMinimal(True)
+        self.rules.append((comment_regex, self.comment_format))
+        
         self.add_rules(["var","func", "return","int","float","char"], self.keyword_format)
         self.add_rules(["draw circle", "draw line", "draw square", "draw rectangle", "draw triangle", "draw polygon", "draw ellipse", "draw arc"], self.drawing_format)
         self.add_rules(["for", "while", "if", "else", "elif", "or", "and"], self.control_format)
-        self.add_rules(["field", "instant"], self.violet_format)
+        self.add_rules(["filled", "instant", "empty", "animated"], self.violet_format)
         self.add_rules(["set", "color", "size"], self.dark_blue_format)
         self.add_rules(["window", "cursor"], self.light_blue_format)
+        self.add_rules(["true", "false"], self.orange_format)
 
-        # Ajouter des règles pour les couleurs
+        # Add rules for colors
         for color in self.color_formats.keys():
             self.add_rules([color], self.color_formats[color])
 
 
     def add_rules(self, patterns, text_format):
-        """Ajoute des règles de surlignage."""
+        """Adds highlighting rules."""
         for pattern in patterns:
-            # Utilisation des expressions régulières avec \b pour les mots entiers
+            # Use regular expressions with \b for whole words
             regex = QRegExp(rf"\b{pattern}\b")
             self.rules.append((regex, text_format))
 
     def set_error_lines(self, error_lines):
-        """Met à jour les lignes contenant des erreurs syntaxiques."""
+        """Updates the lines containing syntax errors."""
         self.error_lines = error_lines
+        # Clear tooltips for blocks that are no longer errors
+        for block_number in range(self.document().blockCount()):
+            block = self.document().findBlockByNumber(block_number)
+            if block_number not in error_lines:
+                block.setUserData(None)
         self.rehighlight()
 
     def highlightBlock(self, text):
-        """Applique les règles de surlignage au bloc de texte donné."""
-        # Get the actual line number (0-based)
+        """Applies highlighting rules to the given text block."""
         block_number = self.currentBlock().blockNumber()
 
-        # Apply error underlining first if this block has an error
-        if block_number in self.error_lines:
-            self.setFormat(0, len(text), self.error_format)
+        # Handle multi-line comments first
+        self.highlightMultilineComments(text)
 
-        # Then apply syntax highlighting
+        # Handle errors - Apply error format to the entire line first
+        if block_number in self.error_lines:
+            error_format = QTextCharFormat()
+            error_format.setUnderlineStyle(QTextCharFormat.WaveUnderline)
+            error_format.setUnderlineColor(QColor(Qt.red))
+            self.setFormat(0, len(text), error_format)
+            
+            error_info = self.error_messages.get(block_number, {})
+            error_msg = error_info.get('error', '')
+            suggestion = error_info.get('suggestion', '')
+            
+            # Ensure we have valid strings for the tooltip
+            error_msg = str(error_msg) if error_msg else "Unknown error"
+            suggestion = str(suggestion) if suggestion else ""
+            
+            tooltip = f"""
+            <div style='background-color: #2E2E2E; padding: 8px; border-radius: 4px; font-family: Arial;'>
+                <div style='color: #FF0000; margin-bottom: 4px; text-align: center;'>⚠ Error ⚠</div>
+                <div style='color: #FF0000; font-size: 12px; text-align: center;'>{error_msg}</div>
+            """
+            
+            if suggestion:
+                tooltip += f"<div style='color: #0066cc; font-size: 12px; text-align: center; margin-top: 4px;'>{suggestion}</div>"
+            
+            tooltip += "</div>"
+            
+            self.currentBlock().setUserData(TextBlockData(tooltip.strip()))
+
+        # Apply syntax highlighting rules on top of error formatting
         for regex, text_format in self.rules:
             index = regex.indexIn(text)
             while index >= 0:
                 length = regex.matchedLength()
-                # Create a combined format that preserves error underlining
                 if block_number in self.error_lines:
+                    # Create a combined format that preserves both syntax highlighting and error underlining
                     combined_format = QTextCharFormat(text_format)
-                    combined_format.setUnderlineStyle(self.error_format.underlineStyle())
-                    combined_format.setUnderlineColor(self.error_format.underlineColor())
-                    combined_format.setBackground(self.error_format.background())
+                    combined_format.setUnderlineStyle(QTextCharFormat.WaveUnderline)
+                    combined_format.setUnderlineColor(QColor(Qt.red))
                     self.setFormat(index, length, combined_format)
                 else:
                     self.setFormat(index, length, text_format)
                 index = regex.indexIn(text, index + length)
+
+    def highlightMultilineComments(self, text):
+        """Handle multi-line comment highlighting."""
+        block = self.currentBlock()
+        
+        # If we're continuing a comment from previous block
+        if block.previous().userState() == 1:
+            # Format the entire block as a comment until we find an end marker
+            endIndex = self.commentEndExpression.indexIn(text)
+            if endIndex == -1:
+                # No end found, entire block is a comment
+                self.setFormat(0, len(text), self.multiLineCommentFormat)
+                block.setUserState(1)
+                return
+            else:
+                # Found end of comment
+                length = endIndex + self.commentEndExpression.matchedLength()
+                self.setFormat(0, length, self.multiLineCommentFormat)
+                block.setUserState(0)
+                # Continue processing rest of the line
+                startIndex = length
+        else:
+            startIndex = 0
+            block.setUserState(0)
+
+        # Look for new comment starts in the rest of the text
+        while startIndex >= 0:
+            startIndex = self.commentStartExpression.indexIn(text, startIndex)
+            if startIndex >= 0:
+                endIndex = self.commentEndExpression.indexIn(text, startIndex)
+                commentLength = 0
+                if endIndex == -1:
+                    # Comment continues to next line
+                    commentLength = len(text) - startIndex
+                    block.setUserState(1)
+                else:
+                    # Comment ends on this line
+                    commentLength = endIndex - startIndex + self.commentEndExpression.matchedLength()
+                    block.setUserState(0)
+                
+                self.setFormat(startIndex, commentLength, self.multiLineCommentFormat)
+                
+                if endIndex == -1:
+                    break
+                startIndex = endIndex + self.commentEndExpression.matchedLength()
+
+        # If no comment start found and not in comment, reset state
+        if startIndex == -1 and block.userState() != 1:
+            block.setUserState(0)
 
 class MyDrawppIDE(QMainWindow):
     '''this is main class of the ide, its from there that the instance of the appliaction below is  created'''
@@ -433,24 +875,24 @@ class MyDrawppIDE(QMainWindow):
             QTabBar::tab {{
                 background: #2A2A2A;
                 color: white;
-                padding: 8px 15px;
+                padding: 6px 12px;
                 padding-right: 0px;
-                padding-bottom: 12px;
+                padding-bottom: 10px;
                 border: 1px solid #444444;
                 border-bottom: none;
                 margin-right: 2px;
                 margin-bottom: -1px;
-                min-width: 80px;
-                max-width: 180px;
-                font-size: 12px;
+                min-width: 60px;
+                max-width: 200px;
+                font-size: 10px;
                 border-top-left-radius: 6px;
                 border-top-right-radius: 6px;
             }}
             QTabBar::tab:selected {{
                 background: #1E1E1E;
                 border-bottom: none;
-                padding-bottom: 13px;
-                font-size: 13px;
+                padding-bottom: 11px;
+                font-size: 11px;
                 font-weight: bold;
             }}
             QTabBar::tab:hover {{
@@ -539,8 +981,8 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addWidget(separator2)
 
         save_as_action = QAction("Save As", self)
-        save_as_action.setShortcut("Ctrl+Tab+S")
-        save_as_action.setToolTip("Save As (Ctrl+Tab+S)")
+        save_as_action.setShortcut("Ctrl+Shift+S")
+        save_as_action.setToolTip("Save As (Ctrl+Shift+S)")
         save_as_action.triggered.connect(self.save_as_file)
         save_as_action.triggered.connect(lambda: self.simulate_button_click(save_as_action))
         self.toolbar.addAction(save_as_action)
@@ -579,8 +1021,8 @@ class MyDrawppIDE(QMainWindow):
 
         # Terminal toggle button, same process as the others
         terminal_action = QAction("Terminal", self)
-        terminal_action.setShortcut("Ctrl+Alt+T")  # Common shortcut for terminal
-        terminal_action.setToolTip("Terminal (Ctrl+Alt+T)")
+        terminal_action.setShortcut("Ctrl+Shift+T")  # Common shortcut for terminal
+        terminal_action.setToolTip("Terminal (Ctrl+Shift+T)")
         terminal_action.setCheckable(True)  # Make it checkable
         terminal_action.setChecked(False)  # Terminal is hidden by default
         terminal_action.triggered.connect(self.toggle_terminal)
@@ -588,6 +1030,20 @@ class MyDrawppIDE(QMainWindow):
         self.toolbar.addAction(terminal_action)
         # Store reference to terminal action
         self.terminal_action = terminal_action
+
+        # Séparateur
+        separator8 = QWidget()
+        separator8.setFixedWidth(1)
+        separator8.setStyleSheet("background-color: #1E1E1E;")
+        self.toolbar.addWidget(separator8)
+
+        # Add search/replace shortcut
+        search_action = QAction("Find/Replace", self)
+        search_action.setShortcut("Ctrl+F")
+        search_action.triggered.connect(self.show_search_dialog)
+        search_action.setToolTip("Find/Replace (Ctrl+F)")
+        search_action.triggered.connect(lambda: self.simulate_button_click(search_action))
+        self.toolbar.addAction(search_action)
 
         # Ajouter un widget extensible pour pousser les boutons suivants à droite
         spacer = QWidget()
@@ -934,8 +1390,9 @@ class MyDrawppIDE(QMainWindow):
                 splitter = current_tab.layout().itemAt(0).widget()
                 editor = splitter.widget(0)  # First widget in splitter is the editor
             
-            with open(file_path, "r") as file:
-                editor.setPlainText(file.read())
+            with open(file_path, "r", newline='') as file:
+                content = file.read()
+                editor.setPlainText(content)
                 self.tab_widget.setTabText(self.tab_widget.currentIndex(), file_name)
                 editor.document().setModified(False)
                 self.save_file_history(os.path.abspath(file_path))
@@ -968,8 +1425,8 @@ class MyDrawppIDE(QMainWindow):
         current_tab_name = self.tab_widget.tabText(self.tab_widget.currentIndex())
         # Get the name of the current tab
         if current_tab_name.startswith('New Tab'):
-            current_tab_name = "MySuperDraw"
-            # If the tab name starts with 'New Tab', change it to 'MySuperDraw'
+            current_tab_name = "MySuperDraw.dpp"
+            # If the tab name starts with 'New Tab', change it to 'MySuperDraw.dpp'
 
         options = QFileDialog.Options()
         # Create options for the file dialog
@@ -977,19 +1434,22 @@ class MyDrawppIDE(QMainWindow):
             self, 
             "Save File", 
             current_tab_name,
-            "Draw++ Files (*.dpp);;All Files (*)", 
+            "Draw++ Files (*.dpp)", 
             options=options
         )
         # Open a file dialog to get the save file path
         if file_path:
+            # Ensure file has .dpp extension
+            if not file_path.endswith('.dpp'):
+                file_path += '.dpp'
+                
             current_tab = self.tab_widget.currentWidget()
             # Get the current tab widget
             splitter = current_tab.layout().itemAt(0).widget()
             # Get the splitter widget from the current tab's layout
             editor = splitter.widget(0)  # First widget in splitter is the editor
-            # Get the editor widget from the splitter
             try:
-                with open(file_path, "w") as file:
+                with open(file_path, "w", newline='') as file:
                     file.write(editor.toPlainText())
                     # Write the editor's text to the file
                 self.tab_widget.setTabText(self.tab_widget.currentIndex(), os.path.basename(file_path))
@@ -1023,8 +1483,8 @@ class MyDrawppIDE(QMainWindow):
         editor = splitter.widget(0)  # First widget in splitter is the editor
         terminal = tab_data['terminal']
 
-        # Make sure terminal is visible
-        if not terminal.isVisible():
+        # Make sure terminal is visible and debug
+        if mode == "debug" and not terminal.isVisible():
             self.toggle_terminal()
 
         # if we want to run the code, we need to save the file first, so we check it
@@ -1480,6 +1940,27 @@ class MyDrawppIDE(QMainWindow):
         # Update button state
         self.terminal_action.setChecked(terminal_container.isVisible())
 
+    def show_search_dialog(self):
+        """Show the search and replace dialog."""
+        current_tab = self.tab_widget.currentWidget()
+        if not current_tab:
+            return
+
+        # Get the editor from the current tab
+        splitter = current_tab.layout().itemAt(0).widget()
+        editor = splitter.widget(0)
+
+        # Create search dialog
+        dialog = SearchDialog(editor, self)
+        
+        # Calculate position: align with right edge of window, below toolbar
+        toolbar_height = self.toolbar.height()
+        dialog_x = self.x() + self.width() - dialog.width() - 10  # 10px margin from right
+        dialog_y = self.y() + toolbar_height + 50  # Increased from 5 to 35px margin below toolbar
+        dialog.move(dialog_x, dialog_y)
+        
+        dialog.show()
+
 def is_process_running(pid):
     """Check if a process is still running."""
     try:
@@ -1514,6 +1995,146 @@ class AnotherWindow(MyDrawppIDE):
     """ this class is used to create a new window, it is used to create a new window when the user clicks on the "New Window" button in the main window. """
     def __init__(self):
         super().__init__()
+
+class SearchDialog(QWidget):
+    def __init__(self, editor, parent=None):
+        super().__init__(parent, Qt.Window)
+        self.editor = editor
+        self.setWindowTitle("Find/Replace")
+        self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
+        
+        # Create layout
+        layout = QVBoxLayout()
+        layout.setSpacing(5)  # Reduce spacing between elements
+        layout.setContentsMargins(5, 5, 5, 5)  # Reduce margins
+        
+        # Create search box
+        search_layout = QHBoxLayout()
+        search_layout.setSpacing(5)
+        self.search_box = QLineEdit()
+        self.search_box.setPlaceholderText("Find")
+        self.search_box.returnPressed.connect(self.find_next)
+        search_layout.addWidget(self.search_box)
+        
+        # Create replace box
+        replace_layout = QHBoxLayout()
+        replace_layout.setSpacing(5)
+        self.replace_box = QLineEdit()
+        self.replace_box.setPlaceholderText("Replace with")
+        replace_layout.addWidget(self.replace_box)
+        
+        # Create buttons
+        button_layout = QHBoxLayout()
+        button_layout.setSpacing(3)  # Even smaller spacing for buttons
+        
+        self.case_sensitive = QCheckBox("Case Sens")
+        button_layout.addWidget(self.case_sensitive)
+        
+        find_prev_btn = QPushButton("Prev")
+        find_prev_btn.clicked.connect(self.find_previous)
+        button_layout.addWidget(find_prev_btn)
+
+        find_next_btn = QPushButton("Next")
+        find_next_btn.clicked.connect(self.find_next)
+        button_layout.addWidget(find_next_btn)
+        
+        replace_btn = QPushButton("Replace")
+        replace_btn.clicked.connect(self.replace)
+        button_layout.addWidget(replace_btn)
+        
+        replace_all_btn = QPushButton("All")
+        replace_all_btn.clicked.connect(self.replace_all)
+        button_layout.addWidget(replace_all_btn)
+        
+        # Add all layouts to main layout
+        layout.addLayout(search_layout)
+        layout.addLayout(replace_layout)
+        layout.addLayout(button_layout)
+        
+        self.setLayout(layout)
+        
+        # Set fixed size
+        self.setFixedSize(350, 120)
+        
+        # Style the dialog
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #2E2E2E;
+                color: white;
+                font-family: Consolas;
+                font-size: 11px;
+            }
+            QLineEdit {
+                background-color: #3E3E3E;
+                border: 1px solid #555555;
+                padding: 3px;
+                selection-background-color: #666666;
+                height: 20px;
+            }
+            QPushButton {
+                background-color: #444444;
+                border: none;
+                padding: 3px 6px;
+                min-width: 50px;
+                height: 20px;
+            }
+            QPushButton:hover {
+                background-color: #555555;
+            }
+            QPushButton:pressed {
+                background-color: #666666;
+            }
+            QCheckBox {
+                spacing: 3px;
+            }
+            QCheckBox::indicator {
+                width: 12px;
+                height: 12px;
+            }
+            QCheckBox::indicator:unchecked {
+                background-color: #3E3E3E;
+                border: 1px solid #555555;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #0075f9;
+                border: 1px solid #555555;
+            }
+        """)
+        
+        # Set focus to search box
+        self.search_box.setFocus()
+        
+        # If there's selected text, put it in the search box
+        cursor = self.editor.textCursor()
+        if cursor.hasSelection():
+            self.search_box.setText(cursor.selectedText())
+            self.search_box.selectAll()
+
+    def find_next(self):
+        """Find next occurrence of search text."""
+        text = self.search_box.text()
+        if not self.editor.find_text(text, True, self.case_sensitive.isChecked()):
+            QMessageBox.information(self, "Find", "No more occurrences found.")
+
+    def find_previous(self):
+        """Find previous occurrence of search text."""
+        text = self.search_box.text()
+        if not self.editor.find_text(text, False, self.case_sensitive.isChecked()):
+            QMessageBox.information(self, "Find", "No more occurrences found.")
+
+    def replace(self):
+        """Replace current selection if it matches find text."""
+        find_text = self.search_box.text()
+        replace_with = self.replace_box.text()
+        if not self.editor.replace_text(find_text, replace_with, self.case_sensitive.isChecked()):
+            self.find_next()
+
+    def replace_all(self):
+        """Replace all occurrences of find text."""
+        find_text = self.search_box.text()
+        replace_with = self.replace_box.text()
+        count = self.editor.replace_all_text(find_text, replace_with, self.case_sensitive.isChecked())
+        QMessageBox.information(self, "Replace All", f"Replaced {count} occurrence(s).")
 
 if __name__ == "__main__":
 

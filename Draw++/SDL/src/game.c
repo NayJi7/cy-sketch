@@ -120,8 +120,10 @@ void updateGame(GameState* game, float deltaTime, int cursorX, int cursorY, SDL_
  * 
  * Renders score, timer, game messages, and instructions based on the current game state.
  */
-void renderGameUI(SDL_Renderer* renderer, TTF_Font* font, GameState* game) {
-    SDL_Color textColor = {0, 0, 0, 255};
+void renderGameUI(SDL_Renderer* renderer, TTF_Font* font, GameState* game, int bgcolorR, int bgcolorG, int bgcolorB) {
+    // Get the inverse color for the text
+    SDL_Color textColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
+    
     int windowWidth, windowHeight;
     SDL_GetRendererOutputSize(renderer, &windowWidth, &windowHeight);
 

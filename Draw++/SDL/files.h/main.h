@@ -64,6 +64,7 @@ typedef struct {
         struct { 
             int x, y, rx, ry;
             int initial_rx, initial_ry;  // Initial values
+            float aspect_ratio;  // Aspect ratio of the ellipse
         } ellipse;
         struct { 
             int x, y, radius, start_angle, end_angle;
@@ -92,7 +93,5 @@ typedef struct {
         } square;
     } data;
 } Shape;
-
-void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Cursor cursor, int bgcolorR, int bgcolorG, int bgcolorB);
 
 #endif

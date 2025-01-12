@@ -75,13 +75,17 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
     Uint32 lastTime = SDL_GetTicks();
     Uint32 frameStart = SDL_GetTicks();
     int running = 1;
+
+    // Calculate inverse color from background for cursor and text
+    SDL_Color inverseColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
+    // Update cursor color
+    cursor.color = inverseColor;
     
     while (running) {
         Uint32 currentTime = SDL_GetTicks();
         float deltaTime = (currentTime - lastTime) / 1000.0f;
         lastTime = currentTime;
         
-        SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT || 
                 (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE) ||
@@ -331,7 +335,7 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
 
                     // Move the cursor and selected shapes based on key input.
                     moveCursor(&cursor, dx, dy);
-                    renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
+                    renderCursorCoordinates(renderer, font, cursor.x, cursor.y, bgcolorR, bgcolorG, bgcolorB);
                     moveSelectedShapes(shapes, shapeCount, dx, dy);
                     break;
                 }
@@ -542,17 +546,17 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
 
         if (gameState.isGameMode) {
             // Game mode (active or waiting)
-            renderGameUI(renderer, font, &gameState);
+            renderGameUI(renderer, font, &gameState, bgcolorR, bgcolorG, bgcolorB);
         } else {
             // Normal mode
-            renderCursorCoordinates(renderer, font, cursor.x, cursor.y);
+            renderCursorCoordinates(renderer, font, cursor.x, cursor.y, bgcolorR, bgcolorG, bgcolorB);
             for (int i = 0; i < shapeCount; i++) {
                 if (shapes[i].selected) {
-                    renderShapeInfo(renderer, font, &shapes[i]);
+                    renderShapeInfo(renderer, font, &shapes[i], bgcolorR, bgcolorG, bgcolorB);
                     break;
                 }
             }
-            renderLastKeyPressed(renderer, font);
+            renderLastKeyPressed(renderer, font, bgcolorR, bgcolorG, bgcolorB);
         }
 
         // Update game state
@@ -652,6 +656,9 @@ Cursor createCursor(int x, int y, SDL_Color color, int thickness, bool visible) 
  * 
  * @param renderer SDL renderer instance used for drawing.
  * @param cursor Pointer to the `Cursor` instance to render.
+ * @param bgcolorR Red component of the background color.
+ * @param bgcolorG Green component of the background color.
+ * @param bgcolorB Blue component of the background color.
  */
 void renderCursor(SDL_Renderer *renderer, const Cursor *cursor) {
     // Check if the cursor is visible; skip rendering if not.
@@ -797,15 +804,17 @@ void handleCursorSelection(int cursorX, int cursorY) {
  * @param x Current X coordinate of the cursor
  * @param y Current Y coordinate of the cursor
  */
-void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int y) {
+void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int y, int bgcolorR, int bgcolorG, int bgcolorB) {
     if (!font) return;
+
+    // Get the inverse color for the text
+    SDL_Color textColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
 
     // Create text string with cursor coordinates
     char text[32];
     snprintf(text, sizeof(text), "x: %d, y: %d", x, y);
 
     // Create text surface with black color
-    SDL_Color textColor = {0, 0, 0, 255}; // Black color (R=0, G=0, B=0, A=255)
     SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
     if (!surface) return;
 
@@ -848,8 +857,11 @@ char* getAnimationName(AnimationType animation){
  * @param font The font used for text rendering
  * @param shape Pointer to the currently selected shape
  */
-void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
+void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape, int bgcolorR, int bgcolorG, int bgcolorB) {
     if (!font || !shape->selected) return;
+
+    // Get the inverse color for the text
+    SDL_Color textColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
 
     // Create text string with shape information
     char text[128];
@@ -945,7 +957,6 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
     }
 
     // Create text surface with enhanced quality rendering
-    SDL_Color textColor = {0, 0, 0, 255}; // Black color
     // Use blended rendering for smoother text with word wrap at 300 pixels
     SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font, text, textColor, 300);
     SDL_Surface *surface2 = TTF_RenderText_Blended_Wrapped(font, text2, textColor, 400);
@@ -986,16 +997,18 @@ void renderShapeInfo(SDL_Renderer *renderer, TTF_Font *font, Shape *shape) {
  * @param renderer The SDL renderer used for drawing
  * @param font The font used for text rendering
  */
-void renderLastKeyPressed(SDL_Renderer *renderer, TTF_Font *font) {
+void renderLastKeyPressed(SDL_Renderer *renderer, TTF_Font *font, int bgcolorR, int bgcolorG, int bgcolorB) {
     // Return if font is not loaded or no key has been pressed yet
     if (!font || lastKeyPressed[0] == '\0') return;
+
+    // Get the inverse color for the text
+    SDL_Color textColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
 
     // Create the display text with the last key pressed
     char keyText[64];
     snprintf(keyText, sizeof(keyText), "Key Pressed: %s", lastKeyPressed);
     
     // Set text color to black
-    SDL_Color textColor = {0, 0, 0, 255}; // Black color (R=0, G=0, B=0, A=255)
     SDL_Surface* keySurface = TTF_RenderText_Solid(font, keyText, textColor);
     if (!keySurface) return;
 

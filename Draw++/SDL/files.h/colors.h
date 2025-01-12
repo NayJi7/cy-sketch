@@ -23,4 +23,6 @@ extern SDL_Color gold;
 extern SDL_Color silver;
 extern SDL_Color bronze;
 
+SDL_Color getInverseColor(int bgR, int bgG, int bgB);
+
 #endif // COLORS_H
