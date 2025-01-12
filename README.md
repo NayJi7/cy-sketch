@@ -9,12 +9,14 @@ Draw++ est composé de trois parties principales :
 
 ### 1. IDE
 - Interface graphique moderne et intuitive
-- Coloration syntaxique
-- Multi-onglets
-- Terminal intégré
-- Raccourcis clavier
+- Coloration syntaxique, et dynamique pour les attributs de couleurs
+- Ouverture de fenêtres et onglets en simultané
+- Terminal intégré, avec retour colorié en fonction de la nature de la sortie
+- Raccourcis clavier intégrés
 - Recherche/Remplacement
 - Sauvegarde automatique
+- Barre de menu amovible et modulable
+- Possibilité de kill un process en cours
 
 ### 2. COMPILATEUR
 - Langage simple et intuitif
