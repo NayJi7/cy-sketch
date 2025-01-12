@@ -181,9 +181,11 @@ class CodeEditor(QPlainTextEdit):
                 suggestion = "Verify the comparison expression and its operands"
             elif "comma" in error_msg:
                 suggestion = "Check parameter separation in function calls"
-            elif "Illegal character" in error_msg:
-                char = error_msg.split("'")[1]
-                suggestion = f"Remove or replace the invalid character '{char}'"
+
+        elif "Lexical error" in error_msg:  
+            if "Illegal character" in error_msg:
+                char = error_msg.split("'")[1].split("'")[0]
+                suggestion = (f"Suggestion: Remove the '{char}' character or replace it with a valid one.")
 
         # Handle critical error suggestions
         elif "CriticalError" in error_msg:

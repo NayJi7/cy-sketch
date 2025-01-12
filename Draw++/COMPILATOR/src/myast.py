@@ -18,9 +18,14 @@ def print_error(e):
             else:
                 print(f"-#blue Suggestion: Check if you initialized correctly all your variables and functions.")
         
-        if "expected" in e:
+        elif "expected" in e:
             suggestion = suggest_keyword(e.split("expected ")[1].split(" ")[0])
             print(f"-#blue Suggestion: Change the value of the parameter to {suggestion}.")
+
+        elif "Illegal character" in e:
+            suggestion = e.split("'")[1].split("'")[0]
+            print(f"-#blue Suggestion: Remove the '{suggestion}' character or replace it with a valid one.")
+
         raise SyntaxError(e)
 
 def print_error_interractive(e):
