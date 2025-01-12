@@ -196,6 +196,11 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
             except Exception:
                 raise ValueError(f"ValueError : Cannot perform operation '{left_val} {operator} {right_val}'")
 
+            try:
+                result = int(result)
+            except Exception:
+                pass
+
             # Determine result type
             result_type = "int" if type(result) == int else "float"
 
