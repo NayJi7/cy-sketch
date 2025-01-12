@@ -1,0 +1,30 @@
+# draw circle(animated, filled, yellow, 0, 0, 0)
+# aa rectangle(animated, filled, green, 0, 0, 0, 0)
+draw square(animated, filled, blue, 500, 400, 200)
+# draw triangle(animated, filled, yellow, 0, 0, 0)
+# draw polygon(animated, filled, pink, 0, 0, 0, 3)
+# draw ellipse(animated, filled, brown, 0, 0, 0, 0)
+# draw line(animated, filled, orange, 0, 0, 0, 0, 0)
+# draw arc(animated, filled, purple, 0, 0, 0, 0, 0)
+
+set window size(1200, 900)
+set window color(black)
+set cursor color(red)
+set cursor size(6)
+
+var x = 0
+
+if (x > 3 and x < 2){
+    draw ellipse(animated, filled, brown, 10, 20, 30, 50)
+}
+
+/*
+if (true){
+    draw arc(animated, filled, purple, 0, 0, 0, 0, 0)
+}
+var a = 2
+
+while (a < 2){
+    draw arc(animated, filled, purple, 0, 0, 0, 0, 0)
+}
+*/

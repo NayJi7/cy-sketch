@@ -105,6 +105,7 @@ keywords = {
     'rectangle': 'RECTANGLE',
     'arc': 'ARC',
     'or': 'OR',
+    'and': 'AND',
 }
 
 # Add colors to keywords
@@ -117,7 +118,7 @@ keywords.update(colors)  # Use update instead of | operator for Python 3.6 compa
 tokens = [
     'IDENTIFIER', 'NUMBER', 'STRING', 'BOOLEAN',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EQUALS',
-    'LT', 'GT', 'LE', 'GE', 'EQ', 'NEQ', 'AND',
+    'LT', 'GT', 'LE', 'GE', 'EQ', 'NEQ',
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'LBRACKET', 
     'RBRACKET','COMMA', 'SEMICOLON',
 ] + list(keywords.values())
