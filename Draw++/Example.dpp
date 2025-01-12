@@ -40,7 +40,7 @@ draw line(animated, filled, green, 100, 550, 200, 650, 3)
 draw line(instant, filled, yellow, 250, 550, 350, 650, 5)
 
 # Arcs (with different angles)
-draw arc(animated, filled, magenta, 400, 600, 50, 0, 180)
+draw arc(animated, filled, magenta, 400, 600, 50, 60, 180)
 draw arc(instant, empty, cyan, 550, 600, 50, 90, 270)
 
 # Control structures examples
