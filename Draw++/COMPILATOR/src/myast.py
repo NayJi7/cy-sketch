@@ -747,6 +747,17 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         if newline > 0:
             c_code += "\n" * newline
 
+    # Handle dowhile loop (do)
+    elif isinstance(node, tuple) and node[0] == 'dowhile':
+        bloc = node[1]
+        condition = node[2]
+
+        c_code += "\t" * tabulation + "do {\n"
+        for instr in bloc[1]:
+            c_code += f"{translate_node_to_c(ast, prototypes, instr, 1, tabulation + 1, True)}"
+        c_code += "\t" * tabulation + f"}} while ({condition_to_c(ast, current_position, condition)});\n"
+
+    # Handle while loop (while)
     elif isinstance(node, tuple) and node[0] == "while":
         condition = node[1]
         bloc = node[2][1]

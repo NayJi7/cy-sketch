@@ -79,6 +79,7 @@ keywords = {
     'else': 'ELSE',
     'for': 'FOR',
     'while': 'WHILE',
+    'do':'DO',
     'func': 'FUNC',
     'int' : 'INT',
     'float' : 'FLOAT',

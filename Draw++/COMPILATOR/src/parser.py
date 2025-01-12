@@ -284,11 +284,17 @@ def p_operateur_comparaison(p):
 # @}
 
 # @{
-# @brief Handles loop instructions (while and for loops).
+# @brief Handles loop instructions (while, for, and do-while loops).
 def p_boucle(p):
     '''boucle : WHILE LPAREN expression_logique RPAREN bloc
-              | FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc'''
-    p[0] = ('while', p[3], p[5]) if len(p) == 6 else ('for', p[3], p[5], p[7], p[9])
+              | FOR LPAREN assignation SEMICOLON expression_logique SEMICOLON modification RPAREN bloc
+              | DO bloc WHILE LPAREN expression_logique RPAREN'''
+    if len(p) == 6:  # WHILE loop
+        p[0] = ('while', p[3], p[5])
+    elif len(p) == 10:  # FOR loop
+        p[0] = ('for', p[3], p[5], p[7], p[9])
+    elif len(p) == 7:  # DO-WHILE loop
+        p[0] = ('dowhile', p[2], p[5])
 # @}
 
 # === 2. Syntax Error Handling ===
