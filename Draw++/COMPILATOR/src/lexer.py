@@ -234,7 +234,7 @@ def t_COMMENT_MULTILINE(t):
 # @param t Token object containing the unmatched value
 def t_error(t):
     error_msg = f"Lexical error: Illegal character '{t.value[0]}' at line {t.lineno}, column {find_column(t.lexer.lexdata, t.lexpos)}"
-    raise SyntaxError(error_msg)
+    raise ValueError(error_msg)
 
 # @brief Finds the column number of a given position in the input text
 # @param input_text The full input string

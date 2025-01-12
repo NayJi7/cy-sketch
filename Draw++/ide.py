@@ -11,6 +11,9 @@ import re
 if platform.system() == "Windows":
     from PyQt5.QtWinExtras import QtWin   #Pour Windows uniquement  #type: ignore 
 
+
+####################### FIRST BIG PART ###########################""
+
 # These 2 classes are here to display line numbers, not important and just 
 # aesthetic, nothing to modify inside
 class LineNumberArea(QWidget):
@@ -29,14 +32,6 @@ class LineNumberArea(QWidget):
     def setToolTip(self, tooltip):
         """Set the tooltip for the line number area."""
         super().setToolTip(tooltip)  # Ensure the tooltip is set correctly
-
-
-# This class is a pre-made class from PyQt5 forums to add line number effects in the IDE.
-# It provides visual effects like line counting, syntax highlighting, and error highlighting.
-class TextBlockData(QTextBlockUserData):
-    def __init__(self, tooltip):
-        super().__init__()
-        self.tooltip = tooltip
 
 class CodeEditor(QPlainTextEdit):
 
@@ -583,6 +578,17 @@ class CodeEditor(QPlainTextEdit):
         return count
 
 
+
+# This class is a pre-made class from PyQt5 forums to add line number effects in the IDE.
+# It provides visual effects like line counting, syntax highlighting, and error highlighting.
+class TextBlockData(QTextBlockUserData):
+    def __init__(self, tooltip):
+        super().__init__()
+        self.tooltip = tooltip
+
+
+####################### SECOND BIG PART ###########################""
+
 # Class for highlighting terminal words in the language (return, from, if, cursor...)
 # TBD <to be updated with all words as modified due to tabs addition causing crashes>
 class SyntaxHighlighter(QSyntaxHighlighter):
@@ -801,8 +807,13 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         if startIndex == -1 and block.userState() != 1:
             block.setUserState(0)
 
+
+
+
+
+####################### THIRD BIG PART ###########################""
 class MyDrawppIDE(QMainWindow):
-    '''this is main class of the ide, its from there that the instance of the appliaction below is  created'''
+    '''this is main class of the ide, its from there that the instance of the application below is  created'''
     def __init__(self):
         super().__init__() #we herit from the QMainWindow class, which is basically the "big" widget from QWidget
         self.process = QProcess(self)
@@ -1364,7 +1375,6 @@ class MyDrawppIDE(QMainWindow):
             self.setWindowTitle(f"DrawStudioCode - {current_tab_title}")
             # we used the actual index of the code and search into the list of tabs the name of the actual tab
 
-
     def open_file(self):
         """Open the file in a empty tab or automatically get to the opened file tab"""
         options = QFileDialog.Options()
@@ -1732,7 +1742,6 @@ class MyDrawppIDE(QMainWindow):
         terminal.ensureCursorVisible()  # S'assure que le texte reste visible
         text_format.setForeground(QColor("white"))  # Définit la couleur
 
-
     def display_error(self, process, terminal):
         """Display the error in the termninal, these errors are not expected errors, they are errors that the program can't handle, like python error or gcc error : we use it in extreme debug case"""
         error_output = process.readAllStandardError().data().decode('utf-8', errors='ignore')
@@ -1885,7 +1894,7 @@ class MyDrawppIDE(QMainWindow):
                             pass
         except Exception as e:
             print(f"Error loading history file: {e}")
-    # Print an error message if the history file can't be loaded
+        # Print an error message if the history file can't be loaded
 
     def save_file_history(self, file_path):
         """Sauvegarde le chemin du fichier dans l'historique."""
@@ -1963,6 +1972,10 @@ class MyDrawppIDE(QMainWindow):
         
         dialog.show()
 
+
+
+
+
 def is_process_running(pid):
     """Check if a process is still running."""
     try:
@@ -1997,6 +2010,9 @@ class AnotherWindow(MyDrawppIDE):
     """ this class is used to create a new window, it is used to create a new window when the user clicks on the "New Window" button in the main window. """
     def __init__(self):
         super().__init__()
+
+
+
 
 class SearchDialog(QWidget):
     def __init__(self, editor, parent=None):
@@ -2138,6 +2154,10 @@ class SearchDialog(QWidget):
         count = self.editor.replace_all_text(find_text, replace_with, self.case_sensitive.isChecked())
         QMessageBox.information(self, "Replace All", f"Replaced {count} occurrence(s).")
 
+
+############ EXECUCTION #############
+
+# execution of the main guard
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)

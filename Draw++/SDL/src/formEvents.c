@@ -1085,16 +1085,6 @@ void moveSelectedShapes(Shape *shapes, int shapeCount, int dx, int dy) {
 }
 
 
-
-
-/**
- * @brief Common parameters for functions.
- * 
- * @param x  X-coordinate of the point.
- * @param y  X-coordinate of the point.
- */
-
-
 /**
  * @brief Checks if a point lies inside a circle.
  * 
@@ -1183,6 +1173,16 @@ int isPointInRectangle(int x, int y, int rectX, int rectY, int rectW, int rectH)
     return (x >= rectX && x <= rectX + rectW && y >= rectY && y <= rectY + rectH);
 }
 
+/**
+ * @brief Checks if a point is inside a square.
+ * 
+ * @param x The x-coordinate of the point to check
+ * @param y The y-coordinate of the point to check
+ * @param squareX The x-coordinate of the square's top-left corner
+ * @param squareY The y-coordinate of the square's top-left corner
+ * @param squareC The length of the square's side
+ * @return int Returns 1 if the point is inside the square, 0 otherwise
+ */
 int isPointInSquare(int x, int y, int squareX, int squareY, int squareC) {
     // Check if the point lies within the square's boundaries.
     return (x >= squareX && x <= squareX + squareC && y >= squareY && y <= squareY + squareC);

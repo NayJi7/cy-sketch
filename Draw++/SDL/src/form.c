@@ -4,17 +4,6 @@
 #define RED_COLOR "-#red "
 
 /**
- * @brief Common parameters for functions.
- * 
- * @param renderer Pointer to the SDL renderer used for rendering.
- * @param texture Target texture for the drawing.
- * @param color Color in RGBA format (Uint32).
- * @param type Type of the shape: "filled" or "empty".
- */
-
-
-
-/**
  * @brief Draws a circle on the SDL renderer.
  * 
  * @param x The x-coordinate of the circle's center.
@@ -189,6 +178,24 @@ int drawRectangle(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, in
     return 0;
 }
 
+/**
+ * @brief Draws a square on the SDL renderer
+ * 
+ * @param renderer Pointer to the SDL renderer where the square will be drawn
+ * @param texture Pointer to the SDL texture where the square will be rendered
+ * @param x X-coordinate of the top-left corner of the square
+ * @param y Y-coordinate of the top-left corner of the square
+ * @param c Side length of the square
+ * @param color SDL_Color structure containing the RGB values for the square color
+ * @param type String specifying whether the square should be "filled" or "empty"
+ * 
+ * @return Returns 0 on success, -1 on failure
+ * 
+ * @details This function draws either a filled or empty square on the specified renderer.
+ *          The square is defined by its top-left corner coordinates (x,y) and side length c.
+ *          The type parameter must be either "filled" or "empty".
+ *          After drawing, the square is rendered to the texture and displayed.
+ */
 int drawSquare(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int c, SDL_Color color, char *type) {
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
         printf("Invalid instantSquare type: \"%s.\". Must be filled or empty.\n", type);
@@ -220,6 +227,22 @@ int drawSquare(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int c
 }
 
 
+/**
+ * @brief Draws a triangle on the SDL renderer
+ * @details Creates a triangle by calculating vertex coordinates and using drawPolygon
+ * 
+ * @param renderer Pointer to the SDL renderer
+ * @param texture Texture to render the triangle on
+ * @param cx X coordinate of the triangle's center
+ * @param cy Y coordinate of the triangle's center 
+ * @param radius Radius of the circumscribed circle of the triangle
+ * @param color SDL_Color structure defining the triangle's color
+ * @param type String indicating the type of triangle to draw
+ *
+ * @return 0 on success, -1 on error/exit event
+ *
+ * @note The triangle is oriented with one vertex pointing upward (30 degree rotation)
+ */
 int drawTriangle(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, Sint16 cy, int radius, SDL_Color color, char *type) 
 {
     // Validate the number of sides
@@ -322,8 +345,6 @@ int drawCustomPolygon(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 cx, S
 }
 
 
-
-
 /**
  * @brief Draws a line on the SDL renderer with optional thickness.
  * 
@@ -361,8 +382,6 @@ int drawLine(SDL_Renderer *renderer, SDL_Texture *texture, Sint16 x1, Sint16 y1,
     
     return 0;
 }
-
-
 
 
 /**
@@ -494,6 +513,26 @@ int drawAnimatedRectangle(SDL_Renderer* renderer, SDL_Texture *texture, int x, i
     return 0;
 }
 
+/**
+ * @brief Draws an animated square on the SDL renderer.
+ * 
+ * This function draws either a filled or empty animated square on the specified renderer.
+ * The animation is achieved by drawing the square point by point with a small delay between each point.
+ * 
+ * @param renderer The SDL renderer to draw on
+ * @param texture The SDL texture to render to
+ * @param x The x-coordinate of the top-left corner of the square
+ * @param y The y-coordinate of the top-left corner of the square
+ * @param c The side length of the square in pixels
+ * @param color The SDL_Color to use for drawing
+ * @param type String specifying the type of square ("filled" or "empty")
+ * 
+ * @return Returns 0 on success, -1 on error (invalid type or event handling failure)
+ * 
+ * @note For "empty" type, only the outline is drawn
+ * @note For "filled" type, the entire square is filled
+ * @note The animation can be interrupted by SDL events through handleEvents()
+ */
 int drawAnimatedSquare(SDL_Renderer* renderer, SDL_Texture *texture, int x, int y, int c, SDL_Color color, char *type) {
 
     if ((strcmp(type, "filled") != 0) && (strcmp(type, "empty") != 0)){
@@ -688,6 +727,26 @@ int drawAnimatedArc(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, 
     return 0;
 }
 
+/**
+ * @brief Draws an animated triangle on the renderer with specified parameters
+ *
+ * This function draws an animated triangle either filled or empty. The triangle is drawn
+ * with animation effects by rendering points/lines progressively.
+ *
+ * @param renderer The SDL renderer to draw on
+ * @param texture The SDL texture to draw on
+ * @param cx X coordinate of the center of the triangle
+ * @param cy Y coordinate of the center of the triangle  
+ * @param radius The radius of the circumscribed circle of the triangle
+ * @param color The color to draw the triangle with
+ * @param type String specifying whether triangle should be "filled" or "empty"
+ *
+ * @return Returns 0 on success, -1 on error (invalid type)
+ *
+ * @note The triangle is drawn with a 30 degree rotation from horizontal
+ * @note For empty triangles, the outline is drawn using Bresenham's line algorithm
+ * @note For filled triangles, scan line algorithm is used for filling
+ */
 int drawAnimatedTriangle(SDL_Renderer *renderer, SDL_Texture *texture, int cx, int cy, int radius, SDL_Color color, char *type) 
 {
     

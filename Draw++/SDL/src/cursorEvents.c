@@ -87,10 +87,12 @@ void mainLoop(SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, Curso
     Uint32 frameStart = SDL_GetTicks();
     int running = 1;
 
-    // Calculate inverse color from background for cursor and text
-    SDL_Color inverseColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
-    // Update cursor color
-    cursor.color = inverseColor;
+    if(cursor.color.r == 255 && cursor.color.g == 255 && cursor.color.b == 255) {
+        // Calculate inverse color from background for cursor and text
+        SDL_Color inverseColor = getInverseColor(bgcolorR, bgcolorG, bgcolorB);
+        // Update cursor color
+        cursor.color = inverseColor;
+    }
     
     while (running) {
         Uint32 currentTime = SDL_GetTicks();
@@ -771,17 +773,11 @@ int findShapeAtCursor(int x, int y) {
     return -1; // No shape found at the cursor's position.
 }
 
-
-
 /**
- * @brief Common parameters for functions.
+ * @brief Handles the selection or deselection of shapes based on cursor position.
  * 
  * @param cursorX X-coordinate of the cursor.
  * @param cursorY Y-coordinate of the cursor.
-*/
-
-/**
- * @brief Handles the selection or deselection of shapes based on cursor position.
  * 
  * When the cursor is positioned over a shape and the mouse is clicked:
  * - If the shape is not selected, it will be selected.
@@ -845,6 +841,19 @@ void renderCursorCoordinates(SDL_Renderer *renderer, TTF_Font *font, int x, int 
     SDL_DestroyTexture(texture);
 }
 
+/**
+ * @brief Convert animation type enum to its string representation
+ * 
+ * @param animation The AnimationType enum value to convert
+ * @return char* The string representation of the animation type
+ * 
+ * Possible return values:
+ * - "Rotate" for ANIM_ROTATE
+ * - "Zoom" for ANIM_ZOOM  
+ * - "Color" for ANIM_COLOR
+ * - "Bounce" for ANIM_BOUNCE
+ * - "None" for any other value
+ */
 char* getAnimationName(AnimationType animation){
     switch(animation){
         case ANIM_ROTATE:
