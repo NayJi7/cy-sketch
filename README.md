@@ -1,88 +1,91 @@
 # Draw++ (Cy-Sketch)
 
-Un environnement de développement intégré pour créer des animations graphiques interactives avec un langage simple et intuitif.
+An integrated development environment for creating interactive graphic animations with a simple and intuitive language.
 
 ## 📝 Description
 
-Draw++ est composé de trois modules principaux qui travaillent ensemble :
+Draw++ consists of three main modules working together:
 
-### 🎨 Module SDL (Moteur Graphique)
+### 🎨 SDL Module (Graphics Engine)
 
-- Gestion des formes géométriques (cercle, rectangle, ligne, polygone, etc.)
-- Système d'animations avancé (rotation, zoom, couleur, rebond)
-- Gestion des collisions et interactions
-- Deux modes de jeu : Escape et Defense
-- Interface utilisateur adaptative
+- Geometric shapes management (circle, rectangle, line, polygon, etc.)
+- Advanced animation system (rotation, zoom, color, bounce)
+- Collision and interaction handling
+- Two game modes: Escape and Defense
+- Adaptive user interface
 
-### 🔧 Module Compilateur
+### 🔧 Compiler Module
 
-- Lexer et Parser basés sur PLY
-- Traduction du code Draw++ vers C
-- Gestion intelligente des erreurs avec suggestions
-- Support des variables et fonctions
-- Mode interactif et mode fichier
-- Mode debug pour le développement
+- PLY-based Lexer and Parser
+- Draw++ to C code translation
+- Smart error handling with suggestions
+- Variable and function support
+- Interactive and file modes
+- Debug mode for development
 
-### 💻 Module IDE
+### 💻 IDE Module
 
-- Interface graphique moderne et intuitive
-- Coloration syntaxique, et dynamique pour les attributs de couleurs
-- Ouverture de fenêtres et onglets en simultané
-- Terminal intégré, avec retour colorié en fonction de la nature de la sortie
-- Raccourcis clavier intégrés
-- Recherche/Remplacement
-- Sauvegarde automatique
-- Barre de menu amovible et modulable
-- Possibilité de kill un process en cours
+- Modern and intuitive graphical interface
+- Syntax highlighting, dynamic color attribute highlighting
+- Simultaneous window and tab opening
+- Integrated terminal with color-coded output
+- Built-in keyboard shortcuts
+- Search/Replace functionality
+- Auto-save feature
+- Movable and modular menu bar
+- Ability to kill running processes
 
 ## 🚀 Installation
 
-### Prérequis principaux (obtenus pendant le setup plus bas)
+### Main Prerequisites (obtained during setup below)
 
 - Python 3.6+
-- SDL2 et ses extensions (SDL2_gfx, SDL2_ttf)
-- GCC (pour la compilation C)
-- PyQt5 (pour l'IDE)
+- SDL2 and its extensions (SDL2_gfx, SDL2_ttf)
+- GCC (for C compilation)
+- PyQt5 (for IDE)
 
 ### Installation
 
-1. Cloner le repository :
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/NayJi7/cy-sketch
 ```
 
-2. Installer les dépendances :
+2. Install dependencies:
 
-- Sur Ubuntu :
+- On Ubuntu:
 
 ```bash
 cd Draw++/SETUP
 ./setup.sh
 ```
 
-- Sur Windows :
+- On Windows:
 
 ```
-Aller dans Draw++/SETUP
-Exécuter setup.bat en tant qu'administrateur
+Go to Draw++/SETUP
+Run setup.bat as administrator
 ```
 
-## 🎮 Utilisation
+## 🎮 Usage
 
-1. Lancer l'IDE :
+1. Launch the IDE:
 
 ```bash
-Via python (dans Draw++/) : python3 ide.py
-Lancer le .exe créé par le setup sur windows (à la racine du projet)
-Lancer l`executable créé par le setup sur ubuntu (à la racine du projet ou dans les applications)
+We recommend to launch our ide with its executable after generating it with setup.sh/bat (you can also browse it in your apps)
+
+Launch the .exe created by setup on Windows (at project root or in your applications)
+Launch the executable created by setup on Ubuntu (at project root or in your applications)
+
+Via Python (in Draw++/): python3 ide.py
 ```
 
-2. Créer un nouveau fichier .dpp
-3. Écrire votre code Draw++ (voir Example.dpp)
-4. Executez et profitez !
+2. Create a new .dpp file
+3. Write your Draw++ code (see Example.dpp)
+4. Execute and enjoy!
 
-### Exemple de code :
+### Code Example:
 
 ```
 draw circle(animated, filled, red, 100, 100, 50)
@@ -92,99 +95,92 @@ set window title("Draw++")
 set window size(800, 600)
 ```
 
-## 🎯 Fonctionnalités Principales
+## 🎯 Main Features
 
-### Fonctions supportées
+### Supported Functions
 
-- draw
+- **draw**
 
-  - circle (mode, remplissage, couleur, centerX, centerY, radius)
-  - rectangle (mode , remplissage , couleur , x, y, width ,height)
-  - square (mode , remplissage , couleur , x, y, sideLength)
-  - polygon (mode , remplissage , couleur , centerX , centerY ,radius , sides)
-  - triangle (mode , remplissage , couleur , centerX , centerY ,radius)
-  - arc (mode , couleur , centerX , centerY , radius ,startAngle , endAngle)
-  - line (mode , couleur , x1 , y1 , x2 , y2 , thickness)
-  - ellipse (mode , remplissage , couleur , centerX , centerY ,radiusX , radiusY)
-- set
+  - circle (mode, fill, color, centerX, centerY, radius)
+  - rectangle (mode, fill, color, x, y, width, height)
+  - square (mode, fill, color, x, y, sideLength)
+  - polygon (mode, fill, color, centerX, centerY, radius, sides)
+  - triangle (mode, fill, color, centerX, centerY, radius)
+  - arc (mode, color, centerX, centerY, radius, startAngle, endAngle)
+  - line (mode, color, x1, y1, x2, y2, thickness)
+  - ellipse (mode, fill, color, centerX, centerY, radiusX, radiusY)
+- **set**
 
   - cursor
     - size(size)
     - color(color)
   - window
-    - size(width , height)
+    - size(width, height)
     - color(color)
 
-### Fonctionnalités de base
+### Basic Features
 
-* Boucles
-  * while ( condition )  { bloc }
-  * do { bloc } while ( condition )
-  * for ( initialize; condition; increment ) { bloc }
-* Conditions
-  * if ( condition ) { bloc }
-  * elif ( condition ) { boc }
-  * else ( condition ) { bloc }
-* Déclaration et modification / utilisation de variables / fonctions
+* **Loops**
+  * while (condition) { block }
+  * do { block } while (condition)
+  * for (initialize; condition; increment) { block }
+* **Conditions**
+  * if (condition) { block }
+  * elif (condition) { block }
+  * else (condition) { block }
+* **Variable/Function Declaration and Usage**
   * var name = value
   * name = value
-  * func myfunction ( int a, float b, char c[size] ) { bloc }
+  * func myfunction (int a, float b, char c[size]) { block }
   * myfunction (arguments)
-* Commentaires
-  * Single line : # commentaire
-  * Multi line : /* commentaire */
-* Opérateurs
-  * Aritmétiques ( +, -, *, / )
-  * Logiques ( or, and, ==, !=, <, >, <=, >= )
-  * Booléens ( true, false )
+* **Comments**
+  * Single line: # comment
+  * Multi line: /* comment */
+* **Operators**
+  * Arithmetic (+, -, *, /)
+  * Logical (or, and, ==, !=, <, >, <=, >=)
+  * Boolean (true, false)
 
-### Interractions
+### Interactions
 
-- Rotation gauche ( q ) / droite ( d )
-- Selection / Déselection d'une forme ( click )
-- Bouger une forme ( avec le mouvement de la souris ou flèches directionnelles )
-- Zoom ( * ) / Dezoom ( / ) ( molette )
-- Selection d'animation ( + ) ( - )
-- Application d'une animation ( enter )
-- Retrait d'une animation ( effacer )
-- Lancement de la liste d'animations ( a )
-- Changement de supperposition des formes ( z ) ( s )
-- Réinitialisation de la taille, zoom et couleur ( r )
-- Arrêt de toutes les animations ( n )
-- Suppression d'une forme ( suppr )
-- Mode de jeu ( g )
-  - Séléction du jeu ( g )
-  - Quitter ( space )
-  - Lancer le jeu ( enter )
-- Quitter ( escape )
+- **Rotate** left (q) / right (d)
+- **Select/Deselect shape** (click / e)
+- **Move shape** (mouse movement or arrow keys)
+- **Zoom shape** in (*) / out (/) (scroll wheel)
+- **Animation selection** (+) (-)
+- **Apply animation** (enter)
+- **Remove animation** (delete)
+- **Launch animation** **list** (a)
+- **Change shape layering** (z) (s)
+- **Reset size, zoom and color** (r)
+- **Stop all animations** (n)
+- **Delete shape** (del / suppr)
+- **Game mode** (g)
+  - **Game selection** (g)
+  - **Quit** (space)
+  - **Start game** (enter)
+- **Quit** (escape)
 
 ### Animations
 
-Ces animations peuvent être appliquées en même temps et différement pour chaque forme ( 3 animations max par forme )
+These animations can be applied simultaneously and differently for each shape (3 animations max per shape)
 
-* Rotate
-  * Une rotation
-* Zoom
-  * Un effet de zoom et dezoom
-* Color
-  * Un changement de couleurs
-* Bounce
-  * Un effet de rebond donné à la forme qui parcourira l'écran et rebondira sur les bords
+* **Rotate**
+  * A rotation effect
+* **Zoom**
+  * A zoom in and out effect
+* **Color**
+  * Color changing effect
+* **Bounce**
+  * A bouncing effect making the shape move across the screen and bounce off edges
 
-### Modes de Jeu
+### Game Modes
 
-1. **EscapeShapes** : Capturez les formes qui fuient
-2. **DefenseShapes** : Protégez vos formes des projectiles
+1. **EscapeShapes**: Capture the escaping shapes
+2. **DefenseShapes**: Protect your shapes from projectiles
 
-## 👥 Contributeurs
+## 👥 Contributors
 
-- **MATIAS VINKOVIC** - *IDE et Interface*
-- **ADAM TERRAK & DEULYNE DESTIN** - *Compilateur*
-- **ALICE FRANCO & LOUAYE SAGHIR** - *Moteur SDL*
-
-## 📚 Documentation
-
-Consultez les READMEs spécifiques pour plus de détails :
-
-- [Documentation SDL](SDL/README_SDL.md)
-- [Documentation Compilateur](COMPILATOR/README.md)
+- **IDE and Interface :** Matias Vinkovic & Adam Terrak
+- **Compilator :** Deulyne Destin & Adam Terrak & Matias Vinkovic
+- **SDL :** Alice Franco & Louaye Saghir & Adam Terrak
