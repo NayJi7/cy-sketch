@@ -1,24 +1,21 @@
-# draw circle(animated, filled, yellow, 0, 0, 0)
-# aa rectangle(animated, filled, green, 0, 0, 0, 0)
-draw square(animated, filled, blue, 500, 400, 200)
-# draw triangle(animated, filled, yellow, 0, 0, 0)
-# draw polygon(animated, filled, pink, 0, 0, 0, 3)
-# draw ellipse(animated, filled, brown, 0, 0, 0, 0)
-# draw line(animated, filled, orange, 0, 0, 0, 0, 0)
-# draw arc(animated, filled, purple, 0, 0, 0, 0, 0)
-
-set window size(1200, 900)
+# Configuration de la fenêtre
+set window size(1200, 800)
 set window color(black)
-set cursor color(red)
-set cursor size(6)
+set cursor color(white)
+set cursor size(5)
 
-/*
-if (true){
-    draw arc(animated, filled, purple, 0, 0, 0, 0, 0)
-}
-var a = 2
+# Variables pour positions et dimensions
+var x = 100
+var y = 100
+var radius = 50
+var count = 0
 
-while (a < 2){
-    draw arc(animated, filled, purple, 0, 0, 0, 0, 0)
+# Fonction personnalisée
+func drawPattern(int startX, int startY) {
+    draw square(animated, filled, magenta, startX, startY, 60)
+    draw circle(instant, empty, cyan, startX + 30, startY + 30, 20)
 }
-*/
+
+# Appel de la fonction
+drawPattern(800, 100)
+drawPattern(900, 200)

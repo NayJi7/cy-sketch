@@ -134,11 +134,11 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
                             param_without_type = param.replace (tp,"")
                             if value in param_without_type and param_without_type != param:
                                 if "int" in param:
-                                    return "int", None, None
+                                    return "int", None, 12345678900987654321
                                 elif "float" in param:
-                                    return "float", None, None
+                                    return "float", None, 12345678900987654321
                                 elif "char" in param:
-                                    return param.split()[0] + param.split()[1][param.split()[1].index('['):], None, None
+                                    return param.split()[0] + param.split()[1][param.split()[1].index('['):], None, 12345678900987654321
                     # searching in the body of the function
                     sub_ast = copy.deepcopy(node[0])
                     try:
@@ -246,6 +246,8 @@ def make_prototype(ast, node, prototypes):
             c_code += f"{tp.split('[')[0]+'*'} {name}(" if "char" in tp else f"{tp} {name}("
             prototype += f"{tp.split('[')[0]+'*'} {name}(" if "char" in tp else f"{tp} {name}("
 
+        c_code += "SDL_Window *window, SDL_Renderer *renderer, SDL_Texture *mainTexture, "
+
         if params:
             for i, param in enumerate(params):
                     c_code += f"{translate_node_to_c(ast, prototypes, param, 0, 0, 0)}"
@@ -342,195 +344,226 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
         elif forme == "ellipse":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #center x
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #center y
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius x
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #radius y
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
         elif forme == "line":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x1
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y1
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #x2
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #y2
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
             t = resolve_value_and_find_variable(ast, parametres[7], current_position) #width
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
         elif forme == "polygon":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #sides
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
         elif forme == "triangle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #radius
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
         elif forme == "rectangle":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #w
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #h
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
         elif forme == "square":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #x
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #y
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #c
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
         elif forme == "arc":
             t = resolve_value_and_find_variable(ast, parametres[3], current_position) #cx
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[4], current_position) #cy
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[5], current_position) #r
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[6], current_position) #startangle
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
             
             t = resolve_value_and_find_variable(ast, parametres[7], current_position) #endangle
             if t[0] != ("int"):
                 raise TypeError(f"TypeError : '{t[1]}' is {t[0]}, expected int at line {line_no}")
-            elif t[2] <= 0:
-                raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
+            elif current_position is not None:
+                if t[2] <= 0:
+                    raise ValueError(f"ValueError : '{t[1]}' cannot be 0 or negative at line {line_no}")
 
         if semicolon:
             c_code += ";"
@@ -558,6 +591,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             t = resolve_value_and_find_variable(ast, ret, None)
             tp, n, value = t[0], t[1], t[2] 
             c_code += f"{tp.split('[')[0]+'*'} {name}(" if "char" in tp else f"{tp} {name}("
+
+        c_code += "SDL_Window *window, SDL_Renderer *renderer, SDL_Texture *mainTexture, "
 
         if params:
             for i, param in enumerate(params):
@@ -635,6 +670,8 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
             c_code += "\t" * tabulation
 
         c_code += f"{name}("
+
+        c_code += "window, renderer, mainTexture, "
 
         if params:
             for i, param in enumerate(params):
@@ -800,11 +837,15 @@ def translate_node_to_c(ast, prototypes, node, newline, tabulation, semicolon, c
         condition = node[1]
         bloc_true = node[2][1]  # List of instructions in the true block
 
-        elif_clauses = node[3] if isinstance(node[3], list) else []  # List of elif clauses if available
-        if len(elif_clauses) > 0:
-            bloc_false = node[4][1] if len(node) == 5 else None  # False block elif case
+        if len(node) > 3:
+            elif_clauses = node[3] if isinstance(node[3], list) else []  # List of elif clauses if available
+            if len(elif_clauses) > 0:
+                bloc_false = node[4][1] if len(node) == 5 else None  # False block elif case
+            else:
+                bloc_false = node[3][1] if len(node) == 4 else None  # False block if else case
         else:
-            bloc_false = node[3][1] if len(node) == 4 else None  # False block if else case
+            elif_clauses = []
+            bloc_false = None
 
         if tabulation > 0: 
             c_code += "\t" * tabulation
