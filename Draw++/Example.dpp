@@ -1,21 +1,138 @@
-# Configuration de la fenêtre
+# Window configuration
 set window size(1200, 800)
 set window color(black)
 set cursor color(white)
 set cursor size(5)
 
-# Variables pour positions et dimensions
+# Variables for positions and dimensions
 var x = 100
 var y = 100
 var radius = 50
 var count = 0
 
-# Fonction personnalisée
+# Examples of all shapes with different modes and types
+# Circles
+draw circle(animated, filled, red, 100, 100, 50)
+draw circle(instant, empty, blue, 250, 100, 50)
+
+# Rectangles
+draw rectangle(animated, filled, green, 400, 50, 100, 80)
+draw rectangle(instant, empty, yellow, 550, 50, 100, 80)
+
+# Squares
+draw square(animated, filled, magenta, 100, 200, 80)
+draw square(instant, empty, cyan, 250, 200, 80)
+
+# Triangles
+draw triangle(animated, filled, purple, 400, 250, 60)
+draw triangle(instant, empty, orange, 550, 250, 60)
+
+# Polygons (with different numbers of sides)
+draw polygon(animated, filled, brown, 100, 400, 50, 5)  # Pentagon
+draw polygon(instant, empty, pink, 250, 400, 50, 8)     # Octagon
+
+# Ellipses
+draw ellipse(animated, filled, red, 400, 400, 70, 40)
+draw ellipse(instant, empty, blue, 550, 400, 70, 40)
+
+# Lignes (with différents widths)
+draw line(animated, filled, green, 100, 550, 200, 650, 3)
+draw line(instant, filled, yellow, 250, 550, 350, 650, 5)
+
+# Arcs (with different angles)
+draw arc(animated, filled, magenta, 400, 600, 50, 0, 180)
+draw arc(instant, empty, cyan, 550, 600, 50, 90, 270)
+
+# Control structures examples
+var i = 0
+
+# If-Else
+if (x > 50) {
+    draw circle(instant, filled, purple, 700, 100, 40)
+} else {
+    draw square(instant, filled, orange, 700, 100, 80)
+}
+
+# While
+while (i < 3) {
+    draw circle(animated, empty, brown, 700 + i*80, 200, 30)
+    i = i + 1
+}
+
+# Do-While
+do {
+    draw rectangle(instant, filled, pink, 700, 300 + i*60, 60, 40)
+    i = i - 1
+} while (i > 0)
+
+# For
+for (var j = 0; j < 4; j = j + 1) {
+    draw triangle(animated, empty, red, 700 + j*60, 500, 25)
+}
+
+# Complex conditions
+if (x > 50 and y < 150) {
+    draw ellipse(instant, filled, blue, 800, 600, 40, 25)
+}
+
+if (radius >= 30 or count <= 5) {
+    draw polygon(animated, empty, green, 900, 600, 35, 6)
+}
+
+# Customised function
 func drawPattern(int startX, int startY) {
     draw square(animated, filled, magenta, startX, startY, 60)
     draw circle(instant, empty, cyan, startX + 30, startY + 30, 20)
 }
 
-# Appel de la fonction
+# Call the function
 drawPattern(800, 100)
 drawPattern(900, 200)
+
+# Examples of control structures with elif
+var score = 75
+
+# Complex If-Elif-Else
+if (score > 90) {
+    draw circle(instant, filled, red, 700, 100, 40)
+} elif (score > 80) {
+    draw square(instant, filled, orange, 700, 100, 40)
+} elif (score > 70) {
+    draw triangle(instant, filled, yellow, 700, 100, 40)
+} else {
+    draw polygon(instant, filled, blue, 700, 100, 40, 4)
+}
+
+# Nested conditions with elif
+var age = 25
+var height = 180
+
+if (age < 18) {
+    if (height > 160) {
+        draw circle(animated, filled, purple, 800, 200, 30)
+    } else {
+        draw circle(animated, empty, purple, 800, 200, 20)
+    }
+} elif (age < 30) {
+    if (height > 170) {
+        draw square(animated, filled, green, 800, 200, 40)
+    } else {
+        draw square(animated, empty, green, 800, 200, 30)
+    }
+} else {
+    draw triangle(animated, filled, cyan, 800, 200, 35)
+}
+
+# Conditions with logical operators and elif
+var temperature = 25
+var humidity = 60
+
+if (temperature > 30 and humidity > 70) {
+    draw ellipse(instant, filled, red, 900, 300, 50, 30)
+} elif (temperature > 20 or humidity < 50) {
+    draw rectangle(instant, filled, yellow, 900, 300, 60, 40)
+} elif (temperature < 10 and humidity < 30) {
+    draw polygon(instant, filled, blue, 900, 300, 45, 6)
+} else {
+    draw arc(instant, filled, green, 900, 300, 40, 0, 270)
+}
