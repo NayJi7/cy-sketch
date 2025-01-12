@@ -17,6 +17,9 @@ var x = 0
 if (x > 3 and x < 2){
     draw ellipse(animated, filled, brown, 10, 20, 30, 50)
 }
+else {
+    draw ellipse(animated, filled, brown, 10, 20, 30, 50)
+}
 
 /*
 if (true){
