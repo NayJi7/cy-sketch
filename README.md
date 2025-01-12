@@ -1,74 +1,104 @@
-# Draw++
+# Draw++ (Cy-Sketch)
 
-Bienvenue dans notre projet : Cy-Sketch ! 
+Un environnement de développement intégré pour créer des animations graphiques interactives avec un langage simple et intuitif.
 
-Un projet graphique interactif permettant de créer et manipuler des formes en temps réel avec un langage de programmation simple.
-Nous avons même mis en place 2 jeux : Escape et Defense Shapes.
+## 📝 Description
 
-## 🎨 Présentation
+Draw++ est composé de trois modules principaux qui travaillent ensemble :
 
-Draw++ est composé de trois parties principales :
+### 🎨 Module SDL (Moteur Graphique)
+- Gestion des formes géométriques (cercle, rectangle, ligne, polygone, etc.)
+- Système d'animations avancé (rotation, zoom, couleur, rebond)
+- Gestion des collisions et interactions
+- Deux modes de jeu : Escape et Defense
+- Interface utilisateur adaptative
 
-### 1. IDE
-- Interface graphique moderne et intuitive
-- Coloration syntaxique, et dynamique pour les attributs de couleurs
-- Ouverture de fenêtres et onglets en simultané
-- Terminal intégré, avec retour colorié en fonction de la nature de la sortie
-- Raccourcis clavier intégrés
-- Recherche/Remplacement
-- Sauvegarde automatique
-- Barre de menu amovible et modulable
-- Possibilité de kill un process en cours
-
-### 2. COMPILATEUR
-- Langage simple et intuitif
-- Gestion des erreurs avec suggestions
+### 🔧 Module Compilateur
+- Lexer et Parser basés sur PLY
+- Traduction du code Draw++ vers C
+- Gestion intelligente des erreurs avec suggestions
 - Support des variables et fonctions
-- Compilation vers C
-- Mode debug
+- Mode interactif et mode fichier
+- Mode debug pour le développement
 
-### 3. SDL (Moteur graphique)
-- Formes géométriques : cercle, rectangle, ligne, polygone, etc.
-- Animations : rotation, zoom, couleur, rebond
-- Interactions à la souris
-- Sélection et manipulation des formes
-- Modes de jeu intégrés 
+### 💻 Module IDE
+- Interface moderne avec coloration syntaxique
+- Multi-fenêtres et multi-onglets
+- Terminal intégré avec retours colorés
+- Recherche et remplacement avancés
+- Gestion des processus et sauvegarde automatique
+- Barre d'outils personnalisable
 
-## 🚀 Fonctionnalités
+## 🚀 Installation
 
-- Création de formes avec différents styles (plein/vide)
-- Animations multiples combinables
-- Interaction en temps réel
-- Gestion des collisions
-- Modes de jeu : Escape et Defense
-- Personnalisation des couleurs et tailles
-- Support des événements souris/clavier
+### Prérequis
+- Python 3.6+
+- SDL2 et ses extensions (SDL2_gfx, SDL2_ttf)
+- GCC (pour la compilation C)
+- PyQt5 (pour l'IDE)
 
-## 💻 Installation
+### Installation
+1. Cloner le repository :
+```bash
+git clone https://github.com/votre-repo/Draw++.git
+cd Draw++
+```
 
-1. Cloner le repository
 2. Installer les dépendances :
-   ```./setup.sh``` (sur Ubuntu)
-   ```Lancer en tant qu'administrateur le fichier setup.bat``` (sur Windows)
+- Sur Ubuntu :
+```bash
+./setup.sh
+```
+- Sur Windows :
+```
+Exécuter setup.bat en tant qu'administrateur
+```
 
 ## 🎮 Utilisation
 
-Lancer le programme  :
-    ```cd Draw++```
-    - avec l'IDE :
-    ```python3 ide.py```
-        a. Écrire votre code Draw++ (voir Example.dpp)
-        b. Appuyer sur F5/Run pour exécuter
+1. Lancer l'IDE :
+```bash
+cd Draw++
+python3 ide.py
+```
 
-## 🛠️ Technologies
+2. Créer un nouveau fichier .dpp
+3. Écrire votre code Draw++ (voir Example.dpp)
+4. Appuyer sur F5 pour exécuter
 
-- Python (IDE et Compilateur)
-- C (Moteur graphique SDL)
-- SDL2 (Graphismes)
-- PyQt5 (Interface)
+### Exemple de code :
+```
+draw circle(animated, filled, red, 100, 100, 50)
+draw rectangle(instant, empty, blue, 200, 200, 100, 50)
+set window color(black)
+set window title("Draw++")
+set window size(800, 600)
+```
+
+## 🎯 Fonctionnalités Principales
+
+### Formes Supportées
+- Cercle, Rectangle, Carré
+- Triangle, Arc, Ellipse
+- Ligne, Polygone (3-12 côtés)
+
+### Animations
+- Rotation (touche 'q' - gauche et 'd' - droite)
+- Zoom (touches '*') / Dezoom (touche '/')
+- Rotation, Changement de couleur, Rebond (style DVD) : touche 'a'
+
+### Modes de Jeu
+1. **EscapeShapes** : Capturez les formes qui fuient
+2. **DefenseShapes** : Protégez vos formes des projectiles
 
 ## 👥 Contributeurs
 
-- **[MATIAS VINKOVIC]** - *IDE et Interface*
-- **[ADAM TERRAK & DEULYNE DESTIN]** - *Compilateur*
-- **[ALICE FRANCO & LOUAYE SAGHIR]** - *Moteur SDL*
+- **MATIAS VINKOVIC** - *IDE et Interface*
+- **ADAM TERRAK & DEULYNE DESTIN** - *Compilateur*
+- **ALICE FRANCO & LOUAYE SAGHIR** - *Moteur SDL*
+
+## 📚 Documentation
+
+Consultez les READMEs spécifiques pour plus de détails :
+- [Documentation SDL](SDL/README_SDL.md)
+- [Documentation Compilateur](COMPILATOR/README.md)
