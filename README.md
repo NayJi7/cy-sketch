@@ -1,5 +1,7 @@
 # Draw++
 
+Bienvenue dans notre projet : Cy-Sketch ! 
+
 Un projet graphique interactif permettant de créer et manipuler des formes en temps réel avec un langage de programmation simple.
 Nous avons même mis en place 2 jeux : Escape et Defense Shapes.
 
