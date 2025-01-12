@@ -23,29 +23,24 @@ def get_known_identifiers(t):
         line = line.strip('\t')  # Remove leading/trailing tabs
 
         # Match variable declarations
-        resultat = re.search(r'var (\w+)\s*=', line)
-        if resultat:
-            known_identifiers.append(resultat.group(1))
+        results = re.findall(r'var (\w+)\s*=', line)
+        known_identifiers.extend(results)
 
         # Match function declarations
-        resultat = re.search(r'func\s+(\w+)\s*\(', line)
-        if resultat:
-            known_identifiers.append(resultat.group(1))
+        results = re.findall(r'func\s+(\w+)\s*\(', line)
+        known_identifiers.extend(results)
 
         # Match integer variable declarations
-        resultat = re.search(r'int\s+(\w+)[\s,)]', line)
-        if resultat:
-            known_identifiers.append(resultat.group(1))
+        results = re.findall(r'int\s+(\w+)[\s,)]', line)
+        known_identifiers.extend(results)
 
         # Match float variable declarations
-        resultat = re.search(r'float\s+(\w+)[\s,)]', line)
-        if resultat:
-            known_identifiers.append(resultat.group(1))
+        results = re.findall(r'float\s+(\w+)[\s,)]', line)
+        known_identifiers.extend(results)
 
         # Match char variable declarations
-        resultat = re.search(r'char\s+(\w+)', line)
-        if resultat:
-            known_identifiers.append(resultat.group(1))
+        results = re.findall(r'char\s+(\w+)', line)
+        known_identifiers.extend(results)
 
     return known_identifiers
 
