@@ -20,6 +20,17 @@
 
 // Definition of the global variable
 char lastKeyPressed[32] = "";
+
+/**
+ * @brief Cleans up SDL resources.
+ * 
+ * This function releases the resources allocated for the SDL texture, renderer, and window.
+ * It also calls SDL_Quit() to clean up all initialized subsystems.
+ * 
+ * @param mainTexture Pointer to the SDL texture to be destroyed.
+ * @param renderer Pointer to the SDL renderer to be destroyed.
+ * @param window Pointer to the SDL window to be destroyed.
+ */
 void cleanup(SDL_Texture* mainTexture, SDL_Renderer* renderer, SDL_Window* window){
     if (mainTexture) SDL_DestroyTexture(mainTexture);
     if (renderer) SDL_DestroyRenderer(renderer);

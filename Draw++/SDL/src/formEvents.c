@@ -135,6 +135,16 @@ void renderShape(SDL_Renderer *renderer, Shape *shape) {
                               selectedColor.r, selectedColor.g, selectedColor.b, selectedColor.a);
                 }
             }
+
+            // Draw an indicator line for rotation
+            double angle1 = shape->rotation * M_PI / 180.0; // Convert angle to radians
+            int endX = shape->data.circle.x + cos(angle1) * shape->data.circle.radius;
+            int endY = shape->data.circle.y + sin(angle1) * shape->data.circle.radius;
+
+            
+            setRenderColor(renderer, blue); // Use red for the indicator line
+            SDL_RenderDrawLine(renderer, shape->data.circle.x, shape->data.circle.y, endX, endY);
+
             break;
         }
 
@@ -828,7 +838,7 @@ void zoomShape(Shape *shape, float zoomFactor) {
             double length = sqrt(dx * dx + dy * dy);
 
             // Ensure length stays between min and max values
-            const double minLength = 5.0;
+            const double minLength = 50.0;
             const double maxLength = 1500.0;
             
             if (length < minLength) {
@@ -854,11 +864,8 @@ void zoomShape(Shape *shape, float zoomFactor) {
             shape->data.arc.radius += (int)(zoomFactor * 5);
 
             // Ensure a minimum radius to avoid rendering issues
-            if (shape->data.arc.radius < 50) {
-                shape->data.arc.radius = 50;
-            }
-            else if (shape->data.arc.radius > 100) {
-                shape->data.arc.radius = 100;
+            if (shape->data.arc.radius < 10) {
+                shape->data.arc.radius = 10;
             }
             break;
         }
@@ -1221,34 +1228,6 @@ int isPointInPolygon(int x, int y, int cx, int cy, int radius, int sides) {
     return c; // Return 1 if inside (odd crossings), 0 otherwise.
 }
 
-int isPointInTriangle(int x, int y, int cx, int cy, int radius) {
-    int i, j, c = 0; // `c` keeps track of crossing count (odd = inside, even = outside).
-    int sides = 3;
-    float angle, x1, y1, x2, y2;
-
-    // Loop through each edge of the polygon.
-    for (i = 0, j = sides - 1; i < sides; j = i++) {
-        // Calculate the coordinates of the i-th vertex.
-        angle = (2 * M_PI * i) / sides; // Angle for vertex i.
-        x1 = cx + radius * cos(angle);
-        y1 = cy + radius * sin(angle);
-
-        // Calculate the coordinates of the j-th vertex (previous vertex).
-        angle = (2 * M_PI * j) / sides; // Angle for vertex j.
-        x2 = cx + radius * cos(angle);
-        y2 = cy + radius * sin(angle);
-
-        // Check if the point lies between the y-coordinates of the current edge.
-        // Then determine if a ray extending to the right crosses this edge.
-        if (((y1 > y) != (y2 > y)) && // The point's y lies between the edge's y range.
-            (x < (x2 - x1) * (y - y1) / (y2 - y1) + x1)) { // Ray intersects the edge.
-            c = !c; // Toggle crossing count (odd/even).
-        }
-    }
-
-    return c; // Return 1 if inside (odd crossings), 0 otherwise.
-}
-
 /**
  * @brief Checks if a point is within a line's hitbox
  * 
@@ -1306,6 +1285,62 @@ int isPointInLine(int x, int y, int x1, int y1, int x2, int y2, int tolerance, i
 }
 
 
+/**
+ * @brief Checks if a point is inside a triangle.
+ * 
+ * This function determines if a given point (x, y) is inside a triangle
+ * defined by its center (cx, cy) and radius. The triangle is assumed to be
+ * equilateral and centered at (cx, cy).
+ * 
+ * @param x The x-coordinate of the point to check.
+ * @param y The y-coordinate of the point to check.
+ * @param cx The x-coordinate of the triangle's center.
+ * @param cy The y-coordinate of the triangle's center.
+ * @param radius The radius from the center to a vertex of the triangle.
+ * @return int Returns 1 if the point is inside the triangle, 0 otherwise.
+ */
+int isPointInTriangle(int x, int y, int cx, int cy, int radius) {
+    int i, j, c = 0; // `c` keeps track of crossing count (odd = inside, even = outside).
+    int sides = 3;
+    float angle, x1, y1, x2, y2;
+
+    // Loop through each edge of the polygon.
+    for (i = 0, j = sides - 1; i < sides; j = i++) {
+        // Calculate the coordinates of the i-th vertex.
+        angle = (2 * M_PI * i) / sides; // Angle for vertex i.
+        x1 = cx + radius * cos(angle);
+        y1 = cy + radius * sin(angle);
+
+        // Calculate the coordinates of the j-th vertex (previous vertex).
+        angle = (2 * M_PI * j) / sides; // Angle for vertex j.
+        x2 = cx + radius * cos(angle);
+        y2 = cy + radius * sin(angle);
+
+        // Check if the point lies between the y-coordinates of the current edge.
+        // Then determine if a ray extending to the right crosses this edge.
+        if (((y1 > y) != (y2 > y)) && // The point's y lies between the edge's y range.
+            (x < (x2 - x1) * (y - y1) / (y2 - y1) + x1)) { // Ray intersects the edge.
+            c = !c; // Toggle crossing count (odd/even).
+        }
+    }
+
+    return c; // Return 1 if inside (odd crossings), 0 otherwise.
+}
+
+
+/**
+ * @brief Checks if a point is inside a given shape.
+ * 
+ * This function determines if a given point (x, y) is inside a shape.
+ * The shape can be of various types such as circle, rectangle, square,
+ * ellipse, polygon, triangle, arc, or line. The function uses the shape's
+ * specific data to perform the hit detection.
+ * 
+ * @param shape Pointer to the shape to check.
+ * @param x The x-coordinate of the point to check.
+ * @param y The y-coordinate of the point to check.
+ * @return bool Returns true if the point is inside the shape, false otherwise.
+ */
 bool isPointInShape(Shape* shape, int x, int y) {
     switch (shape->type) {
         case SHAPE_CIRCLE:
