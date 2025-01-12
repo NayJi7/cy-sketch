@@ -114,7 +114,7 @@ def resolve_value_and_find_variable(ast, value, current_position=None):
         if value in special_words :
             return None, value, value
         for i, node in enumerate(ast):
-            if current_position is not None and i >= current_position:
+            if current_position is not None and i > current_position:
                 # If the current position is reached and variable is not found, return an error
                 raise ValueError(f"ValueError : Variable '{value}' is used before initialization.")
             

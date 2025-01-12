@@ -54,21 +54,21 @@ def get_known_identifiers(t):
 # @{
 # @brief Dictionary of available colors
 colors = {
-    "red": "red",
-    "green": "green",
-    "blue": "blue",
-    "white": "white",
-    "black": "black",
-    "yellow": "yellow",
-    "cyan": "cyan",
-    "magenta": "magenta",
-    "gray": "gray",
-    "light_gray": "light_gray",
-    "dark_gray": "dark_gray",
-    "orange": "orange",
-    "purple": "purple",
-    "brown": "brown",
-    "pink": "pink",
+    "red": "RED",
+    "green": "GREEN",
+    "blue": "BLUE",
+    "white": "WHITE",
+    "black": "BLACK",
+    "yellow": "YELLOW",
+    "cyan": "CYAN", 
+    "magenta": "MAGENTA",
+    "gray": "GRAY",
+    "light_gray": "LIGHT_GRAY",
+    "dark_gray": "DARK_GRAY",
+    "orange": "ORANGE",
+    "purple": "PURPLE",
+    "brown": "BROWN",
+    "pink": "PINK",
 }
 
 # @{

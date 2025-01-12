@@ -88,21 +88,21 @@ def p_specialparam(p):
 # @brief Defines available colors
 # @param p Tuple containing production information
 def p_color(p):
-    '''color : red
-             | green
-             | blue
-             | white
-             | black
-             | yellow
-             | cyan
-             | magenta
-             | gray
-             | light_gray
-             | dark_gray
-             | orange
-             | purple
-             | brown
-             | pink'''
+    '''color : RED
+             | GREEN
+             | BLUE
+             | WHITE
+             | BLACK
+             | YELLOW
+             | CYAN
+             | MAGENTA
+             | GRAY
+             | LIGHT_GRAY
+             | DARK_GRAY
+             | ORANGE
+             | PURPLE
+             | BROWN
+             | PINK'''
     p[0] = p[1]
 
 # @brief Defines basic data types
