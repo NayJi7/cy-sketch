@@ -1,6 +1,6 @@
 # Draw++ (Cy-Sketch)
 
-An integrated development environment for creating interactive graphic animations with a simple and intuitive language.
+> An integrated development environment for creating interactive graphic animations with a simple and intuitive language.
 
 ## 📝 Description
 
@@ -189,6 +189,6 @@ These animations can be applied simultaneously and differently for each shape (3
 
 ## 👥 Contributors
 
-- **IDE and Interface :** Matias Vinkovic & Adam Terrak
-- **Compilator :** Deulyne Destin & Adam Terrak & Matias Vinkovic
-- **SDL :** Alice Franco & Louaye Saghir & Adam Terrak
+<a href="https://github.com/NayJi7/cy-sketch/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=NayJi7/cy-sketch" />
+</a>
