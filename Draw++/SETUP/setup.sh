@@ -8,8 +8,8 @@ fi
 
 # Detects the operating system
 if [[ "$OSTYPE" != "linux-gnu"* ]]; then
-  echo "This script is designed for Ubuntu/Debian systems."
-  exit 1
+  echo "This script is designed for Linux systems."
+  # continue but warn
 fi
 
 # Determines the base path from the script's location
@@ -23,27 +23,64 @@ PYINSTALLER_ARGS="--clean --onefile --name=DrawStudioCode"
 
 # Function to install required system packages
 install_dependencies() {
-  echo "Updating package list..."
-  sudo timeout 30 apt-get update || echo "Warning: apt-get update timed out, continuing the script..."
+  echo "Installing required system packages..."
 
-  echo "Installing required packages..."
-  PACKAGES=(
-    build-essential gcc python3 python3-pip libsdl2-2.0-0 libsdl2-dev libsdl2-gfx-dev libsdl2-ttf-dev qt5-default
-  )
-  for pkg in "${PACKAGES[@]}"; do
-    if ! dpkg -l | grep -q "^ii  $pkg "; then
-      echo "Installing $pkg..."
-      sudo apt-get install -y "$pkg"
-    else
-      echo "$pkg is already installed."
-    fi
-  done
+  # Detect package manager and install accordingly (Debian/Ubuntu or Arch)
+  if command -v apt-get >/dev/null 2>&1; then
+    echo "Detected apt-get (Debian/Ubuntu). Updating package list..."
+    sudo timeout 30 apt-get update || echo "Warning: apt-get update timed out, continuing the script..."
+    PACKAGES=(
+      build-essential gcc python3 python3-pip libsdl2-2.0-0 libsdl2-dev libsdl2-gfx-dev libsdl2-ttf-dev qt5-default
+    )
+    for pkg in "${PACKAGES[@]}"; do
+      if ! dpkg -l | grep -q "^ii  $pkg "; then
+        echo "Installing $pkg..."
+        sudo apt-get install -y "$pkg"
+      else
+        echo "$pkg is already installed."
+      fi
+    done
+
+  elif command -v pacman >/dev/null 2>&1; then
+    echo "Detected pacman (Arch/Manjaro). Installing packages with pacman..."
+    # Map Debian package names to pacman equivalents where possible
+    PACMAN_PKGS=(
+      base-devel gcc python python-pip sdl2 sdl2_gfx sdl2_ttf qt5-base
+    )
+    # Use --needed to skip already-installed packages
+    sudo pacman -Sy --needed --noconfirm "${PACMAN_PKGS[@]}"
+
+  else
+    echo "Unsupported package manager. Please install build-essential (or base-devel), gcc, python3, python3-pip, SDL2, SDL2_gfx, SDL2_ttf and Qt5 manually." 
+    echo "On Arch: sudo pacman -S --needed base-devel gcc python python-pip sdl2 sdl2_gfx sdl2_ttf qt5-base"
+  fi
 }
 
 # Function to install Python dependencies
 install_python_dependencies() {
   echo "Installing Python dependencies..."
-  pip3 install --break-system-packages -r requirements.txt freetype-py PyInstaller || echo "Some packages are already installed or system-managed."
+
+  # Workaround for potential PyInstaller version conflicts: prefer the pinned version in requirements.txt
+  # If requirements.txt pins pyinstaller, let pip install it; otherwise install requirements without adding PyInstaller twice.
+  # Some environments (e.g. Python 3.13 on Arch) may not have wheels for older PyInstaller or PyQt5.
+  # Strategy: install requirements excluding PyInstaller, then install a PyInstaller 6.x compatible with newer Pythons.
+  if grep -q -i "pyinstaller" requirements.txt; then
+    echo "requirements.txt contains PyInstaller. Installing everything except PyInstaller and readline first..."
+    # Create a temporary requirements file without pyinstaller and readline lines which often fail to build on Linux
+    TMP_REQS=$(mktemp)
+    grep -iv -E "^pyinstaller|^readline" requirements.txt > "$TMP_REQS" || true
+    pip3 install --break-system-packages -r "$TMP_REQS" || echo "Some packages are already installed or system-managed."
+    rm -f "$TMP_REQS"
+    # Install a PyInstaller version compatible with newer Pythons (6.16.0 is known available)
+    echo "Installing PyInstaller 6.16.0 (compatible with newer Python versions)..."
+    pip3 install --break-system-packages pyinstaller==6.16.0 || echo "Could not install pyinstaller via pip; consider using a virtualenv or installing pyinstaller from your distro."
+  else
+    echo "requirements.txt does not contain PyInstaller; installing requirements then latest PyInstaller (excluding readline)..."
+    TMP_REQS=$(mktemp)
+    grep -iv -E "^readline" requirements.txt > "$TMP_REQS" || true
+    pip3 install --break-system-packages -r "$TMP_REQS" freetype-py PyInstaller || echo "Some packages are already installed or system-managed."
+    rm -f "$TMP_REQS"
+  fi
 }
 
 # Function to verify and include resources
@@ -71,12 +108,18 @@ include_resources() {
     # Expand wildcards into individual files
     for FILE in $(find $(dirname "$RESOURCE") -name "$(basename "$RESOURCE")" 2>/dev/null); do
       if [[ -f "$FILE" ]]; then
-        DEST=$(dirname "$FILE" | sed "s|$BASE_DIR/Draw++/||")
-        if [[ "$FILE" == "/home/cytech/gitstore/cy-sketch/Draw++/interpreter.py" || "$FILE" == "/home/cytech/gitstore/cy-sketch/Draw++/Makefile" ]]; then
-          DEST=". "
+        # Make DEST relative to the Draw++ directory so PyInstaller receives a relative destination
+        REL_PATH=${FILE#${BASE_DIR}/Draw++/}
+        DEST_DIR=$(dirname "$REL_PATH")
+        if [[ "$REL_PATH" == "interpreter.py" || "$REL_PATH" == "Makefile" ]]; then
+          DEST_DIR="."
         fi
-        echo "Including file: $FILE -> $DEST"
-        PYINSTALLER_ARGS+=" --add-data $FILE:$DEST"
+        # If dirname gives '.' or empty, keep '.'
+        if [[ -z "$DEST_DIR" ]]; then
+          DEST_DIR="."
+        fi
+        echo "Including file: $FILE -> $DEST_DIR"
+        PYINSTALLER_ARGS+=" --add-data $FILE:$DEST_DIR"
       fi
     done
   done

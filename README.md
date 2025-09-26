@@ -35,6 +35,14 @@ Draw++ consists of three main modules working together:
 - Movable and modular menu bar
 - Ability to kill running processes
 
+## 📸 Screenshots
+
+### IDE Interface
+![Draw++ IDE](Draw++/README/ide.gif)
+
+### Execution Result
+![Execution Result](Draw++/README/c.gif)
+
 ## 🚀 Installation
 
 ### Main Prerequisites (obtained during setup below)
